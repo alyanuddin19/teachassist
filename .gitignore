@@ -35,6 +35,8 @@ Desktop.ini
 # Local uploads and generated files
 uploads/
 backend/uploads/
+backend/app/generated/
+t2/backend/exports/
 *.log
 
 # Build artifacts and temporary files
@@ -46,4 +48,3 @@ temp/
 # Database / local app state
 *.sqlite3
 *.db
-
