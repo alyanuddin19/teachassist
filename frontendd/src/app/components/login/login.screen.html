@@ -1,0 +1,109 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="logo">
+      <div class="cap">
+        <div class="cap-top"></div>
+        <div class="cap-base"></div>
+        <div class="cap-tassel"></div>
+      </div>
+    </div>
+
+    <h2>Teacher Assist</h2>
+
+    <div class="role-switch">
+      <button type="button" class="role-btn" [class.active]="role === 'teacher'" (click)="setRole('teacher')">
+        Teacher
+      </button>
+      <button type="button" class="role-btn" [class.active]="role === 'student'" (click)="setRole('student')">
+        Student
+      </button>
+      <button type="button" class="role-btn" [class.active]="role === 'hod'" (click)="setRole('hod')">
+        HOD
+      </button>
+      <button type="button" class="role-btn" [class.active]="role === 'admin'" (click)="setRole('admin')">
+        Admin
+      </button>
+    </div>
+
+    <div class="login-fields">
+      <label class="field-label">
+        {{
+        role === 'teacher'
+        ? 'Teacher Username'
+        : role === 'student'
+        ? 'Student ID'
+        : role === 'hod'
+        ? 'HOD Username'
+        : 'Admin ID'
+        }}
+      </label>
+      <input class="login-input" type="text" autocomplete="off" [(ngModel)]="username" />
+
+      <label class="field-label">Password</label>
+      <div class="password-field">
+        <input class="login-input" [type]="showLoginPassword ? 'text' : 'password'" autocomplete="new-password"
+          [(ngModel)]="password" />
+        <button type="button" class="password-toggle" (click)="showLoginPassword = !showLoginPassword">
+          {{ showLoginPassword ? 'Hide' : 'Show' }}
+        </button>
+      </div>
+
+      <div class="error" *ngIf="error">{{ error }}</div>
+      <div class="success" *ngIf="success">{{ success }}</div>
+
+      <button type="button" class="login-btn" (click)="login()" [disabled]="loading">
+        {{
+        loading
+        ? 'Checking...'
+        : role === 'teacher'
+        ? 'Teacher Login'
+        : role === 'student'
+        ? 'Student Login'
+        : role === 'hod'
+        ? 'HOD Login'
+        : 'Admin Login'
+        }}
+      </button>
+
+      <div class="teacher-signup" *ngIf="role === 'teacher'">
+        <button type="button" class="signup-toggle" (click)="toggleTeacherSignup()">
+          {{ teacherSignupOpen ? 'Close Teacher Signup' : 'Teacher Signup' }}
+        </button>
+
+        <div class="signup-panel" *ngIf="teacherSignupOpen">
+          <label class="field-label">Full Name</label>
+          <input class="login-input" type="text" [(ngModel)]="teacherSignup.fullName" />
+
+          <label class="field-label">Contact No</label>
+          <input class="login-input" type="text" autocomplete="off" [(ngModel)]="teacherSignup.contactNo" />
+
+          <label class="field-label">Email</label>
+          <input class="login-input" type="email" autocomplete="off" [(ngModel)]="teacherSignup.email" />
+
+          <label class="field-label">Set Password</label>
+          <div class="password-field">
+            <input class="login-input" [type]="showSignupPassword ? 'text' : 'password'" autocomplete="new-password"
+              [(ngModel)]="teacherSignup.password" />
+            <button type="button" class="password-toggle" (click)="showSignupPassword = !showSignupPassword">
+              {{ showSignupPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+
+          <label class="field-label">Confirm Password</label>
+          <div class="password-field">
+            <input class="login-input" [type]="showSignupConfirmPassword ? 'text' : 'password'"
+              autocomplete="new-password" [(ngModel)]="teacherSignup.confirmPassword" />
+            <button type="button" class="password-toggle"
+              (click)="showSignupConfirmPassword = !showSignupConfirmPassword">
+              {{ showSignupConfirmPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+
+          <button type="button" class="login-btn secondary-login" (click)="signupTeacher()" [disabled]="signupLoading">
+            {{ signupLoading ? 'Saving...' : 'Save Teacher Signup' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

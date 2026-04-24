@@ -1,0 +1,25 @@
+<main class="page-shell">
+  <section class="page-head">
+    <div class="page-head-copy">
+      <span class="page-kicker">Transform Module</span>
+      <h1>Generate a Marksheet</h1>
+    </div>
+    <button class="records-toggle" type="button" (click)="toggleRecords()">
+      {{ showRecords ? 'Close Records' : 'View Records' }}
+    </button>
+  </section>
+
+  <app-transform-teacher-form></app-transform-teacher-form>
+
+  <div class="records-overlay" *ngIf="showRecords" (click)="closeRecords()"></div>
+  <section class="records-panel" *ngIf="showRecords">
+    <div class="records-panel-head">
+      <div>
+        <span class="section-kicker">Saved Marksheets</span>
+        <h3>Transform Records</h3>
+      </div>
+      <button class="close-panel-btn" type="button" (click)="closeRecords()">Close</button>
+    </div>
+    <app-transform-live-sheet></app-transform-live-sheet>
+  </section>
+</main>

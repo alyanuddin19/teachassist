@@ -1,0 +1,385 @@
+<div class="exam-page">
+  <section class="page-hero">
+    <div class="hero-copy">
+      <span class="hero-badge">AI Assessment Studio</span>
+      <h1>Generate Exams With Precision</h1>
+      <p>
+        Build quizzes, assignments, mids, and finals from lecture files with a smoother,
+        professional workflow designed for an education portal.
+      </p>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat-card">
+        <span class="stat-label">Files</span>
+        <strong>{{ selectedFiles.length }}</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Assessment</span>
+        <strong>{{ examType === 'midfinal' ? 'Mid / Final' : (examType | titlecase) }}</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Difficulty</span>
+        <strong>{{ isMidOrFinal ? 'Section Based' : difficulty }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <div class="builder-grid">
+    <div class="builder-main">
+      <div class="card section-enter">
+        <div class="section-header">
+          <div>
+            <h3>Lecture Material</h3>
+            <p>Upload the source material and let the generator build context-aware questions.</p>
+          </div>
+        </div>
+
+        <label class="upload-content">
+          <input type="file" hidden multiple (change)="onFileSelected($event)" />
+          <div class="upload-icon">📄</div>
+          <p>{{ selectedFiles.length === 0 ? 'Upload lecture files' : 'Lecture files ready' }}</p>
+
+          <div class="file-chips" *ngIf="selectedFiles.length">
+            <span class="file-chip" *ngFor="let f of selectedFiles">{{ f.name }}</span>
+          </div>
+
+          <small>{{ selectedFiles.length }} file(s) · PDF / PPTX / DOCX</small>
+        </label>
+      </div>
+
+      <div class="dual-grid">
+        <div class="card section-enter">
+          <div class="section-header">
+            <div>
+              <h3>Assessment Type</h3>
+              <p>Choose the structure for the generated assessment.</p>
+            </div>
+          </div>
+
+          <label>Assessment Type</label>
+          <select [(ngModel)]="examType" (change)="updatePrompt()">
+            <option value="quiz">Quiz</option>
+            <option value="assignment">Assignment</option>
+            <option value="midfinal">Mid / Final</option>
+          </select>
+        </div>
+
+        <div class="card section-enter" *ngIf="!isMidOrFinal">
+          <div class="section-header">
+            <div>
+              <h3>Difficulty</h3>
+              <p>Control the depth and tone of the generated questions.</p>
+            </div>
+          </div>
+
+          <label>Difficulty</label>
+          <select [(ngModel)]="difficulty" (change)="updatePrompt()">
+            <option>Easy</option>
+            <option>Medium</option>
+            <option>Hard</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card section-enter" *ngIf="isQuiz">
+        <div class="section-header">
+          <div>
+            <h3>Quiz Blueprint</h3>
+            <p>Balance counts, Bloom levels, and marks with live adjustments.</p>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div>
+            <label>MCQs</label>
+            <input type="number" [(ngModel)]="mcqs" min="0" (input)="updatePrompt()" />
+          </div>
+          <div>
+            <label>MCQ Bloom</label>
+            <select [(ngModel)]="mcqBloom" (change)="updatePrompt()">
+              <option *ngFor="let b of blooms" [disabled]="isBloomDisabled('mcq', b)">{{ b }}</option>
+            </select>
+          </div>
+          <div>
+            <label>Marks / MCQ</label>
+            <input type="number" [(ngModel)]="mcqMarks" (input)="updatePrompt()" />
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div>
+            <label>Shorts</label>
+            <input type="number" [(ngModel)]="shorts" min="0" (input)="updatePrompt()" />
+          </div>
+          <div>
+            <label>Short Bloom</label>
+            <select [(ngModel)]="shortBloom" (change)="updatePrompt()">
+              <option *ngFor="let b of blooms" [disabled]="isBloomDisabled('short', b)">{{ b }}</option>
+            </select>
+          </div>
+          <div>
+            <label>Marks / Short</label>
+            <input type="number" [(ngModel)]="shortMarks" (input)="updatePrompt()" />
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div>
+            <label>Longs</label>
+            <input type="number" [(ngModel)]="longs" min="0" (input)="updatePrompt()" />
+          </div>
+          <div>
+            <label>Long Bloom</label>
+            <select [(ngModel)]="longBloom" (change)="updatePrompt()">
+              <option *ngFor="let b of blooms" [disabled]="isBloomDisabled('long', b)">{{ b }}</option>
+            </select>
+          </div>
+          <div>
+            <label>Marks / Long</label>
+            <input type="number" [(ngModel)]="longMarks" (input)="updatePrompt()" />
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div>
+            <label>Scenario Questions</label>
+            <input type="number" [(ngModel)]="scenarioQuestions" min="0" (input)="updatePrompt()" />
+          </div>
+          <div>
+            <label>Scenario Bloom</label>
+            <select [(ngModel)]="scenarioBloom" (change)="updatePrompt()">
+              <option *ngFor="let b of blooms" [disabled]="isBloomDisabled('scenario', b)">{{ b }}</option>
+            </select>
+          </div>
+          <div>
+            <label>Marks / Scenario</label>
+            <input type="number" [(ngModel)]="scenarioMarks" (input)="updatePrompt()" />
+          </div>
+        </div>
+      </div>
+
+      <div class="card section-enter" *ngIf="isMidOrFinal">
+        <div class="section-header">
+          <div>
+            <h3>Mid / Final Structure</h3>
+            <p>Create sections with precise marks and balanced question types.</p>
+          </div>
+        </div>
+
+        <label>Number of Sections</label>
+        <select (change)="setSectionCount($any($event.target).value)">
+          <option *ngFor="let n of [1,2,3,4]">{{ n }}</option>
+        </select>
+      </div>
+
+      <ng-container *ngIf="isMidOrFinal">
+        <div class="card section-enter" *ngFor="let s of sections">
+          <div class="section-header">
+            <div>
+              <h3>Section {{ s.name }}</h3>
+              <p>Fine tune the structure for each section independently.</p>
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div>
+              <label>MCQs</label>
+              <input type="number" [(ngModel)]="s.mcqs" min="0" (input)="updatePrompt()" />
+            </div>
+            <div>
+              <label>Bloom</label>
+              <select [(ngModel)]="s.mcqBloom" (change)="updatePrompt()">
+                <option *ngFor="let b of blooms" [disabled]="isBloomDisabled('mcq', b)">{{ b }}</option>
+              </select>
+            </div>
+            <div>
+              <label>Marks / MCQ</label>
+              <input type="number" min="0" [(ngModel)]="s.mcqMarks" (input)="updatePrompt()" />
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div>
+              <label>Shorts</label>
+              <input type="number" [(ngModel)]="s.shorts" min="0" (input)="updatePrompt()" />
+            </div>
+            <div>
+              <label>Bloom</label>
+              <select [(ngModel)]="s.shortBloom" (change)="updatePrompt()">
+                <option *ngFor="let b of blooms" [disabled]="isBloomDisabled('short', b)">{{ b }}</option>
+              </select>
+            </div>
+            <div>
+              <label>Marks / Short</label>
+              <input type="number" min="0" [(ngModel)]="s.shortMarks" (input)="updatePrompt()" />
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div>
+              <label>Longs</label>
+              <input type="number" [(ngModel)]="s.longs" min="0" (input)="updatePrompt()" />
+            </div>
+            <div>
+              <label>Bloom</label>
+              <select [(ngModel)]="s.longBloom" (change)="updatePrompt()">
+                <option *ngFor="let b of blooms" [disabled]="isBloomDisabled('long', b)">{{ b }}</option>
+              </select>
+            </div>
+            <div>
+              <label>Marks / Long</label>
+              <input type="number" min="0" [(ngModel)]="s.longMarks" (input)="updatePrompt()" />
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div>
+              <label>Scenarios</label>
+              <input type="number" [(ngModel)]="s.scenario" min="0" (input)="updatePrompt()" />
+            </div>
+            <div>
+              <label>Bloom</label>
+              <select [(ngModel)]="s.scenarioBloom" (change)="updatePrompt()">
+                <option *ngFor="let b of blooms" [disabled]="isBloomDisabled('scenario', b)">{{ b }}</option>
+              </select>
+            </div>
+            <div>
+              <label>Marks / Scenario</label>
+              <input type="number" min="0" [(ngModel)]="s.scenarioMarks" (input)="updatePrompt()" />
+            </div>
+          </div>
+
+          <div>
+            <label>Total Section Marks</label>
+            <input type="number" [value]="s.marks" readonly />
+          </div>
+        </div>
+      </ng-container>
+
+      <div class="card section-enter" *ngIf="isAssignment">
+        <div class="section-header">
+          <div>
+            <h3>Assignment Blueprint</h3>
+            <p>Set task counts, scenarios, and total marks in one place.</p>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div>
+            <label>Total Marks</label>
+            <input type="number" [(ngModel)]="assignmentTotalMarks" (input)="updatePrompt()" />
+          </div>
+          <div>
+            <label>Number of Tasks</label>
+            <input type="number" [(ngModel)]="assignmentTasks" (input)="updatePrompt()" />
+          </div>
+          <div>
+            <label>Global Bloom Level</label>
+            <select [(ngModel)]="assignmentBloom" (change)="updatePrompt()">
+              <option *ngFor="let b of blooms">{{ b }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div>
+            <label>Scenario Tasks</label>
+            <input type="number" min="0" [(ngModel)]="assignmentScenarios" (input)="updatePrompt()" />
+          </div>
+          <div>
+            <label>Marks / Scenario Task</label>
+            <input type="number" min="0" [(ngModel)]="scenarioMarks" (input)="updatePrompt()" />
+          </div>
+          <div></div>
+        </div>
+      </div>
+
+      <div class="card section-enter">
+        <div class="section-header">
+          <div>
+            <h3>Assessment Summary</h3>
+            <p>Review the live configuration before generation.</p>
+          </div>
+        </div>
+
+        <ul class="summary-list">
+          <li><b>Exam Type:</b> {{ examType }}</li>
+          <li *ngIf="isQuiz"><b>Quiz Structure:</b> MCQs {{ mcqs }}, Shorts {{ shorts }}, Longs {{ longs }}, Scenarios {{ scenarioQuestions }}</li>
+          <li *ngIf="isMidOrFinal"><b>Sections:</b> {{ sections.length }}</li>
+          <li *ngIf="isAssignment"><b>Tasks:</b> {{ assignmentTasks }}, <b>Total Marks:</b> {{ assignmentTotalMarks }}</li>
+        </ul>
+
+        <div class="teacher-notes" *ngIf="teacherPrompt">
+          <b>Teacher Instructions:</b>
+          <p>{{ teacherPrompt }}</p>
+        </div>
+      </div>
+
+      <div class="card section-enter">
+        <div class="section-header">
+          <div>
+            <h3>Additional Instructions</h3>
+            <p>Add final direction while keeping the blueprint intact.</p>
+          </div>
+        </div>
+
+        <textarea
+          rows="4"
+          placeholder="e.g. Focus more on numericals, avoid theory-heavy questions, include real-world scenarios..."
+          [(ngModel)]="teacherPrompt">
+        </textarea>
+
+        <small class="helper-text">
+          These instructions will be prioritized but cannot violate Bloom’s Taxonomy rules.
+        </small>
+      </div>
+
+      <button class="generate-btn" (click)="generate()" [disabled]="loading || !canGenerate">
+        <span *ngIf="!loading">Generate Assessment</span>
+        <span class="loader-wrap" *ngIf="loading">
+          <span class="spinner"></span>
+          Generating...
+        </span>
+      </button>
+
+      <div class="result-container section-enter" *ngIf="result">
+        <div class="section-header">
+          <div>
+            <h3>Generated Output</h3>
+            <p>Review the generated result before export.</p>
+          </div>
+        </div>
+        <pre class="result-text">{{ result }}</pre>
+      </div>
+
+      <div class="export-panel section-enter" *ngIf="generatedExamId">
+        <div>
+          <span class="export-title">Export Assessment</span>
+          <p>Download the final paper in your preferred format.</p>
+        </div>
+        <div class="export-actions">
+          <button class="secondary" (click)="download('pdf')">PDF</button>
+          <button class="secondary" (click)="download('docx')">DOCX</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="builder-side">
+      <div class="card quick-guide section-enter">
+        <div class="section-header">
+          <div>
+            <h3>Builder Guidance</h3>
+            <p>Fast tips for a smoother generation workflow.</p>
+          </div>
+        </div>
+        <ul class="guide-list">
+          <li>Upload clean lecture material before generating.</li>
+          <li>Start with smaller counts when testing output quality.</li>
+          <li>Use Bloom levels to keep the assessment academically balanced.</li>
+          <li>Export only after reviewing the generated structure.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>

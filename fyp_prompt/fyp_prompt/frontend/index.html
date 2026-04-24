@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ExamForge - AI-powered exam paper generator. Upload your documents and generate professional exam papers instantly.">
+    <title>ExamForge — AI Exam Paper Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+
+
+
+    <!-- Main Content -->
+    <main class="main">
+
+
+        <!-- Step Wizard -->
+        <section class="wizard-section">
+            <div class="wizard-container">
+
+                <!-- Progress Bar -->
+                <div class="progress-bar-container">
+                    <div class="progress-steps">
+                        <div class="progress-step active" id="step-indicator-1">
+                            <div class="step-bubble">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                            </div>
+                            <span>Upload</span>
+                        </div>
+                        <div class="progress-line" id="line-1-2"></div>
+                        <div class="progress-step" id="step-indicator-2">
+                            <div class="step-bubble">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            </div>
+                            <span>Configure</span>
+                        </div>
+                        <div class="progress-line" id="line-2-3"></div>
+                        <div class="progress-step" id="step-indicator-3">
+                            <div class="step-bubble">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                            </div>
+                            <span>Prompt</span>
+                        </div>
+                        <div class="progress-line" id="line-3-4"></div>
+                        <div class="progress-step" id="step-indicator-4">
+                            <div class="step-bubble">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </div>
+                            <span>Edit & Save</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 1: Upload -->
+                <div class="wizard-step active" id="step1">
+                    <div class="step-header">
+                        <div class="step-number">01</div>
+                        <div>
+                            <h2 class="step-title">Upload Your Documents</h2>
+                            <p class="step-desc">Upload one or more files — PDF, DOCX, PPT, PPTX</p>
+                        </div>
+                    </div>
+
+                    <div class="upload-zone" id="uploadZone">
+                        <input type="file" id="fileInput" accept=".pdf,.docx,.ppt,.pptx" multiple hidden>
+                        <div class="upload-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                            </svg>
+                        </div>
+                        <p class="upload-title">Drag & drop files here</p>
+                        <p class="upload-sub">or click to browse — multiple files supported</p>
+                        <div class="upload-formats">
+                            <span class="format-badge">PDF</span>
+                            <span class="format-badge">DOCX</span>
+                            <span class="format-badge">PPT</span>
+                            <span class="format-badge">PPTX</span>
+                        </div>
+                    </div>
+
+                    <!-- Multi-file list -->
+                    <div class="file-list hidden" id="fileList"></div>
+
+                    <div class="upload-progress-bar hidden" id="uploadProgressBar">
+                        <div class="upload-progress-fill" id="uploadProgressFill"></div>
+                        <span class="upload-progress-label" id="uploadProgressLabel">Uploading...</span>
+                    </div>
+
+                    <div class="step-actions">
+                        <button class="btn-primary" id="uploadBtn" disabled>
+                            <span class="btn-text">Upload & Continue</span>
+                            <span class="btn-spinner hidden"></span>
+                            <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Configure -->
+                <div class="wizard-step" id="step2">
+                    <div class="step-header">
+                        <div class="step-number">02</div>
+                        <div>
+                            <h2 class="step-title">Configure Your Exam</h2>
+                            <p class="step-desc">Set exam type, MCQs, and theory questions</p>
+                        </div>
+                    </div>
+
+                    <!-- Exam Type -->
+                    <div class="config-section">
+                        <label class="config-label">Exam Type</label>
+                        <div class="exam-type-grid">
+                            <label class="exam-type-card" id="typeQuiz">
+                                <input type="radio" name="examType" value="quiz">
+                                <div class="exam-type-inner">
+                                    <div class="exam-type-icon">⚡</div>
+                                    <div class="exam-type-name">Quiz</div>
+                                    <div class="exam-type-desc">Short assessment</div>
+                                </div>
+                            </label>
+                            <label class="exam-type-card" id="typeMid">
+                                <input type="radio" name="examType" value="mid">
+                                <div class="exam-type-inner">
+                                    <div class="exam-type-icon">📘</div>
+                                    <div class="exam-type-name">Mid-Term</div>
+                                    <div class="exam-type-desc">Mid semester</div>
+                                </div>
+                            </label>
+                            <label class="exam-type-card" id="typeFinal">
+                                <input type="radio" name="examType" value="final">
+                                <div class="exam-type-inner">
+                                    <div class="exam-type-icon">🎓</div>
+                                    <div class="exam-type-name">Final</div>
+                                    <div class="exam-type-desc">End of semester</div>
+                                </div>
+                            </label>
+                            <label class="exam-type-card" id="typeAssignment">
+                                <input type="radio" name="examType" value="assignment">
+                                <div class="exam-type-inner">
+                                    <div class="exam-type-icon">📝</div>
+                                    <div class="exam-type-name">Assignment</div>
+                                    <div class="exam-type-desc">Take-home task</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- MCQ Configuration -->
+                    <div class="config-section">
+                        <div class="config-section-header">
+                            <label class="config-label">Multiple Choice Questions (MCQs)</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enableMCQ" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="mcq-config" id="mcqConfig">
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label class="input-label">Number of MCQs</label>
+                                    <div class="number-input-wrap">
+                                        <button class="num-btn" data-target="mcqCount" data-action="dec">−</button>
+                                        <input type="number" id="mcqCount" class="number-input" value="10" min="1" max="100">
+                                        <button class="num-btn" data-target="mcqCount" data-action="inc">+</button>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label class="input-label">Marks per MCQ</label>
+                                    <div class="number-input-wrap">
+                                        <button class="num-btn" data-target="mcqMarks" data-action="dec">−</button>
+                                        <input type="number" id="mcqMarks" class="number-input" value="1" min="0.5" max="10" step="0.5">
+                                        <button class="num-btn" data-target="mcqMarks" data-action="inc">+</button>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label class="input-label">MCQ Total</label>
+                                    <div class="marks-total-badge" id="mcqTotalMarks">10 marks</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Theory Questions -->
+                    <div class="config-section">
+                        <div class="config-section-header">
+                            <label class="config-label">Theory / Descriptive Questions</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enableTheory" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="theory-config" id="theoryConfig">
+                            <div class="theory-count-row">
+                                <div class="input-group">
+                                    <label class="input-label">Number of Questions</label>
+                                    <div class="number-input-wrap">
+                                        <button class="num-btn" data-target="theoryCount" data-action="dec">−</button>
+                                        <input type="number" id="theoryCount" class="number-input" value="3" min="1" max="20">
+                                        <button class="num-btn" data-target="theoryCount" data-action="inc">+</button>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label class="input-label">Theory Total</label>
+                                    <div class="marks-total-badge" id="theoryTotalMarks">30 marks</div>
+                                </div>
+                            </div>
+                            <div class="theory-questions-list" id="theoryQuestionsList">
+                                <!-- Dynamically generated -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grand Total -->
+                    <div class="grand-total-bar">
+                        <span>Grand Total Marks</span>
+                        <span class="grand-total-value" id="grandTotal">40</span>
+                    </div>
+
+                    <div class="step-actions">
+                        <button class="btn-secondary" id="backToStep1">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                            Back
+                        </button>
+                        <button class="btn-primary" id="generatePromptBtn">
+                            Generate Prompt
+                            <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 3: Prompt Preview -->
+                <div class="wizard-step" id="step3">
+                    <div class="step-header">
+                        <div class="step-number">03</div>
+                        <div>
+                            <h2 class="step-title">Generated Prompt</h2>
+                            <p class="step-desc">Review, copy, or proceed to generate your exam</p>
+                        </div>
+                    </div>
+
+                    <div class="prompt-box">
+                        <div class="prompt-toolbar">
+                            <span class="prompt-label">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                                AI Prompt
+                            </span>
+                            <button class="btn-copy" id="copyPromptBtn">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                                Copy Prompt
+                            </button>
+                        </div>
+                        <pre class="prompt-content" id="promptContent">Generating prompt...</pre>
+                    </div>
+
+                    <!-- Generate Option -->
+                    <div class="generate-option-box">
+                        <div class="generate-option-icon">🚀</div>
+                        <div class="generate-option-text">
+                            <h3>Generate Exam Now?</h3>
+                            <p>Use the extracted document content with AI to create your full exam paper immediately.</p>
+                        </div>
+                        <div class="generate-option-actions">
+                            <button class="btn-outline" id="skipGenerateBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 19l7-7-7-7"/></svg>
+                                Just the Prompt
+                            </button>
+                            <button class="btn-primary btn-glow" id="generateNowBtn">
+                                <span class="btn-text">Generate Now</span>
+                                <span class="btn-spinner hidden"></span>
+                                <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="step-actions">
+                        <button class="btn-secondary" id="backToStep2">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                            Back
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 4: Editor -->
+                <div class="wizard-step" id="step4">
+                    <div class="step-header">
+                        <div class="step-number">04</div>
+                        <div>
+                            <h2 class="step-title">Edit Your Exam Paper</h2>
+                            <p class="step-desc">Review and modify the generated content before saving</p>
+                        </div>
+                    </div>
+
+                    <div class="editor-toolbar">
+                        <div class="editor-toolbar-left">
+                            <button class="tool-btn" id="boldBtn" title="Bold" data-format="bold">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z"/><path d="M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z"/></svg>
+                            </button>
+                            <button class="tool-btn" id="italicBtn" title="Italic" data-format="italic">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
+                            </button>
+                            <div class="toolbar-divider"></div>
+                            <span class="editor-hint">Markdown supported</span>
+                        </div>
+                        <div class="editor-toolbar-right">
+                            <button class="btn-ghost" id="previewToggle">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                Preview
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="editor-pane" id="editorPane">
+                        <textarea class="exam-editor" id="examEditor" placeholder="Your exam paper will appear here..."></textarea>
+                    </div>
+
+                    <div class="preview-pane hidden" id="previewPane">
+                        <div class="preview-content" id="previewContent"></div>
+                    </div>
+
+                    <div class="step-actions">
+                        <button class="btn-secondary" id="backToStep3">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                            Back
+                        </button>
+                        <button class="btn-ghost" id="saveExamBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            Save
+                        </button>
+                        <button class="btn-primary btn-glow" id="downloadPdfBtn">
+                            <span class="btn-text">Download PDF</span>
+                            <span class="btn-spinner hidden"></span>
+                            <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="loading-card">
+            <div class="loading-orb"></div>
+            <h3 id="loadingTitle">Generating Exam...</h3>
+            <p id="loadingSubtitle">AI is crafting your exam paper from the document</p>
+            <div class="loading-dots">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

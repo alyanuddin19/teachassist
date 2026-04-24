@@ -1,0 +1,32 @@
+.dashboard {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+  font-family: Inter, Arial;
+}
+
+.grid {
+  display: flex;
+  gap: 10px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 8px;
+  margin: 8px 0;
+}
+
+button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+pre {
+  background: #f4f4f4;
+  padding: 10px;
+  max-height: 400px;
+  overflow: auto;
+}

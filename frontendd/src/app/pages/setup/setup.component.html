@@ -1,0 +1,43 @@
+<div style="display:flex; justify-content:center; align-items:center; height:100vh; background:#f5f7fa;">
+  <div style="background:white; padding:2rem; border-radius:12px; width:420px; box-shadow:0 2px 16px rgba(0,0,0,0.1);">
+    
+    <h2 style="margin-bottom:1.5rem; color:#1a3a5c;">Complete Your Profile</h2>
+
+    <div style="margin-bottom:1rem;">
+      <label>Semester *</label>
+      <select [(ngModel)]="semester" style="width:100%; padding:10px; margin-top:4px; border:1px solid #ddd; border-radius:6px;">
+        <option value="">Select Semester</option>
+        <option *ngFor="let s of [1,2,3,4,5,6,7,8]" [value]="s">Semester {{s}}</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom:1rem;">
+      <label>Section</label>
+      <input [(ngModel)]="section" placeholder="e.g. A, B, C"
+        style="width:100%; padding:10px; margin-top:4px; border:1px solid #ddd; border-radius:6px; box-sizing:border-box;">
+    </div>
+
+    <div style="margin-bottom:1rem;">
+      <label>Batch</label>
+      <input [(ngModel)]="batch" placeholder="e.g. 2021-2025"
+        style="width:100%; padding:10px; margin-top:4px; border:1px solid #ddd; border-radius:6px; box-sizing:border-box;">
+    </div>
+
+    <div style="margin-bottom:1rem;">
+      <label>Course Code *</label>
+      <input [(ngModel)]="courseCode" (blur)="onCourseCodeBlur()" placeholder="e.g. CS301"
+        style="width:100%; padding:10px; margin-top:4px; border:1px solid #ddd; border-radius:6px; box-sizing:border-box;">
+      <div *ngIf="lookingUp" style="color:#888; font-size:13px; margin-top:4px;">Looking up course...</div>
+      <div *ngIf="courseName" style="color:green; font-size:13px; margin-top:4px;">✓ {{courseName}}</div>
+      <div *ngIf="courseError" style="color:red; font-size:13px; margin-top:4px;">{{courseError}}</div>
+    </div>
+
+    <div *ngIf="error" style="color:red; margin-bottom:1rem; font-size:14px;">{{error}}</div>
+
+    <button (click)="onSubmit()" [disabled]="loading"
+      style="width:100%; padding:12px; background:#1a3a5c; color:white; border:none; border-radius:6px; cursor:pointer; font-size:16px;">
+      {{loading ? 'Saving...' : 'Continue to Dashboard'}}
+    </button>
+
+  </div>
+</div>

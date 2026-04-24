@@ -1,0 +1,136 @@
+﻿.panel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.sheet-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 28px;
+  padding: 26px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+  grid-column: 1 / -1;
+}
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+.eyebrow {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #0369a1;
+  margin-bottom: 8px;
+}
+
+.sheet-header h2 {
+  color: #0f172a;
+  font-size: 1.28rem;
+}
+
+.saved-list {
+  display: grid;
+  gap: 14px;
+}
+
+.saved-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 16px;
+  background: #fff;
+}
+
+.saved-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.subline,
+.saved-meta p {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.saved-meta h3 {
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.download-link {
+  background: #e0f2fe;
+  color: #075985;
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.sheet-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.update-link {
+  background: #dcfce7;
+  color: #166534;
+  border: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.delete-link {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pill-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.pill {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: #f1f5f9;
+  color: #0f172a;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.empty-state,
+.loading {
+  padding: 20px 0;
+  color: #64748b;
+  text-align: center;
+}
+
+@media (max-width: 980px) {
+  .panel-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .saved-meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

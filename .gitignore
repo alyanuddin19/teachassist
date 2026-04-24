@@ -1,0 +1,49 @@
+# Secrets and environment files
+.env
+.env.*
+backend/.env
+frontendd/.env
+
+# Python environments and caches
+.venv/
+venv/
+env/
+backend/.venv/
+backend/venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# Node / Angular
+node_modules/
+frontendd/node_modules/
+frontendd/.angular/
+frontendd/dist/
+frontendd/coverage/
+
+# IDE and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+Thumbs.db
+Desktop.ini
+
+# Local uploads and generated files
+uploads/
+backend/uploads/
+*.log
+
+# Build artifacts and temporary files
+dist/
+build/
+tmp/
+temp/
+
+# Database / local app state
+*.sqlite3
+*.db
+

@@ -1,0 +1,235 @@
+<div class="prompt-page">
+  <section class="page-hero">
+    <div class="hero-copy">
+      <span class="hero-badge">Prompt Generator</span>
+      <h1>Build The Prompt Before The Paper</h1>
+      <p>
+        Upload lecture material, shape the exam blueprint, preview the generated prompt,
+        and then create the final paper without leaving TeachAssist.
+      </p>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat-card">
+        <span class="stat-label">Files</span>
+        <strong>{{ selectedFiles.length }}</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Exam Type</span>
+        <strong>{{ examTypeLabel }}</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Total Marks</span>
+        <strong>{{ totalMarks }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <div class="builder-grid">
+    <div class="builder-main">
+      <section class="card section-enter">
+        <div class="section-header">
+          <div>
+            <h3>Step 1 · Upload Material</h3>
+            <p>Select one or more lecture files that should drive the exam content.</p>
+          </div>
+        </div>
+
+        <label class="upload-content">
+          <input type="file" hidden multiple accept=".pdf,.docx,.ppt,.pptx" (change)="onFileSelected($event)" />
+          <div class="upload-icon">📄</div>
+          <p>{{ selectedFiles.length ? 'Lecture files ready' : 'Upload lecture files' }}</p>
+          <small>PDF / DOCX / PPT / PPTX</small>
+
+          <div class="file-chips" *ngIf="selectedFiles.length">
+            <button type="button" class="file-chip" *ngFor="let file of selectedFiles; let i = index" (click)="$event.preventDefault(); removeFile(i)">
+              {{ file.name }}
+              <span>×</span>
+            </button>
+          </div>
+        </label>
+      </section>
+
+      <section class="card section-enter">
+        <div class="section-header">
+          <div>
+            <h3>Step 2 · Configure Exam</h3>
+            <p>Set the assessment type and the overall blueprint before prompt generation.</p>
+          </div>
+        </div>
+
+        <div class="dual-grid">
+          <div class="field-block">
+            <label>Exam Type</label>
+            <select [(ngModel)]="examType" (change)="onExamTypeChange()">
+              <option value="quiz">Quiz</option>
+              <option value="mid">Mid-Term</option>
+              <option value="final">Final</option>
+              <option value="assignment">Assignment</option>
+            </select>
+          </div>
+
+          <div class="field-block">
+            <label>Time Allowed</label>
+            <input [value]="timeAllowed" readonly />
+          </div>
+        </div>
+
+        <div class="config-panels">
+          <article class="config-card" [class.disabled]="examType === 'assignment'">
+            <div class="config-head">
+              <div>
+                <h4>MCQ Section</h4>
+                <p>Use objective questions when the exam structure needs them.</p>
+              </div>
+              <label class="toggle-pill">
+                <input type="checkbox" [(ngModel)]="mcqEnabled" (change)="rebuildPrompt()" [disabled]="examType === 'assignment'" />
+                <span>{{ mcqEnabled && examType !== 'assignment' ? 'Enabled' : 'Off' }}</span>
+              </label>
+            </div>
+
+            <div class="grid-2">
+              <div class="field-block">
+                <label>MCQ Count</label>
+                <input type="number" min="0" [(ngModel)]="mcqCount" (input)="rebuildPrompt()" />
+              </div>
+              <div class="field-block">
+                <label>Marks / MCQ</label>
+                <input type="number" min="0" step="0.5" [(ngModel)]="mcqMarks" (input)="rebuildPrompt()" />
+              </div>
+            </div>
+          </article>
+
+          <article class="config-card">
+            <div class="config-head">
+              <div>
+                <h4>Theory Section</h4>
+                <p>Create short, descriptive, or case-study questions with individual marks.</p>
+              </div>
+              <label class="toggle-pill">
+                <input type="checkbox" [(ngModel)]="theoryEnabled" (change)="rebuildPrompt()" />
+                <span>{{ theoryEnabled ? 'Enabled' : 'Off' }}</span>
+              </label>
+            </div>
+
+            <div class="grid-2">
+              <div class="field-block">
+                <label>Theory Questions</label>
+                <input type="number" min="1" max="20" [(ngModel)]="theoryCount" (input)="onTheoryCountChange()" />
+              </div>
+              <div class="field-block">
+                <label>Marks Cap</label>
+                <input [value]="maxMarksLabel" readonly />
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="card section-enter" *ngIf="theoryEnabled">
+        <div class="section-header">
+          <div>
+            <h3>Step 3 · Theory Blueprint</h3>
+            <p>Define the type, marks, and Bloom level for each non-MCQ question.</p>
+          </div>
+        </div>
+
+        <div class="theory-list">
+          <article class="theory-row" *ngFor="let question of theoryQuestions; let i = index">
+            <div class="question-index">Q{{ i + 1 }}</div>
+
+            <div class="field-block">
+              <label>Question Type</label>
+              <select [(ngModel)]="question.question_type" (change)="onQuestionTypeChange()">
+                <option *ngFor="let option of getQuestionTypeOptions()" [value]="option.value">{{ option.label }}</option>
+              </select>
+            </div>
+
+            <div class="field-block">
+              <label>Marks</label>
+              <input type="number" min="1" max="100" [(ngModel)]="question.marks" (input)="rebuildPrompt()" />
+            </div>
+
+            <div class="field-block field-wide">
+              <label>Bloom's Level</label>
+              <select [(ngModel)]="question.blooms_level" (change)="rebuildPrompt()">
+                <option *ngFor="let level of bloomsLevels" [value]="level.value">{{ level.label }}</option>
+              </select>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="card section-enter">
+        <div class="section-header">
+          <div>
+            <h3>Step 4 · Prompt Preview</h3>
+            <p>Review or refine the generated prompt before you send it to the exam engine.</p>
+          </div>
+          <button type="button" class="secondary-btn" (click)="copyPrompt()">Copy Prompt</button>
+        </div>
+
+        <textarea class="prompt-box" [(ngModel)]="generatedPrompt" rows="16"></textarea>
+      </section>
+
+      <section class="card section-enter">
+        <div class="section-header">
+          <div>
+            <h3>Teacher Notes</h3>
+            <p>Add optional instructions without breaking the generated structure.</p>
+          </div>
+        </div>
+
+        <textarea rows="5" [(ngModel)]="teacherPrompt"></textarea>
+      </section>
+
+      <button class="generate-btn" (click)="generate()" [disabled]="loading || !selectedFiles.length">
+        <span *ngIf="!loading">Generate Exam Paper</span>
+        <span class="loader-wrap" *ngIf="loading">
+          <span class="spinner"></span>
+          Generating...
+        </span>
+      </button>
+
+      <section class="card section-enter" *ngIf="result">
+        <div class="section-header">
+          <div>
+            <h3>Generated Output</h3>
+            <p>The new prompt-generator workflow is now feeding the main TeachAssist generator.</p>
+          </div>
+        </div>
+
+        <textarea class="result-box" [(ngModel)]="result" rows="18"></textarea>
+      </section>
+
+      <section class="export-panel card section-enter" *ngIf="generatedExamId">
+        <div>
+          <span class="export-title">Export Assessment</span>
+          <p>Download the generated paper in the same formats you already use.</p>
+        </div>
+        <div class="export-actions">
+          <button class="secondary-btn" type="button" (click)="download('pdf')">PDF</button>
+          <button class="secondary-btn" type="button" (click)="download('docx')">DOCX</button>
+        </div>
+      </section>
+    </div>
+
+    <aside class="builder-side">
+      <section class="card quick-guide section-enter">
+        <div class="section-header">
+          <div>
+            <h3>Prompt Workflow</h3>
+            <p>The old Generate page is now replaced with your prompt-first flow.</p>
+          </div>
+        </div>
+
+        <ul class="guide-list">
+          <li>Upload all lecture files before generating the prompt.</li>
+          <li>Set theory question marks individually for better control.</li>
+          <li>Use Bloom levels to guide the prompt instead of editing the paper later.</li>
+          <li>Review the prompt before generation for the best output.</li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+</div>

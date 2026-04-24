@@ -1,0 +1,203 @@
+﻿<section class="hero-card compact-hero">
+  <h1>Generate a Marksheet</h1>
+</section>
+
+<section class="form-grid">
+  <div class="card">
+    <div class="card-header">
+      <h2>Course Selection</h2>
+    </div>
+
+    <div class="grid two-col">
+      <label class="field">
+        <span>Teacher</span>
+        <input [ngModel]="teacherName" readonly />
+      </label>
+
+      <label class="field">
+        <span>UID</span>
+        <input [ngModel]="teacherUid" readonly />
+      </label>
+
+      <label class="field full-width">
+        <span>Select Course</span>
+        <select [(ngModel)]="selectedCourseRecordId" (ngModelChange)="onCourseChange()" [disabled]="isLoadingCourses || !availableCourses.length">
+          <option [ngValue]="null">Select your course</option>
+          <option *ngFor="let course of availableCourses" [ngValue]="course.record_id">
+            {{ getSelectedCourseLabel(course) }}
+          </option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Department</span>
+        <input [ngModel]="teacherDepartment" readonly />
+      </label>
+
+      <label class="field">
+        <span>Semester</span>
+        <input [ngModel]="semester" readonly />
+      </label>
+
+      <label class="field">
+        <span>Batch</span>
+        <input [ngModel]="batch" readonly />
+      </label>
+
+      <label class="field">
+        <span>Section</span>
+        <input [ngModel]="section" readonly />
+      </label>
+
+      <label class="field full-width" *ngIf="selectedCourse">
+        <span>Course</span>
+        <input [ngModel]="courseCode + ' - ' + courseName" readonly />
+      </label>
+
+      <label class="field full-width">
+        <span>Total Marks</span>
+        <input [(ngModel)]="totalMarks" (input)="updateTotalMarks($any($event.target).value)" min="1" placeholder="100" type="number" />
+      </label>
+
+      <label class="field full-width">
+        <span>Excel File Name</span>
+        <input [(ngModel)]="exportFileName" placeholder="Enter custom Excel file name" type="text" />
+      </label>
+    </div>
+
+    <div class="course-summary" *ngIf="selectedCourse">
+      <span class="pill">{{ selectedCourse.student_count }} students</span>
+      <span class="pill">Threshold {{ selectedCourse.threshold_percentage }}%</span>
+      <span class="pill" *ngIf="selectedCourse.reviewed_task_count > 0">{{ selectedCourse.reviewed_task_count }} reviewed tasks</span>
+    </div>
+
+    <div class="button-row top-actions" *ngIf="selectedCourse?.reviewed_task_count && selectedCourse?.latest_marksheet_id">
+      <button class="download-btn" type="button" (click)="generateUpdatedMarksheet()" [disabled]="generatingUpdatedSheet">
+        {{ generatingUpdatedSheet ? 'Generating Updated Sheet...' : 'Generate Updated Marksheet' }}
+      </button>
+    </div>
+
+    <p class="auto-check" *ngIf="isLoadingCourses">Loading your registered courses...</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Dropdown Columns</h2>
+    </div>
+
+    <div class="grid two-col">
+      <label class="field">
+        <span>Select CLO</span>
+        <select [(ngModel)]="selectedOptions.clo">
+          <option value="">Select CLO</option>
+          <option *ngFor="let value of cloOptions" [value]="value">{{ value }}</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Assessment Type</span>
+        <select [(ngModel)]="selectedOptions.assessment_type" (ngModelChange)="onAssessmentTypeChange()">
+          <option value="">Select type</option>
+          <option *ngFor="let value of assessmentTypes" [value]="value">{{ value }}</option>
+        </select>
+      </label>
+
+      <label class="field" *ngIf="shouldShowAssessmentItem()">
+        <span>{{ selectedOptions.assessment_type }} Number</span>
+        <select [(ngModel)]="selectedOptions.assessment_item">
+          <option value="">Select {{ selectedOptions.assessment_type }} number</option>
+          <option *ngFor="let value of getAssessmentItemOptions()" [value]="value">{{ value }}</option>
+        </select>
+      </label>
+
+      <label class="field" *ngIf="shouldShowQuestionFields()">
+        <span>{{ selectedOptions.assessment_type }} Question</span>
+        <select [(ngModel)]="selectedOptions.question_number">
+          <option value="">Select question number</option>
+          <option *ngFor="let value of questionNumbers" [value]="value">{{ value }}</option>
+        </select>
+      </label>
+
+      <label class="field" *ngIf="shouldShowQuestionFields()">
+        <span>{{ selectedOptions.assessment_type }} Question Part</span>
+        <select [(ngModel)]="selectedOptions.question_part">
+          <option *ngFor="let value of questionParts" [value]="value">{{ value }}</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Assessment Total Marks</span>
+        <input [(ngModel)]="selectedOptions.assessment_total_marks" (input)="updateAssessmentTotalMarks($any($event.target).value)" min="1" placeholder="Enter total marks" type="number" />
+      </label>
+    </div>
+
+    <div class="button-row top-actions">
+      <button class="download-btn" type="button" (click)="addAssessmentToClo()">Add To CLO</button>
+    </div>
+
+    <div class="clo-preview" *ngIf="selectedColumns.length">
+      <div class="preview-card" *ngFor="let item of selectedColumns">
+        <strong>{{ item.label }}</strong>
+        <div class="pill-row">
+          <span class="pill removable-pill" *ngFor="let value of cloAssessmentMap[item.label]">
+            {{ value }} ({{ getAssessmentMaxMarks(item.label + ' - ' + value) }})
+            <button type="button" class="pill-remove" (click)="removeAssessmentFromClo(item.label, value)">x</button>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <div class="card-header">
+    <h2>Student Marks Entry</h2>
+    <p *ngIf="selectedCourse">Course: {{ courseCode }} - {{ courseName }} - Batch {{ batch }} - Section {{ section }}</p>
+  </div>
+
+  <div class="loading" *ngIf="isLoadingStudents">Loading students...</div>
+
+  <div class="table-wrap" *ngIf="!isLoadingStudents">
+    <table class="student-table" *ngIf="studentRows.length; else noStudents">
+      <thead>
+        <tr>
+          <th rowspan="2">Roll Number</th>
+          <th rowspan="2">Student Name</th>
+          <th rowspan="2">Semester</th>
+          <th *ngFor="let group of groupedAssessmentColumns" [attr.colspan]="group.items.length">{{ getCloHeader(group) }}</th>
+          <th rowspan="2">Total Marks</th>
+        </tr>
+        <tr>
+          <th *ngFor="let item of assessmentColumns">{{ item.item }} ({{ item.maxMarks }})</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of studentRows; trackBy: trackByStudentId">
+          <td>{{ row.roll_number }}</td>
+          <td>{{ row.full_name }}</td>
+          <td>{{ row.semester || '-' }}</td>
+          <td *ngFor="let item of assessmentColumns">
+            <input [(ngModel)]="row.marksByAssessment[item.label]" (input)="updateStudentMark(row, item.label, $any($event.target).value)" [max]="item.maxMarks || 0" min="0" type="number" [placeholder]="item.item + ' / ' + item.maxMarks" />
+          </td>
+          <td>{{ getStudentTotal(row) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #noStudents>
+    <div class="empty-state">No students loaded yet. Select one of your registered courses first.</div>
+  </ng-template>
+
+  <div class="action-row">
+    <div class="status" *ngIf="statusMessage" [class.success]="statusType === 'success'" [class.error]="statusType === 'error'">{{ statusMessage }}</div>
+
+    <div class="button-row">
+      <a *ngIf="lastDownloadUrl" class="download-btn" [href]="lastDownloadUrl">Download Excel</a>
+      <button *ngIf="lastSavedMarksheetId" class="download-btn" type="button" (click)="continueToGapAnalysis()">Continue To Gap Analysis</button>
+      <button class="submit-btn" type="button" (click)="saveMarksheet()" [disabled]="saveState === 'saving'">
+        {{ saveState === 'saving' ? 'Saving...' : (editingMarksheetId ? 'Update Marksheet' : 'Save Marksheet') }}
+      </button>
+    </div>
+  </div>
+</section>

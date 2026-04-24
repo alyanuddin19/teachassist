@@ -1,0 +1,66 @@
+<div class="login-page">
+  <div class="login-card">
+
+    <div class="logo">
+      <div class="cap">
+        <div class="cap-top"></div>
+        <div class="cap-base"></div>
+        <div class="cap-tassel"></div>
+      </div>
+    </div>
+
+    <h2>TeachAssist</h2>
+    <p class="subtitle">{{ isSignup ? 'Teacher Sign Up' : 'Teacher Login' }}</p>
+
+    <div class="login-fields">
+
+      <input class="login-input" type="text" placeholder="Username"
+        [(ngModel)]="username" />
+
+      <input class="login-input" type="password" placeholder="Password"
+        [(ngModel)]="password" />
+
+      <!-- SIGNUP EXTRA FIELDS -->
+      <ng-container *ngIf="isSignup">
+
+        <select class="login-input" [(ngModel)]="semester">
+          <option value="">Select Semester</option>
+          <option *ngFor="let s of [1,2,3,4,5,6,7,8]" [value]="s">Semester {{s}}</option>
+        </select>
+
+        <input class="login-input" type="text" placeholder="Section (e.g. A, B)"
+          [(ngModel)]="section" />
+
+        <input class="login-input" type="text" placeholder="Batch (e.g. 2021-2025)"
+          [(ngModel)]="batch" />
+
+        <div style="position:relative">
+          <input class="login-input" type="text" placeholder="Course Code (e.g. CS301)"
+            [(ngModel)]="courseCode" (blur)="lookupCourse()" />
+          <div *ngIf="lookingUp" style="font-size:12px; color:#888; margin-top:4px;">
+            Looking up...
+          </div>
+          <div *ngIf="courseName" style="font-size:12px; color:green; margin-top:4px;">
+            ✓ {{ courseName }}
+          </div>
+          <div *ngIf="courseError" style="font-size:12px; color:red; margin-top:4px;">
+            {{ courseError }}
+          </div>
+        </div>
+
+      </ng-container>
+
+      <div class="error" *ngIf="error">{{ error }}</div>
+      <div style="color:green; font-size:13px;" *ngIf="successMsg">{{ successMsg }}</div>
+
+      <button type="button" class="login-btn" (click)="isSignup ? onSignup() : onLogin()">
+        {{ isSignup ? 'Sign Up' : 'Login' }}
+      </button>
+
+      <button type="button" class="signup-toggle-btn" (click)="toggleMode()">
+        {{ isSignup ? 'Already have account? Login' : 'New teacher? Sign Up' }}
+      </button>
+
+    </div>
+  </div>
+</div>

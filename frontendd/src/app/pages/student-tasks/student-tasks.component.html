@@ -1,0 +1,97 @@
+<div class="student-shell">
+  <header class="student-header">
+    <div class="student-identity">
+      <div class="student-avatar">👤</div>
+      <div>
+        <div class="student-name">{{ studentName }}</div>
+        <div class="student-code" *ngIf="studentCode">{{ studentCode }}</div>
+      </div>
+    </div>
+
+    <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+  </header>
+
+  <section class="tasks-panel">
+    <div class="panel-head">
+      <h3>Task Queue</h3>
+      <span class="task-count">{{ tasks.length }} task{{ tasks.length === 1 ? '' : 's' }}</span>
+    </div>
+
+    <div class="state-card" *ngIf="loading">Loading available tasks...</div>
+    <div class="state-card error" *ngIf="!loading && error">{{ error }}</div>
+
+    <div class="empty-card" *ngIf="!loading && !error && tasks.length === 0">
+      <h4>No tasks assigned yet</h4>
+      <p>New work from your teachers will appear here automatically.</p>
+    </div>
+
+    <div class="task-list" *ngIf="!loading && !error && tasks.length > 0">
+      <article class="task-card" *ngFor="let task of tasks">
+        <div class="task-top">
+          <div>
+            <div class="task-source">Teacher Task</div>
+            <h4>{{ task.title || task.course_name || 'Assigned Task' }}</h4>
+          </div>
+          <div class="task-actions">
+            <span class="status-pill">{{ task.status }}</span>
+            <button type="button" class="delete-task-btn" (click)="deleteTask(task.id)" [disabled]="deleting[task.id]">
+              {{ deleting[task.id] ? 'Deleting...' : 'Delete' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="task-overview">
+          <div class="info-chip" *ngIf="task.teacher_name">Teacher: {{ task.teacher_name }}</div>
+          <div class="info-chip" *ngIf="task.course_name">Course: {{ task.course_name }}</div>
+          <div class="info-chip" *ngIf="task.clo">Focus: {{ task.clo }}</div>
+        </div>
+
+        <div class="task-question" *ngIf="task.question_content">
+          <h5>Question</h5>
+          <div class="question-text">{{ task.question_content }}</div>
+        </div>
+
+        <div class="task-question" *ngIf="task.task_attachment_url">
+          <h5>Reference File</h5>
+          <p>
+            <a [href]="'http://127.0.0.1:8000' + task.task_attachment_url" target="_blank" rel="noopener">
+              {{ task.task_attachment_name || 'Open reference file' }}
+            </a>
+          </p>
+        </div>
+
+        <p *ngIf="task.description">{{ task.description }}</p>
+
+        <div class="submission-box" *ngIf="task.status === 'assigned'">
+          <textarea [(ngModel)]="answerText[task.id]" placeholder="Type your answer here"></textarea>
+          <label class="file-pick">
+            <input type="file" hidden accept=".png,.jpg,.jpeg,.pdf,.ppt,.pptx,.doc,.docx" (change)="onAnswerFileChange(task.id, $event)" />
+            <span>{{ answerFiles[task.id]?.name || 'Attach image, PDF, PPT, or Word file' }}</span>
+          </label>
+          <button type="button" class="submit-btn" (click)="submitTask(task.id)" [disabled]="submitting[task.id]">
+            {{ submitting[task.id] ? 'Submitting...' : 'Submit Task' }}
+          </button>
+        </div>
+
+        <div class="submission-result" *ngIf="task.status !== 'assigned'">
+          <h5>Your Submission</h5>
+          <p *ngIf="task.answer_text"><strong>Your Answer:</strong> {{ task.answer_text }}</p>
+          <p *ngIf="task.answer_attachment_url">
+            <strong>Your Attachment:</strong>
+            <a [href]="'http://127.0.0.1:8000' + task.answer_attachment_url" target="_blank" rel="noopener">
+              {{ task.answer_attachment_name || 'Open attachment' }}
+            </a>
+          </p>
+          <p *ngIf="task.status === 'submitted'"><strong>Status:</strong> Submitted and waiting for teacher review.</p>
+          <p *ngIf="task.teacher_decision"><strong>Teacher Result:</strong> {{ task.teacher_decision }}</p>
+          <p *ngIf="task.teacher_score"><strong>Marks:</strong> {{ task.teacher_score }}</p>
+          <p *ngIf="task.teacher_feedback"><strong>Teacher Feedback:</strong> {{ task.teacher_feedback }}</p>
+        </div>
+
+        <div class="task-meta" *ngIf="task.created_at">
+          Assigned: {{ task.created_at | date:'medium' }}
+        </div>
+      </article>
+    </div>
+  </section>
+</div>

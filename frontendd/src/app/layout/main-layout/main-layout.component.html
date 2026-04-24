@@ -1,0 +1,58 @@
+<div class="layout">
+
+  <!-- SIDEBAR (LOCKED) -->
+  <aside class="sidebar" [class.closed]="!sidebarOpen">
+    <button class="toggle-btn" (click)="toggleSidebar()">☰</button>
+
+    <div class="sidebar-shell">
+      <div class="sidebar-main">
+
+        <div class="teacher-header">
+          <div class="teacher-avatar">👤</div>
+          <div class="teacher-name" *ngIf="sidebarOpen">
+            {{ teacherName }}
+          </div>
+        </div>
+
+        <nav class="sidebar-content">
+          <button
+            class="nav-btn"
+            routerLink="/generate"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }">
+            Generate
+          </button>
+
+          <button
+            class="nav-btn"
+            routerLink="/gap-analysis"
+            routerLinkActive="active">
+            Gap Analysis
+          </button>
+
+          <button
+            class="nav-btn"
+            routerLink="/transform"
+            routerLinkActive="active">
+            Transform
+          </button>
+        </nav>
+
+      </div>
+
+      <button
+  type="button"
+  class="logout-btn"
+  (click)="logout()">
+  Logout
+</button>
+
+    </div>
+  </aside>
+
+  <!-- PAGE CONTENT -->
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+
+</div>

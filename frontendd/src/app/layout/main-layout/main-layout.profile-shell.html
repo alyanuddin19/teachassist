@@ -1,0 +1,51 @@
+<div class="layout">
+  <aside class="sidebar" [class.closed]="!sidebarOpen">
+    <button class="toggle-btn" (click)="toggleSidebar()">☰</button>
+
+    <div class="sidebar-shell">
+      <div class="sidebar-main">
+        <div class="teacher-header">
+          <div class="teacher-avatar">TA</div>
+          <div class="teacher-name" *ngIf="sidebarOpen">{{ teacherName }}</div>
+        </div>
+
+        <nav class="sidebar-content">
+          <button
+            class="nav-btn"
+            routerLink="/profile"
+            routerLinkActive="active">
+            Profile
+          </button>
+
+          <button
+            class="nav-btn"
+            routerLink="/generate"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }">
+            Generate
+          </button>
+
+          <button
+            class="nav-btn"
+            routerLink="/gap-analysis"
+            routerLinkActive="active">
+            Gap Analysis
+          </button>
+
+          <button
+            class="nav-btn"
+            routerLink="/transform"
+            routerLinkActive="active">
+            Transform
+          </button>
+        </nav>
+      </div>
+
+      <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

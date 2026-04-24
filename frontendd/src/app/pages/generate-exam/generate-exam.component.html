@@ -1,0 +1,436 @@
+
+<div><h1>Generate Quiz / Assignments / Mids / Finals</h1>
+
+    <!-- ================= UPLOAD ================= -->
+    <div class="card">
+      <label class="upload-content">
+        <input type="file" hidden multiple (change)="onFileSelected($event)" />
+
+        <div class="upload-icon">📄</div>
+
+        <p>
+          {{ selectedFiles.length === 0
+            ? 'Upload lecture files'
+            : 'Uploaded Files' }}
+        </p>
+
+        <div class="file-chips" *ngIf="selectedFiles.length">
+          <span class="file-chip" *ngFor="let f of selectedFiles">
+            {{ f.name }}
+          </span>
+        </div>
+
+        <small>
+          {{ selectedFiles.length }} file(s) · PDF / PPTX / DOCX
+        </small>
+      </label>
+    </div>
+
+    <!-- ================= ASSESSMENT TYPE ================= -->
+    <div class="card">
+      <label>Assessment Type</label>
+      <select [(ngModel)]="examType" (change)="updatePrompt()">
+        <option value="quiz">Quiz</option>
+        <option value="assignment">Assignment</option>
+        <option value="midfinal">Mid / Final</option>
+      </select>
+    </div>
+
+    <!-- ================= DIFFICULTY (QUIZ + ASSIGNMENT ONLY) ================= -->
+    <div class="card" *ngIf="!isMidOrFinal">
+      <label>Difficulty</label>
+      <select [(ngModel)]="difficulty" (change)="updatePrompt()">
+        <option>Easy</option>
+        <option>Medium</option>
+        <option>Hard</option>
+      </select>
+    </div>
+
+    <!-- ================= QUIZ ================= -->
+    <div class="card" *ngIf="isQuiz">
+
+      <!-- MCQs -->
+      <div class="grid-3">
+        <div>
+          <label>MCQs</label>
+          <input
+            type="number"
+            [(ngModel)]="mcqs"
+            min="0"
+            (input)="updatePrompt()" />
+        </div>
+
+        <div>
+          <label>MCQ Bloom</label>
+          <select [(ngModel)]="mcqBloom" (change)="updatePrompt()">
+            <option *ngFor="let b of blooms"
+                    [disabled]="isBloomDisabled('mcq', b)">
+              {{ b }}
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <label>Marks / MCQ</label>
+          <input type="number" [(ngModel)]="mcqMarks" (input)="updatePrompt()" />
+        </div>
+      </div>
+
+      <!-- Shorts -->
+      <div class="grid-3">
+        <div>
+          <label>Shorts</label>
+          <input
+            type="number"
+            [(ngModel)]="shorts"
+            min="0"
+            (input)="updatePrompt()" />
+        </div>
+
+        <div>
+          <label>Short Bloom</label>
+          <select [(ngModel)]="shortBloom" (change)="updatePrompt()">
+            <option *ngFor="let b of blooms"
+                    [disabled]="isBloomDisabled('short', b)">
+              {{ b }}
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <label>Marks / Short</label>
+          <input type="number" [(ngModel)]="shortMarks" (input)="updatePrompt()" />
+        </div>
+      </div>
+
+      <!-- Longs -->
+      <div class="grid-3">
+        <div>
+          <label>Longs</label>
+          <input
+            type="number"
+            [(ngModel)]="longs"
+            min="0"
+            (input)="updatePrompt()" />
+        </div>
+
+        <div>
+          <label>Long Bloom</label>
+          <select [(ngModel)]="longBloom" (change)="updatePrompt()">
+            <option *ngFor="let b of blooms"
+                    [disabled]="isBloomDisabled('long', b)">
+              {{ b }}
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <label>Marks / Long</label>
+          <input type="number" [(ngModel)]="longMarks" (input)="updatePrompt()" />
+        </div>
+      </div>
+
+      <!-- Scenarios -->
+      <div class="grid-3">
+        <div>
+          <label>Scenario Questions</label>
+          <input
+            type="number"
+            [(ngModel)]="scenarioQuestions"
+            min="0"
+            (input)="updatePrompt()" />
+        </div>
+
+        <div>
+          <label>Scenario Bloom</label>
+          <select [(ngModel)]="scenarioBloom" (change)="updatePrompt()">
+            <option *ngFor="let b of blooms"
+                    [disabled]="isBloomDisabled('scenario', b)">
+              {{ b }}
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <label>Marks / Scenario</label>
+          <input type="number" [(ngModel)]="scenarioMarks" (input)="updatePrompt()" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= MID / FINAL ================= -->
+    <div class="card" *ngIf="isMidOrFinal">
+      <label>Number of Sections</label>
+      <select (change)="setSectionCount($any($event.target).value)">
+        <option *ngFor="let n of [1,2,3,4]">{{ n }}</option>
+      </select>
+    </div>
+
+    <ng-container *ngIf="isMidOrFinal">
+      <div class="card" *ngFor="let s of sections">
+        <h3>Section {{ s.name }}</h3>
+
+        <!-- MCQs -->
+        <div class="grid-3">
+          <div>
+            <label>MCQs</label>
+            <input
+              type="number"
+              [(ngModel)]="s.mcqs"
+              min="0"
+              (input)="updatePrompt()" />
+          </div>
+
+          <div>
+            <label>Bloom</label>
+            <select [(ngModel)]="s.mcqBloom" (change)="updatePrompt()">
+              <option *ngFor="let b of blooms"
+                      [disabled]="isBloomDisabled('mcq', b)">
+                {{ b }}
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label>Marks / MCQ</label>
+            <input
+              type="number"
+              min="0"
+              [(ngModel)]="s.mcqMarks"
+              (input)="updatePrompt()" />
+          </div>
+        </div>
+
+        <!-- Shorts -->
+        <div class="grid-3">
+          <div>
+            <label>Shorts</label>
+            <input
+              type="number"
+              [(ngModel)]="s.shorts"
+              min="0"
+              (input)="updatePrompt()" />
+          </div>
+
+          <div>
+            <label>Bloom</label>
+            <select [(ngModel)]="s.shortBloom" (change)="updatePrompt()">
+              <option *ngFor="let b of blooms"
+                      [disabled]="isBloomDisabled('short', b)">
+                {{ b }}
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label>Marks / Short</label>
+            <input
+              type="number"
+              min="0"
+              [(ngModel)]="s.shortMarks"
+              (input)="updatePrompt()" />
+          </div>
+        </div>
+
+        <!-- Longs -->
+        <div class="grid-3">
+          <div>
+            <label>Longs</label>
+            <input
+              type="number"
+              [(ngModel)]="s.longs"
+              min="0"
+              (input)="updatePrompt()" />
+          </div>
+
+          <div>
+            <label>Bloom</label>
+            <select [(ngModel)]="s.longBloom" (change)="updatePrompt()">
+              <option *ngFor="let b of blooms"
+                      [disabled]="isBloomDisabled('long', b)">
+                {{ b }}
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label>Marks / Long</label>
+            <input
+              type="number"
+              min="0"
+              [(ngModel)]="s.longMarks"
+              (input)="updatePrompt()" />
+          </div>
+        </div>
+
+        <!-- Scenarios -->
+        <div class="grid-3">
+          <div>
+            <label>Scenarios</label>
+            <input
+              type="number"
+              [(ngModel)]="s.scenario"
+              min="0"
+              (input)="updatePrompt()" />
+          </div>
+
+          <div>
+            <label>Bloom</label>
+            <select [(ngModel)]="s.scenarioBloom" (change)="updatePrompt()">
+              <option *ngFor="let b of blooms"
+                      [disabled]="isBloomDisabled('scenario', b)">
+                {{ b }}
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label>Marks / Scenario</label>
+            <input
+              type="number"
+              min="0"
+              [(ngModel)]="s.scenarioMarks"
+              (input)="updatePrompt()" />
+          </div>
+        </div>
+
+        <!-- Total (AUTO) -->
+        <div>
+          <label>Total Section Marks</label>
+          <input type="number" [value]="s.marks" readonly />
+        </div>
+
+      </div>
+    </ng-container>
+
+    <!-- ================= ASSIGNMENT ================= -->
+    <div class="card" *ngIf="isAssignment">
+
+      <div class="grid-3">
+        <div>
+          <label>Total Marks</label>
+          <input type="number"
+                 [(ngModel)]="assignmentTotalMarks"
+                 (input)="updatePrompt()" />
+        </div>
+
+        <div>
+          <label>Number of Tasks</label>
+          <input type="number"
+                 [(ngModel)]="assignmentTasks"
+                 (input)="updatePrompt()" />
+        </div>
+
+        <div>
+          <label>Global Bloom Level</label>
+          <select [(ngModel)]="assignmentBloom"
+                  (change)="updatePrompt()">
+            <option *ngFor="let b of blooms">
+              {{ b }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- SCENARIO TASKS (ASSIGNMENT-SPECIFIC) -->
+      <div class="grid-3">
+        <div>
+          <label>Scenario Tasks</label>
+          <input
+            type="number"
+            min="0"
+            [(ngModel)]="assignmentScenarios"
+            (input)="updatePrompt()" />
+        </div>
+
+        <div>
+          <label>Marks / Scenario Task</label>
+          <input
+            type="number"
+            min="0"
+            [(ngModel)]="scenarioMarks"
+            (input)="updatePrompt()" />
+        </div>
+
+        <div></div>
+      </div>
+
+    </div> <!-- end ASSIGNMENT card -->
+
+    <!-- ================= PROMPT PREVIEW ================= -->
+    <div class="card">
+      <h3>Assessment Summary</h3>
+
+      <ul>
+        <li><b>Exam Type:</b> {{ examType }}</li>
+        <li *ngIf="isQuiz">
+          <b>Quiz Structure:</b>
+          MCQs {{ mcqs }},
+          Shorts {{ shorts }},
+          Longs {{ longs }},
+          Scenarios {{ scenarioQuestions }}
+        </li>
+        <li *ngIf="isMidOrFinal">
+          <b>Sections:</b> {{ sections.length }}
+        </li>
+        <li *ngIf="isAssignment">
+          <b>Tasks:</b> {{ assignmentTasks }},
+          <b>Total Marks:</b> {{ assignmentTotalMarks }}
+        </li>
+      </ul>
+
+      <div *ngIf="teacherPrompt">
+        <b>Teacher Instructions:</b>
+        <p>{{ teacherPrompt }}</p>
+      </div>
+    </div>
+
+    <!-- ================= TEACHER PROMPT ================= -->
+    <div class="card">
+      <h3>Additional Instructions (Optional)</h3>
+
+      <textarea
+        rows="4"
+        placeholder="e.g. Focus more on numericals, avoid theory-heavy questions, include real-world scenarios…"
+        [(ngModel)]="teacherPrompt">
+      </textarea>
+
+      <small>
+        These instructions will be prioritized but cannot violate Bloom’s Taxonomy rules.
+      </small>
+    </div>
+
+    <!-- ================= GENERATE ================= -->
+<button
+  class="generate-btn"
+  (click)="generate()"
+  [disabled]="loading || !canGenerate">
+
+  <span *ngIf="!loading">Generate</span>
+
+  <span class="loader-wrap" *ngIf="loading">
+    <span class="spinner"></span>
+    Generating…
+  </span>
+
+</button>
+
+
+    <div class="result-container" *ngIf="result">
+  <pre class="result-text">
+{{ result }}
+  </pre>
+</div>
+
+
+    <!-- ================= EXPORT ================= -->
+    <div class="export-panel" *ngIf="generatedExamId">
+      <span>Export Assessment</span>
+      <div>
+        <button class="secondary" (click)="download('pdf')">PDF</button>
+        <button class="secondary" (click)="download('docx')">DOCX</button>
+      </div>
+    </div>
+
+
+</div>

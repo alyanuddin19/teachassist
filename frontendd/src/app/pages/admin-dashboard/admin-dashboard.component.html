@@ -1,0 +1,178 @@
+﻿<div class="admin-page">
+  <aside class="portal-sidebar" [class.closed]="sidebarCollapsed">
+    <button class="menu-btn" type="button" aria-label="Admin menu" (click)="sidebarCollapsed = !sidebarCollapsed">☰</button>
+
+    <div class="sidebar-shell">
+      <div class="sidebar-main">
+        <div class="identity-card">
+          <div class="avatar-circle">A</div>
+          <div class="identity-copy">
+            <strong>{{ adminName }}</strong>
+            <span>System Admin</span>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <button type="button" [class.active]="activePanel === 'hod'" (click)="switchPanel('hod')">Add HOD</button>
+          <button type="button" [class.active]="activePanel === 'student'" (click)="switchPanel('student')">Add Student</button>
+          <button type="button" [class.active]="activePanel === 'course'" (click)="switchPanel('course')">Add Course</button>
+        </nav>
+      </div>
+
+      <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+    </div>
+  </aside>
+
+  <div class="admin-content">
+    <section class="admin-banner surface-card">
+      <div>
+        <span class="page-kicker">Admin Control</span>
+        <h2>{{ activePanel === 'hod' ? 'Head Of Department' : activePanel === 'student' ? 'Student Access' : 'Course Catalog' }}</h2>
+        <p *ngIf="activePanel === 'hod'">Create HOD accounts with generated usernames and passwords.</p>
+        <p *ngIf="activePanel === 'student'">Register students, save them in the database, and generate their login credentials.</p>
+        <p *ngIf="activePanel === 'course'">Add courses to the central course database using course code and course name.</p>
+      </div>
+    </section>
+
+    <div class="status-line error" *ngIf="error">{{ error }}</div>
+    <div class="status-line success" *ngIf="success">{{ success }}</div>
+
+    <section class="surface-card" *ngIf="activePanel === 'hod'">
+      <div class="section-head">
+        <div>
+          <span class="page-kicker">Add HOD</span>
+          <h3>Head Of Department</h3>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <label class="field-block">
+          <span>Full Name</span>
+          <input [(ngModel)]="hodForm.fullName" />
+        </label>
+
+        <label class="field-block">
+          <span>Contact No</span>
+          <input [(ngModel)]="hodForm.contactNo" />
+        </label>
+
+        <label class="field-block field-span">
+          <span>Department</span>
+          <input [(ngModel)]="hodForm.department" />
+        </label>
+      </div>
+
+      <button type="button" class="primary-btn" (click)="createHod()" [disabled]="savingHod">
+        {{ savingHod ? 'Generating...' : 'Generate HOD Credentials' }}
+      </button>
+
+      <div class="result-card" *ngIf="createdHod">
+        <h4>{{ createdHod.full_name }}</h4>
+        <p><strong>Department:</strong> {{ createdHod.department }}</p>
+        <p><strong>HOD UID:</strong> {{ createdHod.hod_uid }}</p>
+        <p><strong>Username:</strong> {{ createdHod.username }}</p>
+        <p><strong>Password:</strong> {{ createdHod.password }}</p>
+      </div>
+    </section>
+
+    <section class="surface-card" *ngIf="activePanel === 'student'">
+      <div class="section-head">
+        <div>
+          <span class="page-kicker">Add Student</span>
+          <h3>Student Access</h3>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <label class="field-block">
+          <span>Full Name</span>
+          <input [(ngModel)]="studentForm.fullName" />
+        </label>
+
+        <label class="field-block">
+          <span>Roll No</span>
+          <input [(ngModel)]="studentForm.rollNo" />
+        </label>
+
+        <label class="field-block">
+          <span>Contact No</span>
+          <input [(ngModel)]="studentForm.contactNo" />
+        </label>
+
+        <label class="field-block">
+          <span>Generated Email</span>
+          <input [value]="studentForm.rollNo ? (studentForm.rollNo.toUpperCase() + '@students.uitu.edu.pk') : ''" readonly />
+        </label>
+
+        <label class="field-block">
+          <span>Department</span>
+          <input [(ngModel)]="studentForm.department" />
+        </label>
+
+        <label class="field-block">
+          <span>Program</span>
+          <input [(ngModel)]="studentForm.program" />
+        </label>
+
+        <label class="field-block">
+          <span>Batch</span>
+          <input [(ngModel)]="studentForm.batch" />
+        </label>
+
+        <label class="field-block">
+          <span>Section</span>
+          <input [(ngModel)]="studentForm.section" />
+        </label>
+
+        <label class="field-block field-span">
+          <span>Semester</span>
+          <input [(ngModel)]="studentForm.semester" />
+        </label>
+      </div>
+
+      <button type="button" class="primary-btn" (click)="createStudent()" [disabled]="savingStudent">
+        {{ savingStudent ? 'Generating...' : 'Generate Student Credentials' }}
+      </button>
+
+      <div class="result-card" *ngIf="createdStudent">
+        <h4>{{ createdStudent.student_name }}</h4>
+        <p><strong>Roll No:</strong> {{ createdStudent.roll_no }}</p>
+        <p><strong>Email:</strong> {{ createdStudent.email }}</p>
+        <p><strong>Department:</strong> {{ createdStudent.department }}</p>
+        <p><strong>Program:</strong> {{ createdStudent.program }}</p>
+        <p><strong>Login ID:</strong> {{ createdStudent.roll_no }}</p>
+        <p><strong>Password:</strong> {{ createdStudent.password }}</p>
+      </div>
+    </section>
+
+    <section class="surface-card" *ngIf="activePanel === 'course'">
+      <div class="section-head">
+        <div>
+          <span class="page-kicker">Add Course</span>
+          <h3>Course Catalog</h3>
+        </div>
+      </div>
+
+      <div class="form-grid compact-grid">
+        <label class="field-block">
+          <span>Course Code</span>
+          <input [(ngModel)]="courseForm.courseCode" />
+        </label>
+
+        <label class="field-block">
+          <span>Course Name</span>
+          <input [(ngModel)]="courseForm.courseName" />
+        </label>
+      </div>
+
+      <button type="button" class="primary-btn" (click)="createCourse()" [disabled]="savingCourse">
+        {{ savingCourse ? 'Saving...' : 'Save Course' }}
+      </button>
+
+      <div class="result-card" *ngIf="createdCourse">
+        <h4>{{ createdCourse.course_code }}</h4>
+        <p><strong>Course Name:</strong> {{ createdCourse.course_name }}</p>
+      </div>
+    </section>
+  </div>
+</div>

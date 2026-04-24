@@ -1,0 +1,313 @@
+﻿.hod-page {
+  min-height: 100vh;
+}
+
+.portal-sidebar {
+  position: fixed;
+  inset: 18px auto 18px 18px;
+  width: 286px;
+  background: linear-gradient(180deg, rgba(19, 59, 146, 0.98) 0%, rgba(11, 56, 116, 0.96) 100%);
+  color: #fff;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 30px 80px rgba(10, 38, 82, 0.28);
+  overflow: hidden;
+  z-index: 1000;
+  transition: width 220ms var(--ease), transform 220ms var(--ease), box-shadow 220ms var(--ease);
+  animation: fadeSlideIn 420ms var(--ease);
+}
+
+.portal-sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.18), transparent 26%), radial-gradient(circle at bottom right, rgba(17, 183, 163, 0.12), transparent 20%);
+  pointer-events: none;
+}
+
+.portal-sidebar.closed {
+  width: 88px;
+}
+
+.menu-btn {
+  position: relative;
+  z-index: 1;
+  width: 48px;
+  height: 48px;
+  margin: 18px 0 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 1.1rem;
+  backdrop-filter: blur(12px);
+}
+
+.menu-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.sidebar-shell {
+  position: relative;
+  z-index: 1;
+  height: calc(100% - 66px);
+  display: flex;
+  flex-direction: column;
+  padding: 18px 16px 18px;
+}
+
+.sidebar-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.identity-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  margin-bottom: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.avatar-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.identity-copy {
+  min-width: 0;
+}
+
+.identity-copy strong {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #eff5ff;
+}
+
+.identity-copy span {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: rgba(237, 244, 255, 0.72);
+}
+
+.sidebar-nav {
+  display: grid;
+  gap: 10px;
+}
+
+.sidebar-nav button,
+.logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  min-height: 54px;
+  border: 1px solid transparent;
+  border-radius: 18px;
+  background: transparent;
+  color: rgba(237, 244, 255, 0.84);
+  text-align: left;
+  padding: 0 16px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.sidebar-nav button:hover:not(:disabled),
+.logout-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.sidebar-nav button.active {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08));
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 16px 30px rgba(8, 24, 58, 0.18);
+}
+
+.logout-btn {
+  margin-top: auto;
+}
+
+.portal-sidebar.closed .identity-card,
+.portal-sidebar.closed .sidebar-nav,
+.portal-sidebar.closed .logout-btn {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-10px);
+}
+
+.portal-sidebar.closed .sidebar-shell {
+  padding-top: 10px;
+}
+
+.hod-content {
+  min-height: 100vh;
+  margin-left: 322px;
+  padding: 26px 28px 30px;
+  display: grid;
+  gap: 22px;
+  transition: margin-left 220ms var(--ease);
+}
+
+.portal-sidebar.closed ~ .hod-content {
+  margin-left: 124px;
+}
+
+.surface-card {
+  padding: 30px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  animation: fadeSlideUp 420ms var(--ease);
+}
+
+.page-kicker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hod-banner h2,
+.section-head h3 {
+  margin: 14px 0 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.field-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-span {
+  grid-column: span 2;
+}
+
+.field-block span {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.field-block input {
+  min-height: 54px;
+  padding: 14px 16px;
+}
+
+.course-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.course-pill {
+  min-height: 42px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(18, 51, 120, 0.08);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.course-name {
+  color: #1d7f62;
+  font-weight: 700;
+}
+
+.primary-btn {
+  width: 100%;
+  margin-top: 18px;
+  min-height: 54px;
+  border: none;
+  border-radius: 18px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary), #4069d9);
+  color: #fff;
+  box-shadow: 0 20px 36px rgba(38, 72, 184, 0.22);
+}
+
+.primary-btn:hover:not(:disabled) {
+  filter: brightness(0.99);
+}
+
+.result-card {
+  margin-top: 18px;
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  background: rgba(247, 249, 255, 0.92);
+  animation: fadeSlideUp 280ms var(--ease);
+}
+
+.result-card h4 {
+  margin: 0 0 12px;
+}
+
+.result-card p {
+  margin: 8px 0 0;
+}
+
+.status-line.error {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.status-line.success {
+  color: #1d7f62;
+  font-weight: 700;
+}
+
+@media (max-width: 960px) {
+  .portal-sidebar {
+    inset: 12px auto 12px 12px;
+    width: 268px;
+  }
+
+  .hod-content,
+  .portal-sidebar.closed ~ .hod-content {
+    margin-left: 0;
+    padding: 96px 18px 24px;
+  }
+}
+
+@media (max-width: 760px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field-span {
+    grid-column: span 1;
+  }
+}

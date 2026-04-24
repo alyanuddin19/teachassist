@@ -1,0 +1,89 @@
+﻿<div class="hod-page">
+  <aside class="portal-sidebar" [class.closed]="sidebarCollapsed">
+    <button class="menu-btn" type="button" aria-label="HOD menu" (click)="sidebarCollapsed = !sidebarCollapsed">☰</button>
+
+    <div class="sidebar-shell">
+      <div class="sidebar-main">
+        <div class="identity-card">
+          <div class="avatar-circle">H</div>
+          <div class="identity-copy">
+            <strong>{{ hodName }}</strong>
+            <span>{{ department }}<span *ngIf="hodUid"> · {{ hodUid }}</span></span>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <button type="button" class="active">Manage</button>
+        </nav>
+      </div>
+
+      <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+    </div>
+  </aside>
+
+  <div class="hod-content">
+    <section class="surface-card hod-banner">
+      <div>
+        <span class="page-kicker">HOD Dashboard</span>
+        <h2>Assign Course To Teacher</h2>
+        <p>Use a registered teacher username, then link an existing course from the system catalog.</p>
+      </div>
+    </section>
+
+    <div class="status-line error" *ngIf="error">{{ error }}</div>
+    <div class="status-line success" *ngIf="success">{{ success }}</div>
+
+    <section class="surface-card">
+      <div class="section-head">
+        <div>
+          <span class="page-kicker">Manage</span>
+          <h3>Teacher Course Assignment</h3>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <label class="field-block">
+          <span>Teacher Username</span>
+          <input [(ngModel)]="form.teacherUsername" />
+        </label>
+
+        <label class="field-block">
+          <span>Department</span>
+          <input [(ngModel)]="form.department" />
+        </label>
+
+        <label class="field-block field-span">
+          <span>Course Code</span>
+          <input [(ngModel)]="form.courseCode" (input)="onCourseCodeInput()" list="hod-course-codes" />
+          <datalist id="hod-course-codes">
+            <option *ngFor="let course of courseSuggestions" [value]="course.course_code">
+              {{ course.course_name }}
+            </option>
+          </datalist>
+        </label>
+
+        <div class="course-picks field-span" *ngIf="courseSuggestions.length">
+          <button type="button" class="course-pill" *ngFor="let course of courseSuggestions" (click)="selectCourse(course)">
+            {{ course.course_code }} · {{ course.course_name }}
+          </button>
+        </div>
+
+        <div class="course-name field-span" *ngIf="form.courseName">
+          {{ form.courseName }}
+        </div>
+      </div>
+
+      <button type="button" class="primary-btn" (click)="assignCourse()" [disabled]="saving">
+        {{ saving ? 'Assigning...' : 'Assign Course' }}
+      </button>
+
+      <div class="result-card" *ngIf="assignmentResult">
+        <h4>{{ assignmentResult.teacher_name }}</h4>
+        <p><strong>Username:</strong> {{ assignmentResult.username }}</p>
+        <p><strong>Department:</strong> {{ assignmentResult.department }}</p>
+        <p><strong>Teacher UID:</strong> {{ assignmentResult.teacher_uid }}</p>
+        <p><strong>Course:</strong> {{ assignmentResult.course_code }}<span *ngIf="assignmentResult.course_name"> · {{ assignmentResult.course_name }}</span></p>
+      </div>
+    </section>
+  </div>
+</div>

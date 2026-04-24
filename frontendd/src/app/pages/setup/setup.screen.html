@@ -1,0 +1,131 @@
+<div class="setup-page">
+  <div class="setup-shell">
+    <section class="profile-banner surface-card">
+      <div>
+        <span class="setup-badge">{{ setupComplete ? 'Teacher Profile' : 'First-Time Setup' }}</span>
+        <h2>{{ teacherName }}</h2>
+        <p>
+          Save the semester, batch, department, section, and course records you teach.
+          Returning logins load these records automatically.
+        </p>
+      </div>
+
+      <div class="profile-actions">
+        <div class="meta-chip" *ngIf="teacherId">Teacher ID {{ teacherId }}</div>
+        <button class="secondary-btn" type="button" (click)="goToDashboard()" *ngIf="setupComplete">
+          Open Dashboard
+        </button>
+      </div>
+    </section>
+
+    <div class="profile-state error" *ngIf="loadError">{{ loadError }}</div>
+
+    <div class="setup-layout" *ngIf="profileLoaded">
+      <section class="records-panel surface-card">
+        <div class="section-head">
+          <div>
+            <span class="section-kicker">Saved Profile Records</span>
+            <h3>Teacher Profile View</h3>
+          </div>
+          <div class="meta-chip">{{ records.length }} record{{ records.length === 1 ? '' : 's' }}</div>
+        </div>
+
+        <div class="empty-state" *ngIf="!records.length">
+          <h4>No teaching records saved yet</h4>
+          <p>Add your first profile record to connect your classes and load the students you teach.</p>
+        </div>
+
+        <div class="record-list" *ngIf="records.length">
+          <article class="record-card" *ngFor="let record of records; trackBy: trackByRecordId">
+            <div class="record-top">
+              <div>
+                <h4>{{ record.course_code }}<span *ngIf="record.course_name"> · {{ record.course_name }}</span></h4>
+                <p>Semester {{ record.semester }} · Batch {{ record.batch }} · {{ record.department }}</p>
+              </div>
+              <div class="meta-chip">{{ record.students.length }} student{{ record.students.length === 1 ? '' : 's' }}</div>
+            </div>
+
+            <div class="record-tags">
+              <span class="tag-chip">Section {{ record.section || 'N/A' }}</span>
+              <span class="tag-chip">Department {{ record.department }}</span>
+              <span class="tag-chip">Batch {{ record.batch }}</span>
+            </div>
+
+            <div class="student-panel">
+              <div class="student-head">
+                <h5>Students Teaching List</h5>
+              </div>
+
+              <div class="student-empty" *ngIf="!record.students.length">
+                No students matched this record yet.
+              </div>
+
+              <div class="student-list" *ngIf="record.students.length">
+                <div class="student-row" *ngFor="let student of record.students">
+                  <div>
+                    <strong>{{ student.student_name }}</strong>
+                    <span>{{ student.roll_no || 'No roll number' }}</span>
+                  </div>
+                  <div class="student-meta">
+                    <span>Semester {{ student.semester || '-' }}</span>
+                    <span>Section {{ student.section || '-' }}</span>
+                    <span>{{ student.batch || '-' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="form-panel surface-card">
+        <div class="section-head">
+          <div>
+            <span class="section-kicker">Add New Record</span>
+            <h3>Add Teacher Profile Record</h3>
+          </div>
+        </div>
+
+        <div class="setup-grid">
+          <div class="field-block">
+            <label>Semester *</label>
+            <select [(ngModel)]="semester">
+              <option value="">Select Semester</option>
+              <option *ngFor="let s of semesters" [value]="s">Semester {{ s }}</option>
+            </select>
+          </div>
+
+          <div class="field-block">
+            <label>Batch *</label>
+            <input [(ngModel)]="batch" placeholder="e.g. 22FA, 22SP, 25FA" />
+          </div>
+
+          <div class="field-block">
+            <label>Department *</label>
+            <input [(ngModel)]="department" placeholder="e.g. SE, CS, AI" />
+          </div>
+
+          <div class="field-block">
+            <label>Section</label>
+            <input [(ngModel)]="section" placeholder="e.g. A, B" />
+          </div>
+
+          <div class="field-block field-span">
+            <label>Course Code *</label>
+            <input [(ngModel)]="courseCode" (blur)="onCourseCodeBlur()" placeholder="e.g. CS301" />
+            <div class="course-state" *ngIf="lookingUp">Looking up course...</div>
+            <div class="course-state success" *ngIf="courseName">{{ courseName }}</div>
+            <div class="course-state error" *ngIf="courseError">{{ courseError }}</div>
+          </div>
+        </div>
+
+        <div class="profile-state error" *ngIf="error">{{ error }}</div>
+        <div class="profile-state success" *ngIf="success">{{ success }}</div>
+
+        <button class="setup-btn" type="button" (click)="saveRecord()" [disabled]="savingRecord">
+          {{ savingRecord ? 'Saving Record...' : 'Save Teacher Record' }}
+        </button>
+      </section>
+    </div>
+  </div>
+</div>

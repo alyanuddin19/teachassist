@@ -1,0 +1,205 @@
+.layout {
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: fixed;
+  inset: 18px auto 18px 18px;
+  width: 286px;
+  background:
+    linear-gradient(180deg, rgba(19, 59, 146, 0.98) 0%, rgba(11, 56, 116, 0.96) 100%);
+  color: #fff;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 30px 80px rgba(10, 38, 82, 0.28);
+  overflow: hidden;
+  z-index: 1000;
+  transition:
+    width 220ms var(--ease),
+    transform 220ms var(--ease),
+    box-shadow 220ms var(--ease);
+  animation: fadeSlideIn 420ms var(--ease);
+}
+
+.sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.18), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(17, 183, 163, 0.12), transparent 20%);
+  pointer-events: none;
+}
+
+.sidebar.closed {
+  width: 88px;
+}
+
+.toggle-btn {
+  position: relative;
+  z-index: 1;
+  width: 48px;
+  height: 48px;
+  margin: 18px 0 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 1.1rem;
+  backdrop-filter: blur(12px);
+}
+
+.toggle-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.sidebar-shell {
+  position: relative;
+  z-index: 1;
+  height: calc(100% - 66px);
+  display: flex;
+  flex-direction: column;
+  padding: 18px 16px 18px;
+}
+
+.sidebar-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.teacher-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  margin-bottom: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.teacher-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.teacher-name {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #eff5ff;
+}
+
+.teacher-copy {
+  min-width: 0;
+}
+
+.teacher-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: rgba(237, 244, 255, 0.72);
+}
+
+.sidebar-content {
+  display: grid;
+  gap: 10px;
+}
+
+.nav-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  min-height: 54px;
+  border: 1px solid transparent;
+  border-radius: 18px;
+  background: transparent;
+  color: rgba(237, 244, 255, 0.84);
+  text-align: left;
+  padding: 0 16px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.nav-btn.active {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08));
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 16px 30px rgba(8, 24, 58, 0.18);
+}
+
+.logout-btn {
+  width: 100%;
+  margin-top: auto;
+  min-height: 52px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.logout-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.sidebar.closed .teacher-header,
+.sidebar.closed .sidebar-content,
+.sidebar.closed .logout-btn {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-10px);
+}
+
+.sidebar.closed .sidebar-shell {
+  padding-top: 10px;
+}
+
+.content {
+  min-height: 100vh;
+  margin-left: 322px;
+  padding: 26px 28px 30px;
+  transition: margin-left 220ms var(--ease);
+}
+
+.content > * {
+  animation: fadeSlideUp 420ms var(--ease);
+}
+
+.sidebar.closed ~ .content {
+  margin-left: 124px;
+}
+
+@media (max-width: 960px) {
+  .sidebar {
+    inset: 12px auto 12px 12px;
+    width: 268px;
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 96px 18px 24px;
+  }
+
+  .sidebar.closed ~ .content {
+    margin-left: 0;
+  }
+}

@@ -1,0 +1,39 @@
+<div class="dashboard">
+
+  <h2>Generate Assessment</h2>
+
+  <input type="file" (change)="onFile($event)" />
+
+  <select [(ngModel)]="examType">
+    <option value="quiz">Quiz</option>
+    <option value="midterm">Mid Term</option>
+    <option value="final">Final Exam</option>
+  </select>
+
+  <div class="grid">
+    <input type="number" placeholder="MCQs" [(ngModel)]="mcqs">
+    <input type="number" placeholder="Short Questions" [(ngModel)]="shorts">
+    <input type="number" placeholder="Long Questions" [(ngModel)]="longs">
+  </div>
+
+  <select [(ngModel)]="difficulty">
+    <option>Easy</option>
+    <option>Medium</option>
+    <option>Hard</option>
+  </select>
+
+  <input placeholder="Bloom Level" [(ngModel)]="blooms">
+  <textarea placeholder="Custom Instructions" [(ngModel)]="instructions"></textarea>
+
+  <button (click)="generate()">Generate</button>
+
+  <div *ngIf="loading">Generating…</div>
+
+  <pre *ngIf="result">{{ result }}</pre>
+
+  <div *ngIf="examId">
+    <a [href]="api+'/export/pdf/'+examId">Export PDF</a>
+    <a [href]="api+'/export/docx/'+examId">Export DOCX</a>
+  </div>
+
+</div>

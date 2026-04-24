@@ -1,0 +1,49 @@
+﻿<section class="panel-grid">
+  <div class="sheet-card">
+    <div class="sheet-header">
+      <div>
+        <p class="eyebrow">Saved Sheets</p>
+        <h2>Database records and downloads</h2>
+      </div>
+    </div>
+
+    <div class="loading" *ngIf="isLoading">Loading sheets...</div>
+    <div class="loading" *ngIf="!isLoading && updateStatus">{{ updateStatus }}</div>
+
+    <div class="empty-state" *ngIf="!isLoading && loadError">{{ loadError }}</div>
+
+    <div class="saved-list" *ngIf="!isLoading && !loadError && marksheets.length; else emptySheets">
+      <article class="saved-item" *ngFor="let sheet of marksheets">
+        <div class="saved-meta">
+          <div>
+            <h3>{{ sheet.export_file_name || sheet.course_code }}</h3>
+            <p class="file-owner">{{ sheet.course_code }} · {{ sheet.course_name }}</p>
+            <p>{{ sheet.department || '-' }}<span *ngIf="sheet.batch"> - Batch {{ sheet.batch }}</span> - Section {{ sheet.section }}</p>
+          </div>
+
+          <div class="sheet-actions">
+            <button class="update-link" type="button" (click)="editMarksheet(sheet)" [disabled]="updatingMarksheetId === sheet.id">
+              {{ updatingMarksheetId === sheet.id ? 'Updating...' : 'Update' }}
+            </button>
+            <button class="delete-link" type="button" (click)="deleteMarksheet(sheet)" [disabled]="deletingMarksheetId === sheet.id">
+              {{ deletingMarksheetId === sheet.id ? 'Deleting...' : 'Delete' }}
+            </button>
+            <a class="download-link" [href]="getDownloadLink(sheet)">Download</a>
+          </div>
+        </div>
+
+        <p class="subline">
+          {{ sheet.student_count }} students | Total {{ sheet.total_marks }} | {{ sheet.created_at | date: 'medium' }}
+        </p>
+
+        <div class="pill-row">
+          <span class="pill" *ngFor="let item of objectEntries(sheet.selected_options)">{{ item[0] }}: {{ item[1] }}</span>
+        </div>
+      </article>
+    </div>
+
+    <ng-template #emptySheets>
+      <div class="empty-state" *ngIf="!isLoading && !loadError">No saved marksheets found for this teacher yet.</div>
+    </ng-template>
+  </div>
+</section>
