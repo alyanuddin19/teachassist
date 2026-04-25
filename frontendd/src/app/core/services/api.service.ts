@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 /* ===============================
    Response Model
@@ -226,7 +227,7 @@ export interface CreatedTeacherResponse {
 export class ApiService {
 
   // ✅ Single source of truth
-  private BASE_URL = 'http://127.0.0.1:8000/api';
+  private BASE_URL = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

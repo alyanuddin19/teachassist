@@ -61,14 +61,14 @@
               <p *ngIf="submission.question_content"><strong>Question:</strong> {{ submission.question_content }}</p>
               <p *ngIf="submission.task_attachment_url">
                 <strong>Reference File:</strong>
-                <a [href]="'http://127.0.0.1:8000' + submission.task_attachment_url" target="_blank" rel="noopener">
+                <a [href]="backendUrl + submission.task_attachment_url" target="_blank" rel="noopener">
                   {{ submission.task_attachment_name || 'Open reference file' }}
                 </a>
               </p>
               <p *ngIf="submission.answer_text"><strong>Student Answer:</strong> {{ submission.answer_text }}</p>
               <p *ngIf="submission.answer_attachment_url">
                 <strong>Student Attachment:</strong>
-                <a [href]="'http://127.0.0.1:8000' + submission.answer_attachment_url" target="_blank" rel="noopener">
+                <a [href]="backendUrl + submission.answer_attachment_url" target="_blank" rel="noopener">
                   {{ submission.answer_attachment_name || 'Open attachment' }}
                 </a>
               </p>

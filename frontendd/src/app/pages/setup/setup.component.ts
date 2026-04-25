@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 import {
   ApiService,
   CourseSuggestion,
@@ -15,6 +16,7 @@ import {
   styleUrls: ['./setup.screen.css']
 })
 export class SetupComponent implements OnInit {
+  readonly backendUrl = environment.backendUrl;
   teacherName = '';
   teacherId = '';
   teacherUid = '';

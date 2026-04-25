@@ -6,4 +6,11 @@ python-dotenv
 passlib[bcrypt]
 python-multipart
 pypdf
-google-genai
+groq
+python-docx
+python-pptx
+reportlab
+pandas
+openpyxl
+PyMuPDF
+google-generativeai

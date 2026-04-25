@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, map, Observable, Subject } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 export type Student = {
   id: number;
@@ -115,7 +116,7 @@ export type TeacherContext = {
   providedIn: 'root'
 })
 export class TransformService {
-  public baseUrl = 'http://127.0.0.1:8000/api/transform';
+  public baseUrl = `${environment.apiUrl}/transform`;
   private teacherContextSubject = new BehaviorSubject<TeacherContext>({
     teacher_name: localStorage.getItem('transform_teacher_name') || localStorage.getItem('teacherName') || '',
   });
@@ -201,7 +202,7 @@ export class TransformService {
     }
 
     const absoluteUrl =
-      url.startsWith('http://') || url.startsWith('https://') ? url : `http://127.0.0.1:8000${url}`;
+      url.startsWith('http://') || url.startsWith('https://') ? url : `${environment.backendUrl}${url}`;
 
     if (!filename?.trim()) {
       return absoluteUrl;

@@ -54,7 +54,7 @@
         <div class="task-question" *ngIf="task.task_attachment_url">
           <h5>Reference File</h5>
           <p>
-            <a [href]="'http://127.0.0.1:8000' + task.task_attachment_url" target="_blank" rel="noopener">
+            <a [href]="backendUrl + task.task_attachment_url" target="_blank" rel="noopener">
               {{ task.task_attachment_name || 'Open reference file' }}
             </a>
           </p>
@@ -78,7 +78,7 @@
           <p *ngIf="task.answer_text"><strong>Your Answer:</strong> {{ task.answer_text }}</p>
           <p *ngIf="task.answer_attachment_url">
             <strong>Your Attachment:</strong>
-            <a [href]="'http://127.0.0.1:8000' + task.answer_attachment_url" target="_blank" rel="noopener">
+            <a [href]="backendUrl + task.answer_attachment_url" target="_blank" rel="noopener">
               {{ task.answer_attachment_name || 'Open attachment' }}
             </a>
           </p>

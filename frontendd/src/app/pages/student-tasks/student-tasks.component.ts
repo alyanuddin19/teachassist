@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService, StudentTask } from '../../core/services/api.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-student-tasks',
@@ -8,6 +9,7 @@ import { ApiService, StudentTask } from '../../core/services/api.service';
   styleUrls: ['./student-tasks.component.css']
 })
 export class StudentTasksComponent implements OnInit {
+  readonly backendUrl = environment.backendUrl;
   studentName = '';
   studentCode = '';
   studentId = 0;

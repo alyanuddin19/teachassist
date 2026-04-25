@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class GapAnalysisService {
 
-  private baseUrl = 'http://localhost:8000/gap-analysis';
+  private baseUrl = environment.gapAnalysisUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -54,11 +55,11 @@ export class GapAnalysisService {
   }
 
   sendGeneratedTask(data: FormData): Observable<any> {
-    return this.http.post('http://localhost:8000/api/student/tasks/assign', data);
+    return this.http.post(`${environment.apiUrl}/student/tasks/assign`, data);
   }
 
   downloadTransformMarksheet(marksheetId: number): Observable<Blob> {
-    return this.http.get(`http://localhost:8000/api/transform/marksheets/${marksheetId}/download`, {
+    return this.http.get(`${environment.apiUrl}/transform/marksheets/${marksheetId}/download`, {
       responseType: 'blob'
     });
   }

@@ -48,7 +48,7 @@
             <p *ngIf="submission.answer_text"><strong>Student Answer:</strong> {{ submission.answer_text }}</p>
             <p *ngIf="submission.answer_attachment_url">
               <strong>Attachment:</strong>
-              <a [href]="'http://127.0.0.1:8000' + submission.answer_attachment_url" target="_blank" rel="noopener">
+              <a [href]="backendUrl + submission.answer_attachment_url" target="_blank" rel="noopener">
                 {{ submission.answer_attachment_name || 'Open attachment' }}
               </a>
             </p>

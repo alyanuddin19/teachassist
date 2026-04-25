@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ApiService } from '../../core/services/api.service';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-generate-exam',
@@ -658,7 +659,7 @@ Note: Apply while maintaining exact counts and structure.`;
       return;
     }
 
-    const url = `http://127.0.0.1:8000/api/download/${this.generatedExamId}?format=${format}&include_answers=true`;
+    const url = `${environment.apiUrl}/download/${this.generatedExamId}?format=${format}&include_answers=true`;
     window.open(url, '_blank');
   }
 }

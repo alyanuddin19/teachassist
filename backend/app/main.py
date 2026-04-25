@@ -48,6 +48,17 @@ UPLOAD_ROOT = Path(__file__).resolve().parents[1] / "uploads"
 TASK_SUBMISSION_DIR = UPLOAD_ROOT / "task_submissions"
 TASK_SUBMISSION_DIR.mkdir(parents=True, exist_ok=True)
 
+
+def parse_allowed_origins() -> list[str]:
+    raw = os.getenv("ALLOWED_ORIGINS", "").strip()
+    if raw:
+        return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
+    return [
+        "http://localhost:4200",
+        "http://127.0.0.1:4200",
+    ]
+
 # ------------------ APP & DB ------------------
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title="TeachAssist Backend")
@@ -63,11 +74,16 @@ if t2_transform_app is not None:
 # ------------------ CORS ------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=parse_allowed_origins(),
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/health")
+def healthcheck():
+    return {"status": "ok"}
 # ------------------ DB DEP ------------------
 def get_db():
     db = SessionLocal()
