@@ -134,3 +134,27 @@
     align-items: flex-start;
   }
 }
+
+@media (max-width: 640px) {
+  .sheet-card {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .saved-item {
+    padding: 14px;
+  }
+
+  .sheet-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .download-link,
+  .update-link,
+  .delete-link {
+    width: 100%;
+    text-align: center;
+  }
+}

@@ -287,4 +287,27 @@
     display: flex;
     width: 100%;
   }
+
+  .hero-card {
+    padding: 18px;
+  }
+
+  .action-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .button-row {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .submit-btn,
+  .download-btn {
+    width: 100%;
+  }
+
+  .table-wrap {
+    max-height: none;
+  }
 }

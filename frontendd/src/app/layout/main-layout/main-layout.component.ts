@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 })
 export class MainLayoutComponent implements OnInit {
   sidebarOpen = true;
+  isMobileView = false;
   teacherName = '';
   teacherUid = '';
   teacherDepartment = '';
@@ -24,10 +25,31 @@ export class MainLayoutComponent implements OnInit {
     this.teacherName = localStorage.getItem('teacherName') || 'Teacher';
     this.teacherUid = localStorage.getItem('teacherUid') || '';
     this.teacherDepartment = localStorage.getItem('teacherDepartment') || '';
+    this.syncViewportState();
   }
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeSidebar(): void {
+    if (this.isMobileView) {
+      this.sidebarOpen = false;
+    }
+  }
+
+  handleNavSelection(): void {
+    this.closeSidebar();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.syncViewportState();
+  }
+
+  private syncViewportState(): void {
+    this.isMobileView = window.innerWidth <= 960;
+    this.sidebarOpen = this.isMobileView ? false : true;
   }
 
   logout(): void {

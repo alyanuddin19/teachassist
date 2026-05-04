@@ -313,4 +313,51 @@
   .student-identity {
     width: 100%;
   }
+
+  .task-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .student-shell {
+    padding: 14px;
+  }
+
+  .student-header,
+  .tasks-panel,
+  .task-card,
+  .task-question,
+  .submission-box,
+  .submission-result {
+    border-radius: 20px;
+  }
+
+  .student-header,
+  .tasks-panel,
+  .task-card {
+    padding: 16px;
+  }
+
+  .student-name {
+    font-size: 1.2rem;
+  }
+
+  .logout-btn,
+  .submit-btn,
+  .delete-task-btn,
+  .file-pick {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .task-overview {
+    gap: 8px;
+  }
+
+  .info-chip,
+  .status-pill {
+    min-height: 34px;
+  }
 }

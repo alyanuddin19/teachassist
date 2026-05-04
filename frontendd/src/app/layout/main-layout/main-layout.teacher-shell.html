@@ -1,11 +1,25 @@
 <div class="layout">
+  <button
+    *ngIf="isMobileView"
+    type="button"
+    class="mobile-toggle-btn"
+    (click)="toggleSidebar()"
+    aria-label="Open navigation">
+    &#9776;
+  </button>
+
+  <div
+    class="sidebar-backdrop"
+    *ngIf="isMobileView && sidebarOpen"
+    (click)="closeSidebar()"></div>
+
   <aside class="sidebar" [class.closed]="!sidebarOpen">
-    <button class="toggle-btn" (click)="toggleSidebar()">☰</button>
+    <button class="toggle-btn" (click)="toggleSidebar()">&#9776;</button>
 
     <div class="sidebar-shell">
       <div class="sidebar-main">
         <div class="teacher-header">
-          <div class="teacher-avatar">👤</div>
+          <div class="teacher-avatar">&#128100;</div>
           <div class="teacher-copy" *ngIf="sidebarOpen">
             <div class="teacher-name">{{ teacherName }}</div>
             <div class="teacher-meta" *ngIf="teacherDepartment || teacherUid">
@@ -16,7 +30,7 @@
         </div>
 
         <nav class="sidebar-content">
-          <button class="nav-btn" routerLink="/profile" routerLinkActive="active">
+          <button class="nav-btn" routerLink="/profile" routerLinkActive="active" (click)="handleNavSelection()">
             Profile
           </button>
 
@@ -24,15 +38,16 @@
             class="nav-btn"
             routerLink="/generate"
             routerLinkActive="active"
+            (click)="handleNavSelection()"
             [routerLinkActiveOptions]="{ exact: true }">
             Generate
           </button>
 
-          <button class="nav-btn" routerLink="/transform" routerLinkActive="active">
+          <button class="nav-btn" routerLink="/transform" routerLinkActive="active" (click)="handleNavSelection()">
             Transform
           </button>
 
-          <button class="nav-btn" routerLink="/gap-analysis" routerLinkActive="active">
+          <button class="nav-btn" routerLink="/gap-analysis" routerLinkActive="active" (click)="handleNavSelection()">
             Gap Analysis
           </button>
         </nav>

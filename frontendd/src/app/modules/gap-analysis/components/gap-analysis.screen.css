@@ -245,3 +245,47 @@ canvas {
     overflow-x: auto;
   }
 }
+
+@media (max-width: 640px) {
+  .container {
+    gap: 16px;
+  }
+
+  .container > h1,
+  .card {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .upload-box,
+  .upload-content {
+    min-height: 180px;
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .analyze-center {
+    margin-top: 16px;
+  }
+
+  .analyze-btn,
+  .primary-btn,
+  .secondary-btn,
+  .export-btn {
+    width: 100%;
+  }
+
+  .chart-wrapper {
+    height: 300px;
+    padding: 10px;
+  }
+
+  .student-assignment-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .student-header {
+    align-items: flex-start;
+  }
+}
