@@ -14,3 +14,4 @@ pandas
 openpyxl
 PyMuPDF
 google-generativeai
+chromadb
