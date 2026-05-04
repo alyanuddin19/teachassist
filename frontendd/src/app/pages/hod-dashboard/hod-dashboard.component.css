@@ -1,5 +1,23 @@
-﻿.hod-page {
+.hod-page {
   min-height: 100vh;
+}
+
+.mobile-menu-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1101;
+  width: 52px;
+  height: 52px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(19, 59, 146, 0.98), rgba(11, 56, 116, 0.96));
+  color: #ffffff;
+  font-size: 1.2rem;
+  box-shadow: 0 22px 48px rgba(10, 38, 82, 0.24);
 }
 
 .portal-sidebar {
@@ -198,6 +216,15 @@
   margin: 14px 0 0;
 }
 
+.hod-banner p,
+.result-card p,
+.status-line,
+.course-name {
+  max-width: 62ch;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -289,10 +316,23 @@
   font-weight: 700;
 }
 
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(10, 22, 46, 0.34);
+  backdrop-filter: blur(4px);
+}
+
 @media (max-width: 960px) {
+  .mobile-menu-btn {
+    display: inline-flex;
+  }
+
   .portal-sidebar {
     inset: 12px auto 12px 12px;
-    width: 268px;
+    width: min(84vw, 320px);
+    z-index: 1100;
   }
 
   .hod-content,
@@ -300,14 +340,81 @@
     margin-left: 0;
     padding: 96px 18px 24px;
   }
+
+  .portal-sidebar.closed {
+    width: min(84vw, 320px);
+    transform: translateX(calc(-100% - 18px));
+    box-shadow: none;
+  }
+
+  .portal-sidebar.closed .identity-card,
+  .portal-sidebar.closed .sidebar-nav,
+  .portal-sidebar.closed .logout-btn {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+
+  .menu-btn {
+    display: none;
+  }
 }
 
 @media (max-width: 760px) {
+  .surface-card {
+    padding: 22px;
+    border-radius: 24px;
+  }
+
   .form-grid {
     grid-template-columns: 1fr;
   }
 
   .field-span {
     grid-column: span 1;
+  }
+
+  .section-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .hod-content {
+    padding: 82px 14px 18px;
+  }
+
+  .portal-sidebar {
+    inset: 10px auto 10px 10px;
+    width: calc(100vw - 20px);
+    border-radius: 24px;
+  }
+
+  .portal-sidebar.closed {
+    width: calc(100vw - 20px);
+    transform: translateX(calc(-100% - 14px));
+  }
+
+  .sidebar-shell {
+    padding: 14px;
+  }
+
+  .surface-card {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .hod-banner h2,
+  .section-head h3 {
+    font-size: 1.65rem;
+    line-height: 1.15;
+  }
+
+  .primary-btn,
+  .course-pill,
+  .sidebar-nav button,
+  .logout-btn {
+    min-height: 52px;
   }
 }

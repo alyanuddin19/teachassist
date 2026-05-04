@@ -1,7 +1,7 @@
 <div class="student-shell">
   <header class="student-header">
     <div class="student-identity">
-      <div class="student-avatar">👤</div>
+      <div class="student-avatar">&#128100;</div>
       <div>
         <div class="student-name">{{ studentName }}</div>
         <div class="student-code" *ngIf="studentCode">{{ studentCode }}</div>
@@ -47,7 +47,7 @@
         </div>
 
         <div class="task-question" *ngIf="task.question_content">
-          <h5>Question</h5>
+          <h5>Question Prompt</h5>
           <div class="question-text">{{ task.question_content }}</div>
         </div>
 
@@ -60,7 +60,7 @@
           </p>
         </div>
 
-        <p *ngIf="task.description">{{ task.description }}</p>
+        <p class="task-description" *ngIf="task.description">{{ task.description }}</p>
 
         <div class="submission-box" *ngIf="task.status === 'assigned'">
           <textarea [(ngModel)]="answerText[task.id]" placeholder="Type your answer here"></textarea>
@@ -75,17 +75,17 @@
 
         <div class="submission-result" *ngIf="task.status !== 'assigned'">
           <h5>Your Submission</h5>
-          <p *ngIf="task.answer_text"><strong>Your Answer:</strong> {{ task.answer_text }}</p>
-          <p *ngIf="task.answer_attachment_url">
+          <p class="result-line" *ngIf="task.answer_text"><strong>Your Answer:</strong> {{ task.answer_text }}</p>
+          <p class="result-line" *ngIf="task.answer_attachment_url">
             <strong>Your Attachment:</strong>
             <a [href]="backendUrl + task.answer_attachment_url" target="_blank" rel="noopener">
               {{ task.answer_attachment_name || 'Open attachment' }}
             </a>
           </p>
-          <p *ngIf="task.status === 'submitted'"><strong>Status:</strong> Submitted and waiting for teacher review.</p>
-          <p *ngIf="task.teacher_decision"><strong>Teacher Result:</strong> {{ task.teacher_decision }}</p>
-          <p *ngIf="task.teacher_score"><strong>Marks:</strong> {{ task.teacher_score }}</p>
-          <p *ngIf="task.teacher_feedback"><strong>Teacher Feedback:</strong> {{ task.teacher_feedback }}</p>
+          <p class="result-line" *ngIf="task.status === 'submitted'"><strong>Status:</strong> Waiting for teacher review.</p>
+          <p class="result-line" *ngIf="task.teacher_decision"><strong>Teacher Result:</strong> {{ task.teacher_decision }}</p>
+          <p class="result-line" *ngIf="task.teacher_score"><strong>Marks:</strong> {{ task.teacher_score }}</p>
+          <p class="result-line" *ngIf="task.teacher_feedback"><strong>Teacher Feedback:</strong> {{ task.teacher_feedback }}</p>
         </div>
 
         <div class="task-meta" *ngIf="task.created_at">

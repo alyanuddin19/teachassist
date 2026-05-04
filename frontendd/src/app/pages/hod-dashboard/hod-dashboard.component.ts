@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService, CourseSuggestion, CreatedTeacherResponse } from '../../core/services/api.service';
 
@@ -12,6 +12,7 @@ export class HodDashboardComponent implements OnInit {
   hodUid = '';
   department = '';
   sidebarCollapsed = false;
+  isCompactViewport = false;
   error = '';
   success = '';
   saving = false;
@@ -40,6 +41,7 @@ export class HodDashboardComponent implements OnInit {
     this.hodUid = localStorage.getItem('hodUid') || '';
     this.department = localStorage.getItem('hodDepartment') || '';
     this.form.department = this.department;
+    this.syncViewportState();
   }
 
   onCourseCodeInput(): void {
@@ -65,6 +67,29 @@ export class HodDashboardComponent implements OnInit {
     this.form.courseCode = course.course_code;
     this.form.courseName = course.course_name;
     this.courseSuggestions = [];
+  }
+
+  toggleSidebar(): void {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
+
+  closeSidebar(): void {
+    if (this.isCompactViewport) {
+      this.sidebarCollapsed = true;
+    }
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.syncViewportState();
+  }
+
+  private syncViewportState(): void {
+    const compact = typeof window !== 'undefined' && window.innerWidth <= 960;
+    if (compact !== this.isCompactViewport) {
+      this.isCompactViewport = compact;
+      this.sidebarCollapsed = compact;
+    }
   }
 
   assignCourse(): void {

@@ -1,6 +1,9 @@
-﻿<div class="admin-page">
+<div class="admin-page">
+  <button class="mobile-menu-btn" *ngIf="isCompactViewport" type="button" aria-label="Open admin menu" (click)="toggleSidebar()">☰</button>
+  <div class="sidebar-backdrop" *ngIf="isCompactViewport && !sidebarCollapsed" (click)="closeSidebar()"></div>
+
   <aside class="portal-sidebar" [class.closed]="sidebarCollapsed">
-    <button class="menu-btn" type="button" aria-label="Admin menu" (click)="sidebarCollapsed = !sidebarCollapsed">☰</button>
+    <button class="menu-btn" type="button" aria-label="Admin menu" (click)="toggleSidebar()">☰</button>
 
     <div class="sidebar-shell">
       <div class="sidebar-main">
@@ -28,9 +31,9 @@
       <div>
         <span class="page-kicker">Admin Control</span>
         <h2>{{ activePanel === 'hod' ? 'Head Of Department' : activePanel === 'student' ? 'Student Access' : 'Course Catalog' }}</h2>
-        <p *ngIf="activePanel === 'hod'">Create HOD accounts with generated usernames and passwords.</p>
-        <p *ngIf="activePanel === 'student'">Register students, save them in the database, and generate their login credentials.</p>
-        <p *ngIf="activePanel === 'course'">Add courses to the central course database using course code and course name.</p>
+        <p *ngIf="activePanel === 'hod'">Create HOD accounts and generate ready-to-use credentials.</p>
+        <p *ngIf="activePanel === 'student'">Register students, save them in the database, and prepare their login details.</p>
+        <p *ngIf="activePanel === 'course'">Add courses to the central catalog using course code and course name.</p>
       </div>
     </section>
 

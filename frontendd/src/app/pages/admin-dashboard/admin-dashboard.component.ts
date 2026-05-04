@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   ApiService,
@@ -18,6 +18,7 @@ export class AdminDashboardComponent implements OnInit {
   adminName = '';
   activePanel: AdminPanel = 'hod';
   sidebarCollapsed = false;
+  isCompactViewport = false;
   error = '';
   success = '';
   savingHod = false;
@@ -61,12 +62,37 @@ export class AdminDashboardComponent implements OnInit {
     }
 
     this.adminName = localStorage.getItem('adminName') || 'System Admin';
+    this.syncViewportState();
   }
 
   switchPanel(panel: AdminPanel): void {
     this.activePanel = panel;
     this.error = '';
     this.success = '';
+    this.closeSidebar();
+  }
+
+  toggleSidebar(): void {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
+
+  closeSidebar(): void {
+    if (this.isCompactViewport) {
+      this.sidebarCollapsed = true;
+    }
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.syncViewportState();
+  }
+
+  private syncViewportState(): void {
+    const compact = typeof window !== 'undefined' && window.innerWidth <= 960;
+    if (compact !== this.isCompactViewport) {
+      this.isCompactViewport = compact;
+      this.sidebarCollapsed = compact;
+    }
   }
 
   createHod(): void {

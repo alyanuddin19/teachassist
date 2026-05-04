@@ -271,6 +271,15 @@ textarea {
 .toggle-pill span {
   background: rgba(18, 51, 120, 0.08);
   color: var(--primary);
+  min-width: 90px;
+  border: 1px solid rgba(38, 72, 184, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.toggle-pill input:checked + span {
+  background: linear-gradient(135deg, var(--primary), #4069d9);
+  color: #ffffff;
+  border-color: transparent;
 }
 
 .theory-list {
@@ -400,5 +409,16 @@ textarea {
   .card,
   .page-hero {
     padding: 22px;
+  }
+
+  .config-head,
+  .section-header,
+  .export-panel {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .toggle-pill {
+    align-self: flex-start;
   }
 }

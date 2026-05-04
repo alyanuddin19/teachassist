@@ -65,6 +65,8 @@ p {
   margin: 0;
   color: var(--text-muted);
   line-height: 1.65;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
 }
 
 button,
@@ -117,6 +119,18 @@ textarea:focus {
 
 textarea {
   resize: vertical;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+label,
+span,
+strong {
+  overflow-wrap: anywhere;
 }
 
 ::placeholder {

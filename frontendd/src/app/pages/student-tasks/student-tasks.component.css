@@ -168,6 +168,9 @@
   margin: 14px 0 0;
   color: #5d7187;
   line-height: 1.55;
+  max-width: 72ch;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
 }
 
 .task-overview {
@@ -213,6 +216,25 @@
   white-space: pre-wrap;
   line-height: 1.7;
   color: #39516c;
+  max-width: 72ch;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.task-description {
+  font-size: 0.96rem;
+}
+
+.task-question,
+.submission-result {
+  display: grid;
+  gap: 10px;
+}
+
+.task-question p,
+.submission-result p,
+.result-line {
+  margin-top: 0;
 }
 
 .status-pill {
@@ -318,6 +340,12 @@
     width: 100%;
     justify-content: flex-start;
   }
+
+  .task-card h4,
+  .panel-head h3 {
+    max-width: 18ch;
+    line-height: 1.25;
+  }
 }
 
 @media (max-width: 560px) {
@@ -344,6 +372,13 @@
     font-size: 1.2rem;
   }
 
+  .question-text,
+  .task-card p,
+  .result-line {
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
   .logout-btn,
   .submit-btn,
   .delete-task-btn,
@@ -359,5 +394,11 @@
   .info-chip,
   .status-pill {
     min-height: 34px;
+  }
+
+  .task-count {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
   }
 }

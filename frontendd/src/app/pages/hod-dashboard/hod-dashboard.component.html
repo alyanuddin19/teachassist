@@ -1,6 +1,9 @@
-﻿<div class="hod-page">
+<div class="hod-page">
+  <button class="mobile-menu-btn" *ngIf="isCompactViewport" type="button" aria-label="Open HOD menu" (click)="toggleSidebar()">☰</button>
+  <div class="sidebar-backdrop" *ngIf="isCompactViewport && !sidebarCollapsed" (click)="closeSidebar()"></div>
+
   <aside class="portal-sidebar" [class.closed]="sidebarCollapsed">
-    <button class="menu-btn" type="button" aria-label="HOD menu" (click)="sidebarCollapsed = !sidebarCollapsed">☰</button>
+    <button class="menu-btn" type="button" aria-label="HOD menu" (click)="toggleSidebar()">☰</button>
 
     <div class="sidebar-shell">
       <div class="sidebar-main">
@@ -13,7 +16,7 @@
         </div>
 
         <nav class="sidebar-nav">
-          <button type="button" class="active">Manage</button>
+          <button type="button" class="active" (click)="closeSidebar()">Manage</button>
         </nav>
       </div>
 
@@ -26,7 +29,7 @@
       <div>
         <span class="page-kicker">HOD Dashboard</span>
         <h2>Assign Course To Teacher</h2>
-        <p>Use a registered teacher username, then link an existing course from the system catalog.</p>
+        <p>Use a registered teacher username and link one course from the system catalog.</p>
       </div>
     </section>
 
