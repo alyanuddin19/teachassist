@@ -99,13 +99,87 @@
     </section>
 
     <div class="setup-layout" *ngIf="profileLoaded">
+      <section class="form-panel surface-card">
+        <div class="section-head">
+          <div>
+            <span class="section-kicker">Add New Record</span>
+            <h3>Add Teacher Profile Record</h3>
+          </div>
+        </div>
+
+        <div class="setup-grid">
+          <div class="field-block">
+            <label>Semester *</label>
+            <select [(ngModel)]="semester">
+              <option value="">Select Semester</option>
+              <option *ngFor="let s of semesters" [value]="s">Semester {{ s }}</option>
+            </select>
+          </div>
+
+          <div class="field-block">
+            <label>Batch *</label>
+            <input [(ngModel)]="batch" />
+          </div>
+
+          <div class="field-block">
+            <label>Department *</label>
+            <input [(ngModel)]="department" />
+          </div>
+
+          <div class="field-block">
+            <label>Section</label>
+            <input [(ngModel)]="section" />
+          </div>
+
+          <div class="field-block field-span">
+            <label>Course Code *</label>
+            <input [(ngModel)]="courseCode" (input)="onCourseCodeInput()" (blur)="onCourseCodeBlur()" list="teacher-course-codes" />
+            <datalist id="teacher-course-codes">
+              <option *ngFor="let course of courseSuggestions" [value]="course.course_code">
+                {{ course.course_name }}
+              </option>
+            </datalist>
+            <div class="course-picks" *ngIf="courseSuggestions.length">
+              <button type="button" class="course-pill" *ngFor="let course of courseSuggestions" (click)="selectSuggestedCourse(course)">
+                {{ course.course_code }} - {{ course.course_name }}
+              </button>
+            </div>
+            <div class="course-state" *ngIf="lookingUp">Looking up course...</div>
+            <div class="course-state success" *ngIf="courseName">{{ courseName }}</div>
+            <div class="course-state error" *ngIf="courseError">{{ courseError }}</div>
+          </div>
+
+          <div class="field-block field-span">
+            <label>Threshold Percentage *</label>
+            <input type="number" min="1" max="100" [(ngModel)]="thresholdPercentage" />
+            <div class="course-state">This threshold will be used in gap analysis for this course.</div>
+          </div>
+        </div>
+
+        <div class="profile-state error" *ngIf="error">{{ error }}</div>
+        <div class="profile-state success" *ngIf="success">{{ success }}</div>
+
+        <button class="setup-btn" type="button" (click)="saveRecord()" [disabled]="savingRecord">
+          {{ savingRecord ? 'Saving Record...' : 'Save Teacher Record' }}
+        </button>
+      </section>
+
       <section class="records-panel surface-card">
         <div class="section-head">
           <div>
             <span class="section-kicker">Saved Profile Records</span>
             <h3>Your Courses</h3>
           </div>
-          <div class="meta-chip">{{ records.length }} record{{ records.length === 1 ? '' : 's' }}</div>
+          <div class="records-head-actions">
+            <div class="meta-chip">{{ records.length }} record{{ records.length === 1 ? '' : 's' }}</div>
+            <button
+              class="secondary-btn records-collapse-btn"
+              type="button"
+              *ngIf="isCompactPortrait && records.length"
+              (click)="toggleRecordsPanel()">
+              {{ recordsPanelCollapsed ? 'Show Records' : 'Hide Records' }}
+            </button>
+          </div>
         </div>
 
         <div class="empty-state" *ngIf="!records.length">
@@ -113,7 +187,7 @@
           <p>Add your first profile record to connect your classes and load the students you teach.</p>
         </div>
 
-        <div class="record-list" *ngIf="records.length">
+        <div class="record-list" *ngIf="records.length && (!isCompactPortrait || !recordsPanelCollapsed)">
           <article class="record-card" *ngFor="let record of records; trackBy: trackByRecordId">
             <div class="record-top">
               <div>
@@ -254,68 +328,6 @@
             </div>
           </article>
         </div>
-      </section>
-
-      <section class="form-panel surface-card">
-        <div class="section-head">
-          <span class="section-kicker">Add New Record</span>
-        </div>
-
-        <div class="setup-grid">
-          <div class="field-block">
-            <label>Semester *</label>
-            <select [(ngModel)]="semester">
-              <option value="">Select Semester</option>
-              <option *ngFor="let s of semesters" [value]="s">Semester {{ s }}</option>
-            </select>
-          </div>
-
-          <div class="field-block">
-            <label>Batch *</label>
-            <input [(ngModel)]="batch" />
-          </div>
-
-          <div class="field-block">
-            <label>Department *</label>
-            <input [(ngModel)]="department" />
-          </div>
-
-          <div class="field-block">
-            <label>Section</label>
-            <input [(ngModel)]="section" />
-          </div>
-
-          <div class="field-block field-span">
-            <label>Course Code *</label>
-            <input [(ngModel)]="courseCode" (input)="onCourseCodeInput()" (blur)="onCourseCodeBlur()" list="teacher-course-codes" />
-            <datalist id="teacher-course-codes">
-              <option *ngFor="let course of courseSuggestions" [value]="course.course_code">
-                {{ course.course_name }}
-              </option>
-            </datalist>
-            <div class="course-picks" *ngIf="courseSuggestions.length">
-              <button type="button" class="course-pill" *ngFor="let course of courseSuggestions" (click)="selectSuggestedCourse(course)">
-                {{ course.course_code }} - {{ course.course_name }}
-              </button>
-            </div>
-            <div class="course-state" *ngIf="lookingUp">Looking up course...</div>
-            <div class="course-state success" *ngIf="courseName">{{ courseName }}</div>
-            <div class="course-state error" *ngIf="courseError">{{ courseError }}</div>
-          </div>
-
-          <div class="field-block field-span">
-            <label>Threshold Percentage *</label>
-            <input type="number" min="1" max="100" [(ngModel)]="thresholdPercentage" />
-            <div class="course-state">This threshold will be used in gap analysis for this course.</div>
-          </div>
-        </div>
-
-        <div class="profile-state error" *ngIf="error">{{ error }}</div>
-        <div class="profile-state success" *ngIf="success">{{ success }}</div>
-
-        <button class="setup-btn" type="button" (click)="saveRecord()" [disabled]="savingRecord">
-          {{ savingRecord ? 'Saving Record...' : 'Save Teacher Record' }}
-        </button>
       </section>
     </div>
   </div>

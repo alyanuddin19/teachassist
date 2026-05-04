@@ -46,13 +46,9 @@
   text-align: center;
   border-radius: 24px;
   border: 1.5px dashed rgba(38, 72, 184, 0.28);
-  background:
-    linear-gradient(180deg, rgba(244, 248, 255, 0.94), rgba(255, 255, 255, 0.98));
+  background: linear-gradient(180deg, rgba(244, 248, 255, 0.94), rgba(255, 255, 255, 0.98));
   cursor: pointer;
-  transition:
-    transform 180ms var(--ease),
-    border-color 180ms var(--ease),
-    box-shadow 180ms var(--ease);
+  transition: transform 180ms var(--ease), border-color 180ms var(--ease), box-shadow 180ms var(--ease);
 }
 
 .upload-box:hover,
@@ -121,6 +117,61 @@
   border: 1px solid rgba(38, 72, 184, 0.16);
 }
 
+.section-title-row,
+.assignments-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.result-summary {
+  margin-top: 8px;
+  max-width: 72ch;
+}
+
+.error-text {
+  color: var(--danger);
+}
+
+.next-step-card,
+.result-block {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 22px;
+  background: #f8fbff;
+  border: 1px solid rgba(103, 128, 173, 0.16);
+}
+
+.next-step-card h4 {
+  margin: 0 0 8px;
+}
+
+.cis-upload-wrap {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.inline-upload {
+  min-height: 0;
+}
+
+.result-toggle {
+  width: 100%;
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid rgba(38, 72, 184, 0.16);
+  border-radius: 16px;
+  background: rgba(233, 239, 255, 0.88);
+  color: var(--primary);
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
 .chart-wrapper {
   position: relative;
   height: 400px;
@@ -184,6 +235,11 @@ canvas {
   font-weight: 700;
 }
 
+.inline-badge {
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+
 .status {
   display: inline-flex;
   align-items: center;
@@ -207,13 +263,111 @@ canvas {
 
 .title {
   color: #16345c;
+  margin: 0;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-card {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  width: min(100%, 560px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.modal-card h3 {
+  margin-top: 0;
+  color: #1a237e;
+}
+
+.modal-section + .modal-section {
+  margin-top: 24px;
+}
+
+.modal-label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.clo-setting-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.count-choices,
+.difficulty-row,
+.generated-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.count-choices button,
+.difficulty-row button {
+  min-width: 40px;
+  min-height: 40px;
+  border: 1px solid rgba(38, 72, 184, 0.18);
+  border-radius: 10px;
+  background: #e8eaf6;
+  color: #1a237e;
+  font-weight: 700;
+}
+
+.choice-active {
+  background: #1a237e !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+.choice-label,
+.progress-text,
+.done-text {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.done-text {
+  color: #1d7f62;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 28px;
+}
+
+.assignments-section {
+  margin-top: 32px;
+}
+
+.small-btn {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-size: 0.88rem;
 }
 
 .student-assignment-card {
   border: 1px solid rgba(103, 128, 173, 0.16);
   border-radius: 22px;
   padding: 20px;
-  margin-bottom: 24px;
+  margin-top: 24px;
   background: #fafcff;
   box-shadow: var(--shadow-sm);
 }
@@ -229,9 +383,24 @@ canvas {
 }
 
 .student-name {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text);
+}
+
+.assignment-group {
+  margin-top: 16px;
+}
+
+.assignment-group h4 {
+  color: #1a73e8;
+  margin: 0 0 8px;
+}
+
+@media (max-width: 1080px) and (orientation: portrait) {
+  .result-toggle {
+    display: inline-flex;
+  }
 }
 
 @media (max-width: 900px) {
@@ -243,6 +412,12 @@ canvas {
   .gap-table {
     display: block;
     overflow-x: auto;
+  }
+
+  .section-title-row,
+  .assignments-head {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 
@@ -258,10 +433,17 @@ canvas {
   }
 
   .upload-box,
+  .upload-content,
+  .next-step-card,
+  .result-block,
+  .student-assignment-card {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .upload-box,
   .upload-content {
     min-height: 180px;
-    padding: 20px;
-    border-radius: 20px;
   }
 
   .analyze-center {
@@ -280,9 +462,13 @@ canvas {
     padding: 10px;
   }
 
-  .student-assignment-card {
-    padding: 16px;
+  .modal-card {
+    padding: 20px;
     border-radius: 18px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
   }
 
   .student-header {

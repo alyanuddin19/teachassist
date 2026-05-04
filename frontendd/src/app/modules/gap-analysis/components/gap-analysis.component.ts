@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { GapAnalysisService } from '../services/gap-analysis.service';
 import { Chart, registerables } from 'chart.js';
 import jsPDF from 'jspdf';
@@ -7,7 +7,7 @@ Chart.register(...registerables);
 
 @Component({
   selector: 'app-gap-analysis',
-  templateUrl: './gap-analysis.dashboard.html',
+  templateUrl: './gap-analysis.component.html',
   styleUrls: ['./gap-analysis.screen.css']
 })
 export class GapAnalysisComponent implements OnInit {
@@ -38,13 +38,25 @@ export class GapAnalysisComponent implements OnInit {
   cloWarning = '';
   recoGenerated    = false;
   showAssignments  = false;
+  isCompactPortrait = false;
+  sectionState: Record<string, boolean> = {
+    chart: true,
+    questionTable: true,
+    cloTable: true
+  };
 
   chart: Chart | null = null;
 
   constructor(private service: GapAnalysisService) {}
 
   ngOnInit(): void {
+    this.syncViewportState();
     this.loadTransformPrefill();
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.syncViewportState();
   }
 
   onQuestionPaper(e: any) { this.questionPaper = e.target.files[0]; }
@@ -84,6 +96,7 @@ export class GapAnalysisComponent implements OnInit {
         this.thresholdPercentage = this.extractThresholdPercentage(res);
         this.cloWarning = res.clo_warning || '';
         this.loading = false;
+        this.resetSectionState();
         setTimeout(() => this.renderChart(), 300);
       },
       error: (err) => {
@@ -181,6 +194,14 @@ export class GapAnalysisComponent implements OnInit {
 
   get weakOnlyStudents(): any[] {
     return this.weakStudents.filter(s => s.has_weakness);
+  }
+
+  toggleSection(section: 'chart' | 'questionTable' | 'cloTable'): void {
+    this.sectionState[section] = !this.sectionState[section];
+  }
+
+  isSectionOpen(section: 'chart' | 'questionTable' | 'cloTable'): boolean {
+    return !this.isCompactPortrait || !!this.sectionState[section];
   }
 
   sendGeneratedTask(student: any) {
@@ -457,5 +478,27 @@ export class GapAnalysisComponent implements OnInit {
         plugins: { legend: { position: 'top' } }
       }
     });
+  }
+
+  private syncViewportState(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const compact = window.innerWidth <= 820 || (window.innerWidth <= 1080 && window.innerHeight > window.innerWidth);
+    const changed = compact !== this.isCompactPortrait;
+    this.isCompactPortrait = compact;
+    if (changed) {
+      this.resetSectionState();
+    }
+  }
+
+  private resetSectionState(): void {
+    const expanded = !this.isCompactPortrait;
+    this.sectionState = {
+      chart: expanded,
+      questionTable: expanded,
+      cloTable: expanded
+    };
   }
 }

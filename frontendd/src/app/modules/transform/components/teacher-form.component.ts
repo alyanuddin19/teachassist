@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -98,6 +98,9 @@ export class TeacherFormComponent implements OnInit, OnDestroy {
   lastSavedMarksheetId: number | null = null;
   lastSavedFileName = '';
   editingMarksheetId: number | null = null;
+  isCompactPortrait = false;
+  dropdownSectionCollapsed = false;
+  marksSectionCollapsed = false;
 
   cloAssessmentMap: Record<string, string[]> = {};
   selectedColumns: CloPreview[] = [];
@@ -115,6 +118,7 @@ export class TeacherFormComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.syncViewportState();
     this.teacherName = (localStorage.getItem('teacherName') || '').trim();
     this.teacherDepartment = (localStorage.getItem('teacherDepartment') || '').trim();
     this.teacherUid = (localStorage.getItem('teacherUid') || '').trim();
@@ -136,6 +140,11 @@ export class TeacherFormComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.syncViewportState();
   }
 
   private refreshView(): void {
@@ -242,6 +251,9 @@ export class TeacherFormComponent implements OnInit, OnDestroy {
         }));
 
         this.syncStudentAssessmentColumns();
+        if (this.isCompactPortrait && this.studentRows.length) {
+          this.marksSectionCollapsed = false;
+        }
         this.handlePendingUpdatedSheetRequest();
         this.refreshView();
       },
@@ -326,6 +338,9 @@ export class TeacherFormComponent implements OnInit, OnDestroy {
     this.selectedOptions.question_number = '';
     this.selectedOptions.question_part = 'No Part';
     this.selectedOptions.assessment_total_marks = null;
+    if (this.isCompactPortrait && this.studentRows.length) {
+      this.marksSectionCollapsed = false;
+    }
     this.refreshView();
   }
 
@@ -573,6 +588,14 @@ export class TeacherFormComponent implements OnInit, OnDestroy {
     return `${course.course_code} - ${course.course_name} (${course.student_count} students)`;
   }
 
+  toggleDropdownSection(): void {
+    this.dropdownSectionCollapsed = !this.dropdownSectionCollapsed;
+  }
+
+  toggleMarksSection(): void {
+    this.marksSectionCollapsed = !this.marksSectionCollapsed;
+  }
+
   private onSaveConfirmed(
     response: SaveMarksheetResponse,
     wasEditing: boolean,
@@ -811,5 +834,25 @@ export class TeacherFormComponent implements OnInit, OnDestroy {
     }
 
     sessionStorage.removeItem('transform:autoGenerateUpdated');
+  }
+
+  private syncViewportState(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const compact = window.innerWidth <= 820 || (window.innerWidth <= 1080 && window.innerHeight > window.innerWidth);
+    if (compact === this.isCompactPortrait) {
+      return;
+    }
+
+    this.isCompactPortrait = compact;
+    this.dropdownSectionCollapsed = compact;
+    this.marksSectionCollapsed = compact;
+    if (!compact) {
+      this.dropdownSectionCollapsed = false;
+      this.marksSectionCollapsed = false;
+    }
+    this.refreshView();
   }
 }

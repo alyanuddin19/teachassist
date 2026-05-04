@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import {
@@ -61,6 +61,8 @@ export class SetupComponent implements OnInit {
   reviewFeedback: Record<number, string> = {};
   reviewScore: Record<number, string> = {};
   reviewLoading: Record<number, boolean> = {};
+  isCompactPortrait = false;
+  recordsPanelCollapsed = false;
   readonly semesters = [1, 2, 3, 4, 5, 6, 7, 8];
   private dismissedNotificationIds = new Set<number>();
 
@@ -87,8 +89,14 @@ export class SetupComponent implements OnInit {
     }
 
     this.loadDismissedNotifications();
+    this.syncViewportState();
     this.loadProfile();
     this.loadNotifications();
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.syncViewportState();
   }
 
   onCourseCodeBlur(): void {
@@ -292,6 +300,10 @@ export class SetupComponent implements OnInit {
 
   toggleRecord(recordId: number): void {
     this.expandedRecords[recordId] = !this.expandedRecords[recordId];
+  }
+
+  toggleRecordsPanel(): void {
+    this.recordsPanelCollapsed = !this.recordsPanelCollapsed;
   }
 
   isRecordExpanded(recordId: number): boolean {
@@ -563,5 +575,17 @@ export class SetupComponent implements OnInit {
       `teacherDismissedNotifications:${this.teacherName}`,
       JSON.stringify(Array.from(this.dismissedNotificationIds))
     );
+  }
+
+  private syncViewportState(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const compact = window.innerWidth <= 820 || (window.innerWidth <= 1080 && window.innerHeight > window.innerWidth);
+    if (compact !== this.isCompactPortrait) {
+      this.isCompactPortrait = compact;
+      this.recordsPanelCollapsed = compact;
+    }
   }
 }

@@ -49,6 +49,13 @@
   margin-bottom: 20px;
 }
 
+.collapsible-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
 .card-header h2 {
   font-size: 1.3rem;
   color: #0f172a;
@@ -58,6 +65,11 @@
 .card-header p {
   color: #64748b;
   line-height: 1.6;
+}
+
+.card-content {
+  display: grid;
+  gap: 18px;
 }
 
 .grid {
@@ -210,6 +222,18 @@
   color: #075985;
 }
 
+.section-toggle {
+  min-height: 46px;
+  border: 1px solid rgba(38, 72, 184, 0.15);
+  border-radius: 14px;
+  padding: 0 16px;
+  background: rgba(231, 237, 252, 0.9);
+  color: var(--primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .clo-preview {
   display: grid;
   gap: 12px;
@@ -309,5 +333,14 @@
 
   .table-wrap {
     max-height: none;
+  }
+
+  .collapsible-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .section-toggle {
+    width: 100%;
   }
 }

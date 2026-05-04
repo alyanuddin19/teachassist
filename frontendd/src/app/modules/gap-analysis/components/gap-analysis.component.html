@@ -1,269 +1,264 @@
 <div class="container">
-  <h1>Gap Analysis – TeachAssist</h1>
+  <h1>Gap Analysis - TeachAssist</h1>
 
-  <!-- UPLOAD CARD -->
   <div class="card">
     <div class="upload-grid">
       <label class="upload-box">
         <input type="file" hidden accept=".pdf,.docx" (change)="onQuestionPaper($event)" />
-        <div class="upload-icon">📄</div>
-        <p>{{ questionPaper ? 'Question Paper Uploaded ✅' : 'Upload Question Paper' }}</p>
+        <div class="upload-icon">&#128196;</div>
+        <p>{{ questionPaper ? 'Question paper uploaded' : 'Upload question paper' }}</p>
         <small>PDF / DOCX</small>
         <div class="file-name" *ngIf="questionPaper">{{ questionPaper.name }}</div>
       </label>
+
       <label class="upload-box">
         <input type="file" hidden accept=".xlsx,.csv" (change)="onMarksheet($event)" />
-        <div class="upload-icon">📊</div>
-        <p>{{ marksheet ? 'Marksheet Uploaded ✅' : 'Upload Marksheet' }}</p>
+        <div class="upload-icon">&#128202;</div>
+        <p>{{ marksheet ? 'Marksheet uploaded' : 'Upload marksheet' }}</p>
         <small>Excel / CSV</small>
         <div class="file-name" *ngIf="marksheet">{{ marksheet.name }}</div>
       </label>
     </div>
+
     <div class="analyze-center">
       <button class="primary-btn" (click)="analyze()" [disabled]="loading">
-        {{ loading ? '⏳ Analyzing...' : '🔍 Analyze Gap' }}
+        {{ loading ? 'Analyzing...' : 'Analyze Gap' }}
       </button>
     </div>
   </div>
 
-  <!-- RESULT CARD -->
   <div class="card" *ngIf="result">
-
-    <h3>Gap Analysis Result</h3>
-    <div class="chart-wrapper"><canvas id="classChart"></canvas></div>
-    <button class="secondary-btn" (click)="exportToCSV()">📥 Export CSV</button>
-
-    <!-- Question-wise Table -->
-    <table class="gap-table" style="margin-top: 20px;">
-      <thead>
-        <tr>
-          <th>Question</th><th>CLO</th><th>Max Marks</th><th>Threshold Marks</th>
-          <th>Students Below</th><th>Gap %</th><th>Student Names</th><th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of result.gap_results">
-          <td><strong>{{ item.question }}</strong></td>
-          <td><span class="clo-badge">{{ item.clo }}</span></td>
-          <td>{{ item.max_marks }}</td>
-          <td>{{ item.threshold_marks }}</td>
-          <td>{{ item.students_below_threshold }}</td>
-          <td>{{ item.gap_percentage }}%</td>
-          <td>{{ item.student_names?.length ? item.student_names.join(', ') : '—' }}</td>
-          <td>
-            <span class="status"
-              [class.no-gap]="item.status === 'No Gap'"
-              [class.gap]="item.status === 'Gap Identified'">
-              {{ item.status }}
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- CLO-wise Table -->
-    <div *ngIf="result.clo_results?.length">
-      <h2 class="title" style="margin-top: 40px;">🎯 CLO-wise Gap Analysis</h2>
-      <table class="gap-table">
-        <thead>
-          <tr>
-            <th>CLO</th><th>Questions</th><th>Max Marks</th><th>Threshold Marks</th>
-            <th>Students Below</th><th>Gap %</th><th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let clo of result.clo_results">
-            <td><strong>{{ clo.clo }}</strong></td>
-            <td>{{ clo.questions.join(', ') }}</td>
-            <td>{{ clo.max_marks }}</td>
-            <td>{{ clo.threshold_marks }}</td>
-            <td>{{ clo.students_below_threshold }}</td>
-            <td>{{ clo.gap_percentage }}%</td>
-            <td>
-              <span class="status"
-                [class.no-gap]="clo.status === 'OK'"
-                [class.gap]="clo.status === 'Weak CLO'">
-                {{ clo.status }}
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="section-title-row">
+      <div>
+        <h3>Gap Analysis Result</h3>
+        <p class="result-summary" *ngIf="courseTitle || detectedCourseCode">
+          {{ detectedCourseCode || 'Course' }}<span *ngIf="courseTitle"> - {{ courseTitle }}</span>
+          <span *ngIf="thresholdPercentage !== null"> - Threshold {{ thresholdPercentage }}%</span>
+        </p>
+        <p class="result-summary error-text" *ngIf="cloWarning">{{ cloWarning }}</p>
+      </div>
+      <button class="secondary-btn" (click)="exportToCSV()">Export CSV</button>
     </div>
 
-    <!-- CIS UPLOAD + LOAD STUDENTS BUTTON -->
-    <div style="text-align: center; margin-top: 40px;" *ngIf="!recoGenerated">
-      <div style="margin-bottom: 24px;">
-        <label class="upload-box" style="display: inline-block; cursor: pointer; min-width: 280px;">
+    <div class="next-step-card" *ngIf="!recoGenerated">
+      <div>
+        <h4>Next Step</h4>
+        <p>Upload the CIS file and load weak students when you are ready to create practice tasks.</p>
+      </div>
+      <div class="cis-upload-wrap">
+        <label class="upload-box inline-upload">
           <input type="file" hidden accept=".pdf,.docx" (change)="onCisFile($event)" />
-          <div class="upload-icon">📋</div>
-          <p>{{ cisFile ? 'CIS Uploaded ✅' : 'Upload CIS File' }}</p>
-          <small>Course Information Sheet (PDF / DOCX)</small>
+          <div class="upload-icon">&#128203;</div>
+          <p>{{ cisFile ? 'CIS uploaded' : 'Upload CIS file' }}</p>
+          <small>Course Information Sheet</small>
           <div class="file-name" *ngIf="cisFile">{{ cisFile.name }}</div>
         </label>
-        <p style="color: #888; font-size: 12px; margin-top: 8px;">
-          CIS se AI cognitive levels identify karega aur topic-wise questions banega
-        </p>
+        <button class="primary-btn" (click)="fetchWeakStudents()" [disabled]="loading || !cisFile">
+          {{ loading ? 'Loading...' : 'Load Weak Students' }}
+        </button>
       </div>
-      <button class="primary-btn" (click)="fetchWeakStudents()" [disabled]="loading || !cisFile">
-        <span *ngIf="!loading">👥 Load Weak Students</span>
-        <span *ngIf="loading">⏳ Loading...</span>
-      </button>
     </div>
 
-    <!-- PER-STUDENT MODAL -->
-    <div *ngIf="showModal" style="
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.5); z-index: 999;
-        display: flex; align-items: center; justify-content: center;">
-      <div style="background: white; border-radius: 16px; padding: 40px;
-          min-width: 440px; box-shadow: 0 8px 32px rgba(0,0,0,0.25);">
+    <section class="result-block">
+      <button class="result-toggle" *ngIf="isCompactPortrait" type="button" (click)="toggleSection('chart')">
+        <span>Class Overview Chart</span>
+        <span>{{ isSectionOpen('chart') ? 'Hide' : 'Show' }}</span>
+      </button>
+      <div *ngIf="isSectionOpen('chart')">
+        <div class="chart-wrapper"><canvas id="classChart"></canvas></div>
+      </div>
+    </section>
 
-        <h3 style="margin-top: 0; color: #1a237e;">
-          ⚙️ {{ selectedStudent?.student_name }} — Assignment Settings
-        </h3>
+    <section class="result-block">
+      <button class="result-toggle" *ngIf="isCompactPortrait" type="button" (click)="toggleSection('questionTable')">
+        <span>Question-wise Results</span>
+        <span>{{ isSectionOpen('questionTable') ? 'Hide' : 'Show' }}</span>
+      </button>
 
-        <!-- Har CLO ke liye alag questions count -->
-        <div style="margin-bottom: 24px;">
-          <label style="display:block; font-weight:600; margin-bottom:12px; color:#333;">
-            Questions per CLO
-          </label>
-          <div *ngFor="let clo of getCloList()"
-            style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-            <span class="clo-badge" style="min-width:70px; text-align:center; font-size:13px;">
-              {{ clo }}
-            </span>
-            <div style="display:flex; gap:6px;">
-              <button *ngFor="let n of [1, 2, 3, 4, 5]"
+      <div *ngIf="isSectionOpen('questionTable')">
+        <table class="gap-table">
+          <thead>
+            <tr>
+              <th>Question</th>
+              <th>CLO</th>
+              <th>Max Marks</th>
+              <th>Threshold Marks</th>
+              <th>Students Below</th>
+              <th>Gap %</th>
+              <th>Student Names</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of result.gap_results">
+              <td><strong>{{ item.question }}</strong></td>
+              <td><span class="clo-badge">{{ item.clo }}</span></td>
+              <td>{{ item.max_marks }}</td>
+              <td>{{ item.threshold_marks }}</td>
+              <td>{{ item.students_below_threshold }}</td>
+              <td>{{ item.gap_percentage }}%</td>
+              <td>{{ item.student_names?.length ? item.student_names.join(', ') : '-' }}</td>
+              <td>
+                <span class="status" [class.no-gap]="item.status === 'No Gap'" [class.gap]="item.status === 'Gap Identified'">
+                  {{ item.status }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="result-block" *ngIf="result.clo_results?.length">
+      <button class="result-toggle" *ngIf="isCompactPortrait" type="button" (click)="toggleSection('cloTable')">
+        <span>CLO-wise Results</span>
+        <span>{{ isSectionOpen('cloTable') ? 'Hide' : 'Show' }}</span>
+      </button>
+
+      <div *ngIf="isSectionOpen('cloTable')">
+        <h2 class="title">CLO-wise Gap Analysis</h2>
+        <table class="gap-table">
+          <thead>
+            <tr>
+              <th>CLO</th>
+              <th>Questions</th>
+              <th>Max Marks</th>
+              <th>Threshold Marks</th>
+              <th>Students Below</th>
+              <th>Gap %</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let clo of result.clo_results">
+              <td><strong>{{ clo.clo }}</strong></td>
+              <td>{{ clo.questions.join(', ') }}</td>
+              <td>{{ clo.max_marks }}</td>
+              <td>{{ clo.threshold_marks }}</td>
+              <td>{{ clo.students_below_threshold }}</td>
+              <td>{{ clo.gap_percentage }}%</td>
+              <td>
+                <span class="status" [class.no-gap]="clo.status === 'OK'" [class.gap]="clo.status === 'Weak CLO'">
+                  {{ clo.status }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div *ngIf="showModal" class="modal-overlay">
+      <div class="modal-card">
+        <h3>{{ selectedStudent?.student_name }} - Assignment Settings</h3>
+
+        <div class="modal-section">
+          <label class="modal-label">Questions per CLO</label>
+          <div *ngFor="let clo of getCloList()" class="clo-setting-row">
+            <span class="clo-badge">{{ clo }}</span>
+            <div class="count-choices">
+              <button
+                *ngFor="let n of [1, 2, 3, 4, 5]"
+                type="button"
                 (click)="cloQuestionMap[clo] = n"
-                [style.background]="cloQuestionMap[clo] === n ? '#1a237e' : '#e8eaf6'"
-                [style.color]="cloQuestionMap[clo] === n ? 'white' : '#1a237e'"
-                style="width:36px; height:36px; border:none; border-radius:8px;
-                  cursor:pointer; font-weight:600; font-size:14px;">
+                [class.choice-active]="cloQuestionMap[clo] === n">
                 {{ n }}
               </button>
             </div>
-            <span style="color:#888; font-size:12px;">selected: {{ cloQuestionMap[clo] }}</span>
+            <span class="choice-label">Selected: {{ cloQuestionMap[clo] }}</span>
           </div>
         </div>
 
-        <!-- Difficulty Level -->
-        <div style="margin-bottom: 32px;">
-          <label style="display:block; font-weight:600; margin-bottom:10px; color:#333;">
-            Difficulty Level
-          </label>
-          <div style="display: flex; gap: 10px;">
-            <button *ngFor="let level of ['Low', 'Moderate', 'High']"
-              (click)="difficultyLevel = level"
-              [style.background]="difficultyLevel === level ?
-                (level === 'High' ? '#b71c1c' : level === 'Moderate' ? '#e65100' : '#1b5e20') : '#f5f5f5'"
-              [style.color]="difficultyLevel === level ? 'white' : '#333'"
-              style="padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
-              {{ level === 'Low' ? '🟢 Low' : level === 'Moderate' ? '🟡 Moderate' : '🔴 High' }}
+        <div class="modal-section">
+          <label class="modal-label">Difficulty Level</label>
+          <div class="difficulty-row">
+            <button *ngFor="let level of ['Low', 'Moderate', 'High']" type="button" (click)="difficultyLevel = level" [class.choice-active]="difficultyLevel === level">
+              {{ level }}
             </button>
           </div>
         </div>
 
-        <div style="display: flex; gap: 12px; justify-content: flex-end;">
-          <button (click)="closeModal()"
-            style="padding: 10px 24px; border: 1px solid #ddd; border-radius: 8px;
-              cursor: pointer; background: white; font-size: 14px;">
-            Cancel
-          </button>
-          <button (click)="confirmGenerate()"
-            style="padding: 10px 28px; background: #1a237e; color: white;
-              border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
-            🚀 Generate
-          </button>
+        <div class="modal-actions">
+          <button type="button" class="secondary-btn" (click)="closeModal()">Cancel</button>
+          <button type="button" class="primary-btn" (click)="confirmGenerate()">Generate</button>
         </div>
       </div>
     </div>
 
-    <!-- WEAK STUDENTS TABLE -->
-    <div *ngIf="showAssignments && weakOnlyStudents.length > 0" style="margin-top: 40px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h2 class="title" style="margin:0;">⚠️ Students Requiring Attention</h2>
-        <button class="secondary-btn" (click)="downloadPDF()">📄 Download PDF</button>
+    <div *ngIf="showAssignments && weakOnlyStudents.length > 0" class="assignments-section">
+      <div class="assignments-head">
+        <h2 class="title">Students Requiring Attention</h2>
+        <button class="secondary-btn" (click)="downloadPDF()">Download PDF</button>
       </div>
 
       <table class="gap-table">
         <thead>
-          <tr><th>#</th><th>Student Name</th><th>Weak CLOs</th><th>Action</th></tr>
+          <tr>
+            <th>#</th>
+            <th>Student Name</th>
+            <th>Weak CLOs</th>
+            <th>Action</th>
+          </tr>
         </thead>
         <tbody>
           <tr *ngFor="let s of weakOnlyStudents; let i = index">
             <td>{{ i + 1 }}</td>
             <td><strong>{{ s.student_name }}</strong></td>
             <td>
-              <span *ngFor="let clo of s.weak_clos" class="clo-badge" style="margin-right: 6px;">
-                {{ clo }}
-              </span>
+              <span *ngFor="let clo of s.weak_clos" class="clo-badge inline-badge">{{ clo }}</span>
             </td>
             <td>
-  <!-- Pehli baar generate — sirf jab na generated ho aur na loading ho -->
-  <button
-    *ngIf="!generatedStudents[s.student_name] && !loadingStudents[s.student_name]"
-    (click)="openGenerateModal(s)"
-    style="padding: 6px 16px; background: #1a237e; color: white;
-      border: none; border-radius: 6px; cursor: pointer; font-size: 13px;">
-    ⚡ Generate
-  </button>
+              <button
+                *ngIf="!generatedStudents[s.student_name] && !loadingStudents[s.student_name]"
+                class="primary-btn small-btn"
+                type="button"
+                (click)="openGenerateModal(s)">
+                Generate
+              </button>
 
-  <!-- Loading state -->
-  <span *ngIf="loadingStudents[s.student_name]"
-    style="color: #e65100; font-weight: 600;">
-    ⏳ Generating...
-  </span>
+              <span *ngIf="loadingStudents[s.student_name]" class="progress-text">Generating...</span>
 
-  <!-- Generated + Regenerate — dono saath -->
-  <div *ngIf="generatedStudents[s.student_name] && !loadingStudents[s.student_name]"
-    style="display:flex; gap:8px; align-items:center;">
-    <span style="color: #2e7d32; font-weight: 600;">✅ Done</span>
-    <button
-      (click)="openGenerateModal(s)"
-      style="padding: 4px 12px; background: #e65100; color: white;
-        border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">
-      🔄 Regenerate
-    </button>
-  </div>
-</td>
+              <div *ngIf="generatedStudents[s.student_name] && !loadingStudents[s.student_name]" class="generated-actions">
+                <span class="done-text">Done</span>
+                <button class="secondary-btn small-btn" type="button" (click)="openGenerateModal(s)">Regenerate</button>
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>
 
-      <!-- Generated assignments -->
       <div *ngFor="let s of weakOnlyStudents">
-        <div *ngIf="generatedStudents[s.student_name]" class="student-assignment-card" style="margin-top: 24px;">
+        <div *ngIf="generatedStudents[s.student_name]" class="student-assignment-card">
           <div class="student-header">
-            <span class="student-name">👤 {{ s.student_name }}</span>
-            <span *ngFor="let clo of s.weak_clos" class="clo-badge" style="margin-left: 8px;">{{ clo }}</span>
+            <span class="student-name">{{ s.student_name }}</span>
+            <span *ngFor="let clo of s.weak_clos" class="clo-badge inline-badge">{{ clo }}</span>
           </div>
 
-          <div *ngFor="let clo of getCloKeys(generatedStudents[s.student_name])" style="margin-top: 16px;">
-            <h4 style="color: #1a73e8; margin-bottom: 8px;">{{ clo }} — Practice Questions</h4>
+          <div *ngFor="let clo of getCloKeys(generatedStudents[s.student_name])" class="assignment-group">
+            <h4>{{ clo }} - Practice Questions</h4>
             <table class="gap-table">
               <thead>
-                <tr><th>#</th><th>Question</th><th>Marks</th><th>Cognitive Level</th><th>Hint</th></tr>
+                <tr>
+                  <th>#</th>
+                  <th>Question</th>
+                  <th>Marks</th>
+                  <th>Cognitive Level</th>
+                  <th>Hint</th>
+                </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let q of generatedStudents[s.student_name][clo]">
                   <td>{{ q.question_no }}</td>
                   <td>{{ q.question }}</td>
-                  <td style="text-align:center">{{ q.marks }}</td>
-                  <td>
-                    <span style="background:#e8f5e9; color:#2e7d32; padding:2px 8px;
-                      border-radius:12px; font-size:12px; font-weight:600;">
-                      {{ q.cognitive_level || '—' }}
-                    </span>
-                  </td>
-                  <td style="color:#888; font-style:italic;">{{ q.hint || '—' }}</td>
+                  <td>{{ q.marks }}</td>
+                  <td>{{ q.cognitive_level || '-' }}</td>
+                  <td>{{ q.hint || '-' }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </div>

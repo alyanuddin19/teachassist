@@ -81,11 +81,19 @@
   </div>
 
   <div class="card">
-    <div class="card-header">
+    <div class="card-header collapsible-head">
       <h2>Dropdown Columns</h2>
+      <button
+        *ngIf="isCompactPortrait"
+        class="section-toggle"
+        type="button"
+        (click)="toggleDropdownSection()">
+        {{ dropdownSectionCollapsed ? 'Show Fields' : 'Hide Fields' }}
+      </button>
     </div>
 
-    <div class="grid two-col">
+    <div class="card-content" *ngIf="!isCompactPortrait || !dropdownSectionCollapsed">
+      <div class="grid two-col">
       <label class="field">
         <span>Select CLO</span>
         <select [(ngModel)]="selectedOptions.clo">
@@ -129,20 +137,21 @@
         <span>Assessment Total Marks</span>
         <input [(ngModel)]="selectedOptions.assessment_total_marks" (input)="updateAssessmentTotalMarks($any($event.target).value)" min="1" placeholder="Enter total marks" type="number" />
       </label>
-    </div>
+      </div>
 
-    <div class="button-row top-actions">
-      <button class="download-btn" type="button" (click)="addAssessmentToClo()">Add To CLO</button>
-    </div>
+      <div class="button-row top-actions">
+        <button class="download-btn" type="button" (click)="addAssessmentToClo()">Add To CLO</button>
+      </div>
 
-    <div class="clo-preview" *ngIf="selectedColumns.length">
-      <div class="preview-card" *ngFor="let item of selectedColumns">
-        <strong>{{ item.label }}</strong>
-        <div class="pill-row">
-          <span class="pill removable-pill" *ngFor="let value of cloAssessmentMap[item.label]">
-            {{ value }} ({{ getAssessmentMaxMarks(item.label + ' - ' + value) }})
-            <button type="button" class="pill-remove" (click)="removeAssessmentFromClo(item.label, value)">x</button>
-          </span>
+      <div class="clo-preview" *ngIf="selectedColumns.length">
+        <div class="preview-card" *ngFor="let item of selectedColumns">
+          <strong>{{ item.label }}</strong>
+          <div class="pill-row">
+            <span class="pill removable-pill" *ngFor="let value of cloAssessmentMap[item.label]">
+              {{ value }} ({{ getAssessmentMaxMarks(item.label + ' - ' + value) }})
+              <button type="button" class="pill-remove" (click)="removeAssessmentFromClo(item.label, value)">x</button>
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -150,54 +159,65 @@
 </section>
 
 <section class="card">
-  <div class="card-header">
-    <h2>Student Marks Entry</h2>
-    <p *ngIf="selectedCourse">Course: {{ courseCode }} - {{ courseName }} - Batch {{ batch }} - Section {{ section }}</p>
+  <div class="card-header collapsible-head">
+    <div>
+      <h2>Student Marks Entry</h2>
+      <p *ngIf="selectedCourse">Course: {{ courseCode }} - {{ courseName }} - Batch {{ batch }} - Section {{ section }}</p>
+    </div>
+    <button
+      *ngIf="isCompactPortrait"
+      class="section-toggle"
+      type="button"
+      (click)="toggleMarksSection()">
+      {{ marksSectionCollapsed ? 'Show Marks' : 'Hide Marks' }}
+    </button>
   </div>
 
-  <div class="loading" *ngIf="isLoadingStudents">Loading students...</div>
+  <div class="card-content" *ngIf="!isCompactPortrait || !marksSectionCollapsed">
+    <div class="loading" *ngIf="isLoadingStudents">Loading students...</div>
 
-  <div class="table-wrap" *ngIf="!isLoadingStudents">
-    <table class="student-table" *ngIf="studentRows.length; else noStudents">
-      <thead>
-        <tr>
-          <th rowspan="2">Roll Number</th>
-          <th rowspan="2">Student Name</th>
-          <th rowspan="2">Semester</th>
-          <th *ngFor="let group of groupedAssessmentColumns" [attr.colspan]="group.items.length">{{ getCloHeader(group) }}</th>
-          <th rowspan="2">Total Marks</th>
-        </tr>
-        <tr>
-          <th *ngFor="let item of assessmentColumns">{{ item.item }} ({{ item.maxMarks }})</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let row of studentRows; trackBy: trackByStudentId">
-          <td>{{ row.roll_number }}</td>
-          <td>{{ row.full_name }}</td>
-          <td>{{ row.semester || '-' }}</td>
-          <td *ngFor="let item of assessmentColumns">
-            <input [(ngModel)]="row.marksByAssessment[item.label]" (input)="updateStudentMark(row, item.label, $any($event.target).value)" [max]="item.maxMarks || 0" min="0" type="number" [placeholder]="item.item + ' / ' + item.maxMarks" />
-          </td>
-          <td>{{ getStudentTotal(row) }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <div class="table-wrap" *ngIf="!isLoadingStudents">
+      <table class="student-table" *ngIf="studentRows.length; else noStudents">
+        <thead>
+          <tr>
+            <th rowspan="2">Roll Number</th>
+            <th rowspan="2">Student Name</th>
+            <th rowspan="2">Semester</th>
+            <th *ngFor="let group of groupedAssessmentColumns" [attr.colspan]="group.items.length">{{ getCloHeader(group) }}</th>
+            <th rowspan="2">Total Marks</th>
+          </tr>
+          <tr>
+            <th *ngFor="let item of assessmentColumns">{{ item.item }} ({{ item.maxMarks }})</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of studentRows; trackBy: trackByStudentId">
+            <td>{{ row.roll_number }}</td>
+            <td>{{ row.full_name }}</td>
+            <td>{{ row.semester || '-' }}</td>
+            <td *ngFor="let item of assessmentColumns">
+              <input [(ngModel)]="row.marksByAssessment[item.label]" (input)="updateStudentMark(row, item.label, $any($event.target).value)" [max]="item.maxMarks || 0" min="0" type="number" [placeholder]="item.item + ' / ' + item.maxMarks" />
+            </td>
+            <td>{{ getStudentTotal(row) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-  <ng-template #noStudents>
-    <div class="empty-state">No students loaded yet. Select one of your registered courses first.</div>
-  </ng-template>
+    <ng-template #noStudents>
+      <div class="empty-state">No students loaded yet. Select one of your registered courses first.</div>
+    </ng-template>
 
-  <div class="action-row">
-    <div class="status" *ngIf="statusMessage" [class.success]="statusType === 'success'" [class.error]="statusType === 'error'">{{ statusMessage }}</div>
+    <div class="action-row">
+      <div class="status" *ngIf="statusMessage" [class.success]="statusType === 'success'" [class.error]="statusType === 'error'">{{ statusMessage }}</div>
 
-    <div class="button-row">
-      <a *ngIf="lastDownloadUrl" class="download-btn" [href]="lastDownloadUrl">Download Excel</a>
-      <button *ngIf="lastSavedMarksheetId" class="download-btn" type="button" (click)="continueToGapAnalysis()">Continue To Gap Analysis</button>
-      <button class="submit-btn" type="button" (click)="saveMarksheet()" [disabled]="saveState === 'saving'">
-        {{ saveState === 'saving' ? 'Saving...' : (editingMarksheetId ? 'Update Marksheet' : 'Save Marksheet') }}
-      </button>
+      <div class="button-row">
+        <a *ngIf="lastDownloadUrl" class="download-btn" [href]="lastDownloadUrl">Download Excel</a>
+        <button *ngIf="lastSavedMarksheetId" class="download-btn" type="button" (click)="continueToGapAnalysis()">Continue To Gap Analysis</button>
+        <button class="submit-btn" type="button" (click)="saveMarksheet()" [disabled]="saveState === 'saving'">
+          {{ saveState === 'saving' ? 'Saving...' : (editingMarksheetId ? 'Update Marksheet' : 'Save Marksheet') }}
+        </button>
+      </div>
     </div>
   </div>
 </section>
