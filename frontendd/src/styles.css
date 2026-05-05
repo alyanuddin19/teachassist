@@ -215,7 +215,13 @@ body.theme-dark .student-assignment-card {
 
 body.theme-dark .login-page,
 body.theme-dark .student-shell,
-body.theme-dark .setup-page {
+body.theme-dark .setup-page,
+body.theme-dark .admin-page,
+body.theme-dark .hod-page,
+body.theme-dark .container,
+body.theme-dark .page-shell,
+body.theme-dark .prompt-page,
+body.theme-dark .main {
   background:
     radial-gradient(circle at top left, rgba(88, 110, 255, 0.14), transparent 28%),
     linear-gradient(180deg, #0d1527 0%, #121c31 100%) !important;
@@ -263,8 +269,59 @@ body.theme-dark .login-btn,
 body.theme-dark .setup-btn,
 body.theme-dark .submit-btn,
 body.theme-dark .generate-btn,
-body.theme-dark .logout-btn {
+body.theme-dark .logout-btn,
+body.theme-dark .analyze-btn,
+body.theme-dark .export-btn,
+body.theme-dark .download-btn {
   color: #fff !important;
+}
+
+body.theme-dark .container > h1,
+body.theme-dark .hero-card,
+body.theme-dark .wizard-step,
+body.theme-dark .page-hero,
+body.theme-dark .records-panel,
+body.theme-dark .prompt-box,
+body.theme-dark .config-card,
+body.theme-dark .theory-row,
+body.theme-dark .result-card,
+body.theme-dark .stat-card {
+  background: rgba(18, 29, 50, 0.96) !important;
+  border-color: rgba(144, 173, 228, 0.18) !important;
+}
+
+body.theme-dark .upload-zone,
+body.theme-dark .prompt-box,
+body.theme-dark .preview-pane,
+body.theme-dark .exam-editor,
+body.theme-dark .upload-content,
+body.theme-dark .upload-box {
+  background: rgba(21, 35, 61, 0.96) !important;
+  border-color: rgba(144, 173, 228, 0.18) !important;
+}
+
+body.theme-dark .upload-progress-bar,
+body.theme-dark .number-input-wrap,
+body.theme-dark .marks-total-badge,
+body.theme-dark .grand-total-bar,
+body.theme-dark .toggle-pill span,
+body.theme-dark .file-chip {
+  background: rgba(134, 164, 255, 0.12) !important;
+  border-color: rgba(144, 173, 228, 0.16) !important;
+  color: var(--text) !important;
+}
+
+body.theme-dark .config-label,
+body.theme-dark .input-label,
+body.theme-dark .exam-type-name,
+body.theme-dark .theory-q-label,
+body.theme-dark .exam-type-desc,
+body.theme-dark .upload-title,
+body.theme-dark .upload-sub,
+body.theme-dark .prompt-label,
+body.theme-dark .editor-hint,
+body.theme-dark .field-label {
+  color: var(--text) !important;
 }
 
 textarea {

@@ -290,6 +290,59 @@
   font-weight: 600;
 }
 
+body.theme-dark .hero-card,
+body.theme-dark .card,
+body.theme-dark .preview-card,
+body.theme-dark .table-wrap {
+  background: rgba(18, 29, 50, 0.96);
+  border-color: rgba(144, 173, 228, 0.18);
+  box-shadow: var(--shadow-md);
+}
+
+body.theme-dark .compact-hero h1,
+body.theme-dark .card-header h2,
+body.theme-dark .field span,
+body.theme-dark .student-table th,
+body.theme-dark .auto-check {
+  color: var(--text);
+}
+
+body.theme-dark .card-header p,
+body.theme-dark .loading,
+body.theme-dark .empty-state {
+  color: var(--text-muted);
+}
+
+body.theme-dark .field input,
+body.theme-dark .field select,
+body.theme-dark .student-table input {
+  background: rgba(26, 40, 68, 0.96);
+  border-color: rgba(144, 173, 228, 0.18);
+  color: var(--text);
+}
+
+body.theme-dark .field input[readonly] {
+  background: rgba(22, 34, 58, 0.96);
+}
+
+body.theme-dark .table-wrap,
+body.theme-dark .student-table th,
+body.theme-dark .student-table td,
+body.theme-dark .preview-card {
+  border-color: rgba(144, 173, 228, 0.16);
+}
+
+body.theme-dark .section-toggle {
+  background: rgba(134, 164, 255, 0.12);
+  border-color: rgba(144, 173, 228, 0.18);
+  color: #e6eeff;
+}
+
+body.theme-dark .download-btn {
+  background: rgba(112, 193, 255, 0.14);
+  color: #bfe7ff;
+}
+
 @media (max-width: 980px) {
   .form-grid {
     grid-template-columns: 1fr;

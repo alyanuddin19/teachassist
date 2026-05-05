@@ -35,6 +35,17 @@
     linear-gradient(90deg, rgba(244, 248, 255, 0.82) 0%, rgba(244, 248, 255, 0.58) 34%, rgba(244, 248, 255, 0.82) 100%);
 }
 
+body.theme-dark .login-page::before {
+  background-image:
+    linear-gradient(rgba(7, 15, 30, 0.62), rgba(7, 15, 30, 0.48)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='1000' viewBox='0 0 1600 1000'%3E%3Crect width='1600' height='1000' fill='%230f182c'/%3E%3Cg opacity='0.92'%3E%3Cpath d='M130 716c92-62 193-99 289-117 125-24 216-79 303-145 87-66 190-142 332-147 148-5 264 53 409 177v184H130Z' fill='%23182744'/%3E%3Cpath d='M0 765c82-34 177-44 286-20 94 20 201 18 322-26 131-48 245-121 406-117 171 4 328 80 586 222V1000H0Z' fill='%23223258'/%3E%3Cpath d='M1122 190 888 275l234 88 233-88-233-85Zm-143 125v127c0 28 63 67 143 67s143-39 143-67V315l-143 54-143-54Z' fill='%233154d5'/%3E%3Cpath d='M1321 325v98' stroke='%23f4c542' stroke-width='10' stroke-linecap='round'/%3E%3Ccircle cx='1321' cy='442' r='16' fill='%23f4c542'/%3E%3Crect x='220' y='230' width='318' height='208' rx='24' fill='%2315223d'/%3E%3Crect x='252' y='278' width='170' height='18' rx='9' fill='%23223258'/%3E%3Crect x='252' y='314' width='240' height='14' rx='7' fill='%23283860'/%3E%3Crect x='252' y='345' width='218' height='14' rx='7' fill='%23283860'/%3E%3Crect x='252' y='376' width='186' height='14' rx='7' fill='%23283860'/%3E%3Cpath d='M467 218a52 52 0 1 1-104 0 52 52 0 0 1 104 0Z' fill='%233154d5'/%3E%3Cpath d='M340 219c29-23 64-34 100-33-10 37-37 64-80 80-17-15-23-30-20-47Z' fill='%23557aff'/%3E%3Crect x='1088' y='548' width='278' height='162' rx='24' fill='%2315223d'/%3E%3Crect x='1120' y='582' width='128' height='16' rx='8' fill='%23223258'/%3E%3Crect x='1120' y='615' width='196' height='14' rx='7' fill='%23283860'/%3E%3Crect x='1120' y='644' width='167' height='14' rx='7' fill='%23283860'/%3E%3Cpath d='M1265 525a44 44 0 1 1-88 0 44 44 0 0 1 88 0Z' fill='%233154d5'/%3E%3Cpath d='M1170 528c22-18 48-27 75-25-7 28-28 48-60 61-12-11-17-22-15-36Z' fill='%23557aff'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+body.theme-dark .login-page::after {
+  background:
+    linear-gradient(90deg, rgba(8, 16, 30, 0.56) 0%, rgba(8, 16, 30, 0.2) 34%, rgba(8, 16, 30, 0.56) 100%);
+}
+
 .login-card {
   width: min(100%, 620px);
   padding: 44px 42px;
@@ -215,6 +226,7 @@ h2 {
   transform: translateY(-50%);
   width: 48px;
   height: 40px;
+  min-height: 40px;
   border: none;
   border-radius: 12px;
   background: rgba(19, 59, 175, 0.1);
@@ -336,6 +348,62 @@ h2 {
   margin-top: 10px;
 }
 
+body.theme-dark .login-card {
+  background: rgba(16, 26, 46, 0.96);
+  border-color: rgba(144, 173, 228, 0.18);
+}
+
+body.theme-dark h2,
+body.theme-dark .subtitle,
+body.theme-dark .field-label,
+body.theme-dark .notice,
+body.theme-dark .signup-panel-head h3 {
+  color: var(--text);
+}
+
+body.theme-dark .notice {
+  background: rgba(25, 38, 64, 0.9);
+  border-color: rgba(144, 173, 228, 0.16);
+}
+
+body.theme-dark .login-input {
+  background: rgba(26, 40, 68, 0.96);
+  border-color: rgba(144, 173, 228, 0.2);
+  color: var(--text);
+}
+
+body.theme-dark .login-input:focus {
+  background: rgba(31, 48, 80, 0.98);
+}
+
+body.theme-dark .password-toggle,
+body.theme-dark .theme-toggle-btn,
+body.theme-dark .signup-toggle,
+body.theme-dark .collapse-btn {
+  background: rgba(134, 164, 255, 0.12);
+  border-color: rgba(144, 173, 228, 0.18);
+  color: #e6eeff;
+}
+
+body.theme-dark .signup-panel,
+body.theme-dark .signup-panel-focus {
+  background: rgba(24, 37, 63, 0.96);
+  border-color: rgba(144, 173, 228, 0.18);
+}
+
+body.theme-dark .role-switch {
+  background: rgba(134, 164, 255, 0.08);
+  border-color: rgba(144, 173, 228, 0.16);
+}
+
+body.theme-dark .role-btn {
+  color: #d7e3ff;
+}
+
+body.theme-dark .signup-badge {
+  color: #cfe0ff;
+}
+
 @media (max-width: 720px) {
   .role-switch {
     grid-template-columns: repeat(2, 1fr);
@@ -379,13 +447,18 @@ h2 {
 
   .login-input,
   .login-btn,
-  .signup-toggle,
-  .password-toggle {
+  .signup-toggle {
     min-height: 52px;
   }
 
   .password-field .login-input {
     padding-right: 80px;
+  }
+
+  .password-toggle {
+    width: 48px;
+    height: 40px;
+    min-height: 40px;
   }
 
   .signup-panel {

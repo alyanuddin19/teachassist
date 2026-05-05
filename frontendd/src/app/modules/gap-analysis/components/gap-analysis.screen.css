@@ -401,6 +401,49 @@ canvas {
   margin: 0 0 8px;
 }
 
+body.theme-dark .container > h1,
+body.theme-dark .card,
+body.theme-dark .next-step-card,
+body.theme-dark .result-block,
+body.theme-dark .chart-wrapper,
+body.theme-dark .modal-card,
+body.theme-dark .student-assignment-card {
+  background: rgba(18, 29, 50, 0.96);
+  border-color: rgba(144, 173, 228, 0.18);
+}
+
+body.theme-dark .container > h1,
+body.theme-dark .title,
+body.theme-dark .modal-card h3,
+body.theme-dark .student-name {
+  color: var(--text);
+}
+
+body.theme-dark .gap-table tbody tr {
+  background: rgba(23, 36, 61, 0.96);
+}
+
+body.theme-dark .gap-table tbody tr:hover {
+  background: rgba(28, 44, 75, 0.98);
+}
+
+body.theme-dark .no-gap {
+  background: rgba(29, 127, 98, 0.16);
+  color: #7ee1c3;
+}
+
+body.theme-dark .gap {
+  background: rgba(198, 61, 61, 0.18);
+  color: #ff9f9f;
+}
+
+body.theme-dark .count-choices button,
+body.theme-dark .difficulty-row button {
+  background: rgba(134, 164, 255, 0.12);
+  color: var(--text);
+  border-color: rgba(144, 173, 228, 0.16);
+}
+
 @media (max-width: 1080px) and (orientation: portrait) {
   .result-toggle {
     display: inline-flex;
