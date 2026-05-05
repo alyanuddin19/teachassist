@@ -158,3 +158,43 @@
     text-align: center;
   }
 }
+
+body.theme-dark .sheet-card,
+body.theme-dark .saved-item {
+  background: rgba(18, 28, 48, 0.94);
+  border-color: rgba(144, 173, 228, 0.16);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.22);
+}
+
+body.theme-dark .sheet-header h2,
+body.theme-dark .saved-meta h3,
+body.theme-dark .pill {
+  color: var(--text);
+}
+
+body.theme-dark .subline,
+body.theme-dark .saved-meta p,
+body.theme-dark .empty-state,
+body.theme-dark .loading {
+  color: var(--text-muted);
+}
+
+body.theme-dark .pill {
+  background: rgba(134, 164, 255, 0.12);
+  border: 1px solid rgba(144, 173, 228, 0.14);
+}
+
+body.theme-dark .download-link {
+  background: rgba(59, 130, 246, 0.18);
+  color: #dbeafe;
+}
+
+body.theme-dark .update-link {
+  background: rgba(34, 197, 94, 0.16);
+  color: #bbf7d0;
+}
+
+body.theme-dark .delete-link {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fecaca;
+}

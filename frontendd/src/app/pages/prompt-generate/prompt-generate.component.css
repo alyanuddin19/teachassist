@@ -380,6 +380,55 @@ textarea {
   }
 }
 
+body.theme-dark .prompt-page .page-hero,
+body.theme-dark .prompt-page .card,
+body.theme-dark .prompt-page .quick-guide,
+body.theme-dark .prompt-page .config-card,
+body.theme-dark .prompt-page .theory-row {
+  background: rgba(18, 28, 48, 0.94);
+  border-color: rgba(144, 173, 228, 0.16);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.22);
+}
+
+body.theme-dark .prompt-page .stat-card,
+body.theme-dark .prompt-page .upload-content,
+body.theme-dark .prompt-page .prompt-box,
+body.theme-dark .prompt-page .result-box {
+  background: rgba(24, 37, 63, 0.94);
+  border-color: rgba(144, 173, 228, 0.18);
+  color: var(--text);
+}
+
+body.theme-dark .prompt-page h1,
+body.theme-dark .prompt-page h3,
+body.theme-dark .prompt-page h4,
+body.theme-dark .prompt-page label,
+body.theme-dark .prompt-page .export-title,
+body.theme-dark .prompt-page .upload-content p {
+  color: var(--text);
+}
+
+body.theme-dark .prompt-page p,
+body.theme-dark .prompt-page li,
+body.theme-dark .prompt-page .section-header p,
+body.theme-dark .prompt-page .config-head p,
+body.theme-dark .prompt-page .upload-content small,
+body.theme-dark .prompt-page .guide-list,
+body.theme-dark .prompt-page .stat-label {
+  color: var(--text-muted);
+}
+
+body.theme-dark .prompt-page .stat-card strong,
+body.theme-dark .prompt-page .file-chip {
+  color: #dce8ff;
+}
+
+body.theme-dark .prompt-page .secondary-btn {
+  background: rgba(134, 164, 255, 0.12);
+  border-color: rgba(144, 173, 228, 0.18);
+  color: #e6eeff;
+}
+
 @media (max-width: 1100px) {
   .builder-grid {
     grid-template-columns: 1fr;

@@ -207,3 +207,46 @@ th {
   opacity: 0.85;
   cursor: not-allowed;
 }
+
+body.theme-dark .page {
+  background: transparent;
+  color: var(--text);
+}
+
+body.theme-dark .card,
+body.theme-dark .result,
+body.theme-dark .upload-box {
+  background: rgba(18, 28, 48, 0.94);
+  border-color: rgba(144, 173, 228, 0.16);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.22);
+}
+
+body.theme-dark label,
+body.theme-dark .upload-box p,
+body.theme-dark th {
+  color: var(--text);
+}
+
+body.theme-dark .file-name,
+body.theme-dark .upload-box small,
+body.theme-dark td {
+  color: var(--text-muted);
+}
+
+body.theme-dark input,
+body.theme-dark select,
+body.theme-dark th {
+  background: rgba(24, 37, 63, 0.94);
+  border-color: rgba(144, 173, 228, 0.18);
+  color: var(--text);
+}
+
+body.theme-dark td {
+  border-bottom-color: rgba(144, 173, 228, 0.14);
+}
+
+body.theme-dark .toggle-mapping-btn {
+  background: rgba(79, 70, 229, 0.18);
+  border-color: rgba(144, 173, 228, 0.18);
+  color: #dce8ff;
+}
