@@ -46,7 +46,7 @@
           <div class="file-chips" *ngIf="selectedFiles.length">
             <button type="button" class="file-chip" *ngFor="let file of selectedFiles; let i = index" (click)="$event.preventDefault(); removeFile(i)">
               {{ file.name }}
-              <span>×</span>
+              <span class="material-symbols-rounded">close</span>
             </button>
           </div>
         </label>

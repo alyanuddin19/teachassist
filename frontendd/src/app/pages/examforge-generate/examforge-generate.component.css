@@ -29,7 +29,10 @@
 .file-chip { display: flex; align-items: center; gap: .65rem; padding: .75rem .95rem; background: rgba(36,74,165,.06); border: 1px solid rgba(36,74,165,.14); border-radius: 16px; }
 .file-chip svg { color: #244aa5; flex-shrink: 0; }
 .file-chip-name { flex: 1; font-size: .88rem; font-weight: 700; color: #18355f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.file-chip-remove { width: 24px; height: 24px; border-radius: 8px; background: transparent; border: 1px solid rgba(96,122,174,.2); color: #61779f; cursor: pointer; display: grid; place-items: center; padding: 0; }
+.file-chip-remove { width: 28px; height: 28px; border-radius: 10px; background: transparent; border: 1px solid rgba(96,122,174,.2); color: #61779f; cursor: pointer; display: grid; place-items: center; padding: 0; }
+.file-chip-remove .material-symbols-rounded,
+.generate-option-icon .material-symbols-rounded,
+.toast-icon.material-symbols-rounded { font-size: 1.1rem; line-height: 1; }
 .upload-progress-bar { margin-top: 1rem; height: 4px; background: rgba(96,122,174,.16); border-radius: 999px; overflow: hidden; }
 .upload-progress-fill { height: 100%; background: linear-gradient(135deg, #244aa5 0%, #3f67d8 100%); border-radius: 999px; transition: width .25s ease; }
 .upload-progress-label { display: block; font-size: .8rem; color: #61779f; margin-top: .45rem; text-align: center; }
@@ -80,7 +83,7 @@
 .btn-secondary { min-height: 46px; padding: 0 18px; background: transparent; border: 1px solid rgba(96,122,174,.18); color: #61779f; font-size: .9rem; font-weight: 700; }
 .prompt-content { font-family: "IBM Plex Mono", Consolas, monospace; font-size: .82rem; line-height: 1.7; color: #51698f; padding: 1.25rem; overflow-x: auto; white-space: pre-wrap; word-break: break-word; max-height: 360px; overflow-y: auto; }
 .generate-option-box { display: flex; align-items: center; gap: 1.25rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(36,74,165,.08), rgba(63,103,216,.07)); border: 1px solid rgba(36,74,165,.14); border-radius: 24px; margin-bottom: 1.5rem; flex-wrap: wrap; }
-.generate-option-icon { font-size: 2.25rem; }
+.generate-option-icon { width: 56px; height: 56px; border-radius: 18px; background: rgba(36,74,165,.12); display: grid; place-items: center; color: #244aa5; flex-shrink: 0; }
 .generate-option-text { flex: 1; min-width: 220px; }
 .generate-option-text h3 { font-size: 1.06rem; font-weight: 800; margin-bottom: .2rem; color: #18355f; }
 .generate-option-text p { font-size: .88rem; color: #61779f; }
@@ -101,7 +104,7 @@
 .toast.success { border-color: rgba(23,123,95,.22); }
 .toast.error { border-color: rgba(205,64,64,.22); }
 .toast.info { border-color: rgba(36,74,165,.22); }
-.toast-icon { font-size: 1rem; font-weight: 900; }
+.toast-icon { display: inline-flex; align-items: center; justify-content: center; }
 .loading-overlay { position: fixed; inset: 0; z-index: 999; background: rgba(13,23,43,.56); backdrop-filter: blur(8px); display: grid; place-items: center; }
 .loading-card { text-align: center; padding: 2.8rem 2.4rem; background: rgba(255,255,255,.98); border: 1px solid rgba(96,122,174,.14); border-radius: 28px; box-shadow: 0 24px 64px rgba(26,52,110,.16); max-width: 380px; width: 90%; }
 .loading-orb { width: 64px; height: 64px; margin: 0 auto 1.5rem; border-radius: 50%; background: linear-gradient(135deg, #244aa5 0%, #3f67d8 100%); box-shadow: 0 0 36px rgba(36,74,165,.24); animation: orbPulse 1.5s ease infinite; }

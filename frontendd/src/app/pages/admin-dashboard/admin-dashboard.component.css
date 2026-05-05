@@ -111,6 +111,11 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
+.avatar-circle .material-symbols-rounded {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
 .identity-copy {
   min-width: 0;
 }
