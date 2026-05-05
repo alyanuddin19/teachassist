@@ -1,5 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-main-layout',
@@ -12,8 +13,12 @@ export class MainLayoutComponent implements OnInit {
   teacherName = '';
   teacherUid = '';
   teacherDepartment = '';
+  darkMode = false;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private themeService: ThemeService
+  ) {}
 
   ngOnInit(): void {
     const role = localStorage.getItem('userRole');
@@ -25,6 +30,7 @@ export class MainLayoutComponent implements OnInit {
     this.teacherName = localStorage.getItem('teacherName') || 'Teacher';
     this.teacherUid = localStorage.getItem('teacherUid') || '';
     this.teacherDepartment = localStorage.getItem('teacherDepartment') || '';
+    this.darkMode = this.themeService.isDarkMode();
     this.syncViewportState();
   }
 
@@ -53,8 +59,16 @@ export class MainLayoutComponent implements OnInit {
   }
 
   logout(): void {
+    if (!window.confirm('Are you sure you want to log out?')) {
+      return;
+    }
     localStorage.clear();
     sessionStorage.clear();
     this.router.navigate(['/login']);
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
+    this.darkMode = this.themeService.isDarkMode();
   }
 }

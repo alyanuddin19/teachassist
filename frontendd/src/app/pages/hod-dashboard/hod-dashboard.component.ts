@@ -1,6 +1,7 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService, CourseSuggestion, CreatedTeacherResponse } from '../../core/services/api.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-hod-dashboard',
@@ -18,6 +19,7 @@ export class HodDashboardComponent implements OnInit {
   saving = false;
   courseSuggestions: CourseSuggestion[] = [];
   assignmentResult: CreatedTeacherResponse['teacher'] | null = null;
+  darkMode = false;
 
   form = {
     teacherUsername: '',
@@ -28,7 +30,8 @@ export class HodDashboardComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private api: ApiService
+    private api: ApiService,
+    private themeService: ThemeService
   ) {}
 
   ngOnInit(): void {
@@ -40,6 +43,7 @@ export class HodDashboardComponent implements OnInit {
     this.hodName = localStorage.getItem('hodName') || 'HOD';
     this.hodUid = localStorage.getItem('hodUid') || '';
     this.department = localStorage.getItem('hodDepartment') || '';
+    this.darkMode = this.themeService.isDarkMode();
     this.form.department = this.department;
     this.syncViewportState();
   }
@@ -130,8 +134,20 @@ export class HodDashboardComponent implements OnInit {
   }
 
   logout(): void {
+    if (!window.confirm('Are you sure you want to log out?')) {
+      return;
+    }
+    const theme = localStorage.getItem('appTheme');
     localStorage.clear();
     sessionStorage.clear();
+    if (theme) {
+      localStorage.setItem('appTheme', theme);
+    }
     this.router.navigate(['/login']);
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
+    this.darkMode = this.themeService.isDarkMode();
   }
 }

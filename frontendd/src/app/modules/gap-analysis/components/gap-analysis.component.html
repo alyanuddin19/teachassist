@@ -5,7 +5,9 @@
     <div class="upload-grid">
       <label class="upload-box">
         <input type="file" hidden accept=".pdf,.docx" (change)="onQuestionPaper($event)" />
-        <div class="upload-icon">&#128196;</div>
+        <div class="upload-icon">
+          <span class="material-symbols-rounded">description</span>
+        </div>
         <p>{{ questionPaper ? 'Question paper uploaded' : 'Upload question paper' }}</p>
         <small>PDF / DOCX</small>
         <div class="file-name" *ngIf="questionPaper">{{ questionPaper.name }}</div>
@@ -13,7 +15,9 @@
 
       <label class="upload-box">
         <input type="file" hidden accept=".xlsx,.csv" (change)="onMarksheet($event)" />
-        <div class="upload-icon">&#128202;</div>
+        <div class="upload-icon">
+          <span class="material-symbols-rounded">table_chart</span>
+        </div>
         <p>{{ marksheet ? 'Marksheet uploaded' : 'Upload marksheet' }}</p>
         <small>Excel / CSV</small>
         <div class="file-name" *ngIf="marksheet">{{ marksheet.name }}</div>
@@ -48,7 +52,9 @@
       <div class="cis-upload-wrap">
         <label class="upload-box inline-upload">
           <input type="file" hidden accept=".pdf,.docx" (change)="onCisFile($event)" />
-          <div class="upload-icon">&#128203;</div>
+          <div class="upload-icon">
+            <span class="material-symbols-rounded">article</span>
+          </div>
           <p>{{ cisFile ? 'CIS uploaded' : 'Upload CIS file' }}</p>
           <small>Course Information Sheet</small>
           <div class="file-name" *ngIf="cisFile">{{ cisFile.name }}</div>

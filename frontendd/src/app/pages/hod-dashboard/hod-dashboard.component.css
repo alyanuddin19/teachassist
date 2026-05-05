@@ -20,6 +20,11 @@
   box-shadow: 0 22px 48px rgba(10, 38, 82, 0.24);
 }
 
+.mobile-menu-btn .material-symbols-rounded,
+.menu-btn .material-symbols-rounded {
+  font-size: 1.5rem;
+}
+
 .portal-sidebar {
   position: fixed;
   inset: 18px auto 18px 18px;
@@ -130,7 +135,8 @@
 }
 
 .sidebar-nav button,
-.logout-btn {
+.logout-btn,
+.theme-btn {
   width: 100%;
   display: flex;
   align-items: center;
@@ -146,7 +152,8 @@
 }
 
 .sidebar-nav button:hover:not(:disabled),
-.logout-btn:hover:not(:disabled) {
+.logout-btn:hover:not(:disabled),
+.theme-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.08);
   color: #ffffff;
@@ -159,13 +166,20 @@
   box-shadow: 0 16px 30px rgba(8, 24, 58, 0.18);
 }
 
-.logout-btn {
+.sidebar-footer-actions {
+  display: grid;
+  gap: 12px;
   margin-top: auto;
+}
+
+.theme-btn {
+  justify-content: center;
+  gap: 10px;
 }
 
 .portal-sidebar.closed .identity-card,
 .portal-sidebar.closed .sidebar-nav,
-.portal-sidebar.closed .logout-btn {
+.portal-sidebar.closed .sidebar-footer-actions {
   opacity: 0;
   pointer-events: none;
   transform: translateX(-10px);

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService, StudentTask } from '../../core/services/api.service';
 import { environment } from '../../../environments/environment';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-student-tasks',
@@ -20,15 +21,18 @@ export class StudentTasksComponent implements OnInit {
   answerFiles: Record<number, File | null> = {};
   submitting: Record<number, boolean> = {};
   deleting: Record<number, boolean> = {};
+  darkMode = false;
 
   constructor(
     private api: ApiService,
-    private router: Router
+    private router: Router,
+    private themeService: ThemeService
   ) {}
 
   ngOnInit(): void {
     const role = localStorage.getItem('userRole');
     const studentIdValue = localStorage.getItem('studentId');
+    this.darkMode = this.themeService.isDarkMode();
     this.studentName = localStorage.getItem('studentName') || 'Student';
     this.studentCode = localStorage.getItem('studentCode') || 'Student';
 
@@ -115,8 +119,20 @@ export class StudentTasksComponent implements OnInit {
   }
 
   logout(): void {
+    if (!window.confirm('Are you sure you want to log out?')) {
+      return;
+    }
+    const theme = localStorage.getItem('appTheme');
     localStorage.clear();
     sessionStorage.clear();
+    if (theme) {
+      localStorage.setItem('appTheme', theme);
+    }
     this.router.navigate(['/login']);
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
+    this.darkMode = this.themeService.isDarkMode();
   }
 }

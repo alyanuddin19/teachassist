@@ -59,12 +59,18 @@ export class GenerateExamComponent {
   }
 
   logout() {
-  // clear stored name (optional)
-  localStorage.removeItem('teacherName');
+    if (!window.confirm('Are you sure you want to log out?')) {
+      return;
+    }
 
-  // go back to login page
-  this.router.navigate(['/login']);
-}
+    const theme = localStorage.getItem('appTheme');
+    localStorage.clear();
+    sessionStorage.clear();
+    if (theme) {
+      localStorage.setItem('appTheme', theme);
+    }
+    this.router.navigate(['/login']);
+  }
 
   /* ================= FILES ================= */
   selectedFiles: File[] = [];

@@ -1,9 +1,13 @@
 <div class="hod-page">
-  <button class="mobile-menu-btn" *ngIf="isCompactViewport" type="button" aria-label="Open HOD menu" (click)="toggleSidebar()">☰</button>
+  <button class="mobile-menu-btn" *ngIf="isCompactViewport" type="button" aria-label="Open HOD menu" (click)="toggleSidebar()">
+    <span class="material-symbols-rounded">menu</span>
+  </button>
   <div class="sidebar-backdrop" *ngIf="isCompactViewport && !sidebarCollapsed" (click)="closeSidebar()"></div>
 
   <aside class="portal-sidebar" [class.closed]="sidebarCollapsed">
-    <button class="menu-btn" type="button" aria-label="HOD menu" (click)="toggleSidebar()">☰</button>
+    <button class="menu-btn" type="button" aria-label="HOD menu" (click)="toggleSidebar()">
+      <span class="material-symbols-rounded">menu</span>
+    </button>
 
     <div class="sidebar-shell">
       <div class="sidebar-main">
@@ -20,7 +24,13 @@
         </nav>
       </div>
 
-      <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+      <div class="sidebar-footer-actions">
+        <button type="button" class="theme-btn" (click)="toggleTheme()">
+          <span class="material-symbols-rounded">{{ darkMode ? 'light_mode' : 'dark_mode' }}</span>
+          <span>{{ darkMode ? 'Light Mode' : 'Dark Mode' }}</span>
+        </button>
+        <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+      </div>
     </div>
   </aside>
 

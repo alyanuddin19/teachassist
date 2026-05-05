@@ -70,6 +70,10 @@
   animation: pulseGlow 2.8s infinite;
 }
 
+.upload-icon .material-symbols-rounded {
+  font-size: 2rem;
+}
+
 .upload-box p,
 .upload-content p {
   margin: 0;

@@ -20,6 +20,11 @@
   box-shadow: 0 22px 48px rgba(10, 38, 82, 0.24);
 }
 
+.mobile-toggle-btn .material-symbols-rounded,
+.toggle-btn .material-symbols-rounded {
+  font-size: 1.5rem;
+}
+
 .sidebar {
   position: fixed;
   inset: 18px auto 18px 18px;
@@ -106,9 +111,12 @@
   border-radius: 18px;
   display: grid;
   place-items: center;
-  font-size: 1.25rem;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.teacher-avatar .material-symbols-rounded {
+  font-size: 1.8rem;
 }
 
 .teacher-name {
@@ -164,9 +172,15 @@
   box-shadow: 0 16px 30px rgba(8, 24, 58, 0.18);
 }
 
-.logout-btn {
-  width: 100%;
+.sidebar-footer-actions {
+  display: grid;
+  gap: 12px;
   margin-top: auto;
+}
+
+.logout-btn,
+.theme-btn {
+  width: 100%;
   min-height: 52px;
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -175,13 +189,21 @@
   font-weight: 700;
 }
 
-.logout-btn:hover:not(:disabled) {
+.theme-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.logout-btn:hover:not(:disabled),
+.theme-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.14);
 }
 
 .sidebar.closed .teacher-header,
 .sidebar.closed .sidebar-content,
-.sidebar.closed .logout-btn {
+.sidebar.closed .sidebar-footer-actions {
   opacity: 0;
   pointer-events: none;
   transform: translateX(-10px);
@@ -242,7 +264,7 @@
 
   .sidebar.closed .teacher-header,
   .sidebar.closed .sidebar-content,
-  .sidebar.closed .logout-btn {
+  .sidebar.closed .sidebar-footer-actions {
     opacity: 1;
     pointer-events: auto;
     transform: none;

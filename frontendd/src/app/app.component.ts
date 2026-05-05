@@ -1,16 +1,25 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
+import { ThemeService } from './core/services/theme.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private themeService: ThemeService
+  ) {}
 
   ngOnInit(): void {
+    const preservedTheme = localStorage.getItem('appTheme');
     localStorage.clear();
     sessionStorage.clear();
+    if (preservedTheme) {
+      localStorage.setItem('appTheme', preservedTheme);
+    }
+    this.themeService.initializeTheme();
 
     if (this.router.url !== '/login') {
       this.router.navigate(['/login']);

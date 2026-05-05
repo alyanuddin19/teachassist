@@ -5,7 +5,7 @@
     class="mobile-toggle-btn"
     (click)="toggleSidebar()"
     aria-label="Open navigation">
-    &#9776;
+    <span class="material-symbols-rounded">menu</span>
   </button>
 
   <div
@@ -14,12 +14,16 @@
     (click)="closeSidebar()"></div>
 
   <aside class="sidebar" [class.closed]="!sidebarOpen">
-    <button class="toggle-btn" (click)="toggleSidebar()">&#9776;</button>
+    <button class="toggle-btn" (click)="toggleSidebar()" aria-label="Toggle navigation">
+      <span class="material-symbols-rounded">menu</span>
+    </button>
 
     <div class="sidebar-shell">
       <div class="sidebar-main">
         <div class="teacher-header">
-          <div class="teacher-avatar">&#128100;</div>
+          <div class="teacher-avatar">
+            <span class="material-symbols-rounded">account_circle</span>
+          </div>
           <div class="teacher-copy" *ngIf="sidebarOpen">
             <div class="teacher-name">{{ teacherName }}</div>
             <div class="teacher-meta" *ngIf="teacherDepartment || teacherUid">
@@ -53,7 +57,13 @@
         </nav>
       </div>
 
-      <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+      <div class="sidebar-footer-actions">
+        <button type="button" class="theme-btn" (click)="toggleTheme()">
+          <span class="material-symbols-rounded">{{ darkMode ? 'light_mode' : 'dark_mode' }}</span>
+          <span>{{ darkMode ? 'Light Mode' : 'Dark Mode' }}</span>
+        </button>
+        <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+      </div>
     </div>
   </aside>
 

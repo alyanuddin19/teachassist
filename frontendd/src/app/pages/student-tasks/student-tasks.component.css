@@ -34,10 +34,13 @@
   border-radius: 18px;
   display: grid;
   place-items: center;
-  font-size: 1.3rem;
   color: #123d72;
   background: linear-gradient(135deg, rgba(36, 77, 164, 0.12), rgba(36, 77, 164, 0.04));
   border: 1px solid rgba(36, 77, 164, 0.1);
+}
+
+.student-avatar .material-symbols-rounded {
+  font-size: 1.9rem;
 }
 
 .student-name {
@@ -53,7 +56,15 @@
   font-weight: 600;
 }
 
-.logout-btn {
+.student-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.logout-btn,
+.theme-btn {
   border: none;
   border-radius: 999px;
   background: linear-gradient(135deg, #143f7a, #1d4f98);
@@ -62,6 +73,12 @@
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 12px 24px rgba(17, 58, 120, 0.2);
+}
+
+.theme-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .tasks-panel,
@@ -380,6 +397,7 @@
   }
 
   .logout-btn,
+  .theme-btn,
   .submit-btn,
   .delete-task-btn,
   .file-pick {

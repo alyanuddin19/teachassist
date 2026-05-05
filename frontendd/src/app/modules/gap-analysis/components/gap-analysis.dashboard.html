@@ -5,15 +5,15 @@
     <div class="upload-grid">
       <label class="upload-box">
         <input type="file" hidden accept=".pdf,.docx" (change)="onQuestionPaper($event)" />
-        <div class="upload-icon">📄</div>
-        <p>{{ questionPaper ? 'Question Paper Uploaded ✅' : 'Upload Question Paper' }}</p>
+        <div class="upload-icon"><span class="material-symbols-rounded">description</span></div>
+        <p>{{ questionPaper ? 'Question Paper Uploaded' : 'Upload Question Paper' }}</p>
         <small>PDF / DOCX</small>
         <div class="file-name" *ngIf="questionPaper">{{ questionPaper.name }}</div>
       </label>
       <label class="upload-box">
         <input type="file" hidden accept=".xlsx,.csv" (change)="onMarksheet($event)" />
-        <div class="upload-icon">📊</div>
-        <p>{{ marksheet ? 'Marksheet Uploaded ✅' : 'Upload Marksheet' }}</p>
+        <div class="upload-icon"><span class="material-symbols-rounded">table_chart</span></div>
+        <p>{{ marksheet ? 'Marksheet Uploaded' : 'Upload Marksheet' }}</p>
         <small>Excel / CSV</small>
         <div class="file-name" *ngIf="marksheet">{{ marksheet.name }}</div>
       </label>
@@ -94,8 +94,8 @@
       <div style="margin-bottom: 24px;">
         <label class="upload-box" style="display: inline-block; cursor: pointer; min-width: 280px;">
           <input type="file" hidden accept=".pdf,.docx" (change)="onCisFile($event)" />
-          <div class="upload-icon">📋</div>
-          <p>{{ cisFile ? 'CIS Uploaded ✅' : 'Upload CIS File' }}</p>
+          <div class="upload-icon"><span class="material-symbols-rounded">article</span></div>
+          <p>{{ cisFile ? 'CIS Uploaded' : 'Upload CIS File' }}</p>
           <small>Course Information Sheet (PDF / DOCX)</small>
           <div class="file-name" *ngIf="cisFile">{{ cisFile.name }}</div>
         </label>

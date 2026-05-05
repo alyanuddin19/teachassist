@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Source+Serif+4:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Source+Serif+4:wght@600;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..700,0..1,0&display=swap');
 
 :root {
   --bg: #f4f7fd;
@@ -21,6 +21,25 @@
   --radius-md: 18px;
   --radius-sm: 14px;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.theme-dark {
+  --bg: #0d1527;
+  --bg-soft: #121d34;
+  --surface: rgba(16, 26, 46, 0.92);
+  --surface-strong: #13203a;
+  --surface-tint: #172640;
+  --border: rgba(144, 173, 228, 0.18);
+  --border-strong: rgba(117, 149, 225, 0.24);
+  --text: #e8eefb;
+  --text-muted: #b3c2df;
+  --primary: #86a4ff;
+  --primary-strong: #b7c7ff;
+  --primary-soft: rgba(134, 164, 255, 0.14);
+  --accent: #4dd6c3;
+  --danger: #ff8585;
+  --shadow-sm: 0 10px 30px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 24px 60px rgba(0, 0, 0, 0.34);
 }
 
 *,
@@ -49,6 +68,13 @@ body {
   overflow-x: hidden;
 }
 
+body.theme-dark {
+  background:
+    radial-gradient(circle at top left, rgba(88, 110, 255, 0.16), transparent 28%),
+    radial-gradient(circle at top right, rgba(77, 214, 195, 0.1), transparent 18%),
+    linear-gradient(180deg, #0d1527 0%, #10192c 100%);
+}
+
 h1,
 h2,
 h3,
@@ -61,12 +87,22 @@ h6 {
   color: #16345c;
 }
 
+body.theme-dark h1,
+body.theme-dark h2,
+body.theme-dark h3,
+body.theme-dark h4,
+body.theme-dark h5,
+body.theme-dark h6 {
+  color: #eef4ff;
+}
+
 p {
   margin: 0;
   color: var(--text-muted);
   line-height: 1.65;
   text-wrap: pretty;
   overflow-wrap: anywhere;
+  max-width: 72ch;
 }
 
 button,
@@ -74,6 +110,27 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+.material-symbols-rounded {
+  font-family: 'Material Symbols Rounded';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 500,
+    'GRAD' 0,
+    'opsz' 24;
 }
 
 button {
@@ -108,6 +165,13 @@ textarea {
     transform 160ms var(--ease);
 }
 
+body.theme-dark input,
+body.theme-dark select,
+body.theme-dark textarea {
+  background: rgba(21, 35, 61, 0.9);
+  color: var(--text);
+}
+
 input:focus,
 select:focus,
 textarea:focus {
@@ -115,6 +179,92 @@ textarea:focus {
   border-color: rgba(38, 72, 184, 0.42);
   background: #ffffff;
   box-shadow: 0 0 0 4px rgba(38, 72, 184, 0.12);
+}
+
+body.theme-dark input:focus,
+body.theme-dark select:focus,
+body.theme-dark textarea:focus {
+  background: rgba(28, 44, 75, 0.96);
+}
+
+body.theme-dark .surface-card,
+body.theme-dark .card,
+body.theme-dark .login-card,
+body.theme-dark .student-header,
+body.theme-dark .tasks-panel,
+body.theme-dark .task-card,
+body.theme-dark .state-card,
+body.theme-dark .empty-card,
+body.theme-dark .task-question,
+body.theme-dark .submission-box,
+body.theme-dark .submission-result,
+body.theme-dark .record-card,
+body.theme-dark .student-panel,
+body.theme-dark .notification-card,
+body.theme-dark .notification-panel,
+body.theme-dark .upload-box,
+body.theme-dark .upload-content,
+body.theme-dark .next-step-card,
+body.theme-dark .result-block,
+body.theme-dark .modal-card,
+body.theme-dark .student-assignment-card {
+  background: rgba(18, 29, 50, 0.94) !important;
+  border-color: rgba(144, 173, 228, 0.18) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+body.theme-dark .login-page,
+body.theme-dark .student-shell,
+body.theme-dark .setup-page {
+  background:
+    radial-gradient(circle at top left, rgba(88, 110, 255, 0.14), transparent 28%),
+    linear-gradient(180deg, #0d1527 0%, #121c31 100%) !important;
+}
+
+body.theme-dark .meta-chip,
+body.theme-dark .tag-chip,
+body.theme-dark .info-chip,
+body.theme-dark .task-count,
+body.theme-dark .setup-badge,
+body.theme-dark .section-kicker,
+body.theme-dark .page-kicker,
+body.theme-dark .signup-badge {
+  background: rgba(134, 164, 255, 0.14) !important;
+  color: #cfe0ff !important;
+}
+
+body.theme-dark .secondary-btn,
+body.theme-dark .theme-toggle-btn,
+body.theme-dark .signup-toggle,
+body.theme-dark .collapse-btn,
+body.theme-dark .notification-btn,
+body.theme-dark .close-btn,
+body.theme-dark .clear-btn,
+body.theme-dark .course-pill,
+body.theme-dark .record-toggle,
+body.theme-dark .theme-btn {
+  background: rgba(134, 164, 255, 0.12) !important;
+  color: #e6eeff !important;
+  border-color: rgba(144, 173, 228, 0.18) !important;
+}
+
+body.theme-dark .role-switch {
+  background: rgba(134, 164, 255, 0.08) !important;
+  border-color: rgba(144, 173, 228, 0.16) !important;
+}
+
+body.theme-dark .role-btn {
+  color: #d7e3ff !important;
+}
+
+body.theme-dark .role-btn.active,
+body.theme-dark .primary-btn,
+body.theme-dark .login-btn,
+body.theme-dark .setup-btn,
+body.theme-dark .submit-btn,
+body.theme-dark .generate-btn,
+body.theme-dark .logout-btn {
+  color: #fff !important;
 }
 
 textarea {

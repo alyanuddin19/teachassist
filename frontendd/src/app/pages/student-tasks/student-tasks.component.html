@@ -1,14 +1,22 @@
 <div class="student-shell">
   <header class="student-header">
     <div class="student-identity">
-      <div class="student-avatar">&#128100;</div>
+      <div class="student-avatar">
+        <span class="material-symbols-rounded">account_circle</span>
+      </div>
       <div>
         <div class="student-name">{{ studentName }}</div>
         <div class="student-code" *ngIf="studentCode">{{ studentCode }}</div>
       </div>
     </div>
 
-    <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+    <div class="student-header-actions">
+      <button type="button" class="theme-btn" (click)="toggleTheme()">
+        <span class="material-symbols-rounded">{{ darkMode ? 'light_mode' : 'dark_mode' }}</span>
+        <span>{{ darkMode ? 'Light' : 'Dark' }}</span>
+      </button>
+      <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+    </div>
   </header>
 
   <section class="tasks-panel">

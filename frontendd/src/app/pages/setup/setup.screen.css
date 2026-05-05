@@ -48,7 +48,7 @@
   place-items: center;
   border-radius: 14px;
   background: rgba(18, 51, 120, 0.08);
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1;
 }
 
@@ -114,6 +114,9 @@
 .tag-chip {
   background: rgba(18, 51, 120, 0.08);
   color: var(--primary);
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: keep-all;
 }
 
 .secondary-btn,
@@ -149,6 +152,14 @@
   grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
   gap: 22px;
   align-items: start;
+}
+
+.records-panel {
+  order: 1;
+}
+
+.form-panel {
+  order: 2;
 }
 
 .inbox-panel {
@@ -281,6 +292,7 @@
 .record-top h4 {
   margin: 0;
   font-size: 1.2rem;
+  line-height: 1.28;
 }
 
 .record-toggle {

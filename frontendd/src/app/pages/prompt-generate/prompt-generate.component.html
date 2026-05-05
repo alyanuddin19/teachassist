@@ -37,7 +37,9 @@
 
         <label class="upload-content">
           <input type="file" hidden multiple accept=".pdf,.docx,.ppt,.pptx" (change)="onFileSelected($event)" />
-          <div class="upload-icon">📄</div>
+          <div class="upload-icon">
+            <span class="material-symbols-rounded">upload_file</span>
+          </div>
           <p>{{ selectedFiles.length ? 'Lecture files ready' : 'Upload lecture files' }}</p>
           <small>PDF / DOCX / PPT / PPTX</small>
 

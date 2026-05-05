@@ -1,11 +1,15 @@
 <div class="layout">
   <aside class="sidebar" [class.closed]="!sidebarOpen">
-    <button class="toggle-btn" (click)="toggleSidebar()">☰</button>
+    <button class="toggle-btn" (click)="toggleSidebar()">
+      <span class="material-symbols-rounded">menu</span>
+    </button>
 
     <div class="sidebar-shell">
       <div class="sidebar-main">
         <div class="teacher-header">
-          <div class="teacher-avatar">👤</div>
+          <div class="teacher-avatar">
+            <span class="material-symbols-rounded">account_circle</span>
+          </div>
           <div class="teacher-name" *ngIf="sidebarOpen">{{ teacherName }}</div>
         </div>
 

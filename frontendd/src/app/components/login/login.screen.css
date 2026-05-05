@@ -48,6 +48,25 @@
   backdrop-filter: blur(14px);
 }
 
+.login-card.signup-focus {
+  width: min(100%, 680px);
+}
+
+.theme-toggle-btn {
+  margin-left: auto;
+  margin-bottom: 16px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(19, 59, 175, 0.12);
+  border-radius: 14px;
+  background: rgba(245, 248, 255, 0.92);
+  color: #17314f;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .logo {
   display: flex;
   justify-content: center;
@@ -109,6 +128,11 @@ h2 {
   background: #edf2ff;
   border-radius: 16px;
   border: 1px solid rgba(38, 72, 184, 0.08);
+}
+
+.login-intro {
+  display: grid;
+  gap: 18px;
 }
 
 .role-btn {
@@ -189,14 +213,17 @@ h2 {
   top: 50%;
   right: 12px;
   transform: translateY(-50%);
-  min-width: 58px;
-  min-height: 36px;
+  width: 48px;
+  height: 40px;
   border: none;
   border-radius: 12px;
   background: rgba(19, 59, 175, 0.1);
   color: #17314f;
   font-weight: 700;
   transition: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .login-btn {
@@ -264,6 +291,47 @@ h2 {
   animation: fadeSlideUp 320ms var(--ease);
 }
 
+.signup-panel-focus {
+  margin-top: 0;
+}
+
+.signup-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 6px;
+}
+
+.signup-panel-head h3 {
+  margin: 10px 0 0;
+  font-size: 1.6rem;
+}
+
+.signup-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(19, 59, 175, 0.1);
+  color: #173b92;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.collapse-btn {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid #cad8fb;
+  border-radius: 14px;
+  background: #f5f8ff;
+  color: #17314f;
+  font-weight: 700;
+}
+
 .secondary-login {
   margin-top: 10px;
 }
@@ -323,5 +391,14 @@ h2 {
   .signup-panel {
     padding: 14px;
     border-radius: 16px;
+  }
+
+  .signup-panel-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .collapse-btn {
+    width: 100%;
   }
 }
