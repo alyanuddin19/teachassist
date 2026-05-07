@@ -22,6 +22,13 @@
 
     <div class="profile-state error" *ngIf="loadError">{{ loadError }}</div>
 
+    <section class="surface-card profile-loader-card" *ngIf="!profileLoaded && !loadError">
+      <div class="profile-loader-orb"></div>
+      <h3>Loading Teacher Dashboard...</h3>
+      <p>Fetching your courses, students, and notifications.</p>
+      <div class="profile-loader-dots"><span></span><span></span><span></span></div>
+    </section>
+
     <div class="notification-overlay" *ngIf="notificationsOpen" (click)="toggleNotifications()"></div>
     <section class="surface-card notification-panel" *ngIf="notificationsOpen">
       <div class="section-head">

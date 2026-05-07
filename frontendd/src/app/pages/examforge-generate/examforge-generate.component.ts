@@ -94,10 +94,10 @@ export class ExamforgeGenerateComponent {
 
   get examTypeCards() {
     return [
-      { value: 'quiz', name: 'Quiz', desc: 'Short assessment', icon: '\u{1F4DD}' },
-      { value: 'mid', name: 'Mid-Term', desc: 'Mid semester', icon: '\u{1F4D8}' },
-      { value: 'final', name: 'Final', desc: 'End of semester', icon: '\u{1F393}' },
-      { value: 'assignment', name: 'Assignment', desc: 'Take-home task', icon: '\u{1F4DA}' }
+      { value: 'quiz', name: 'Quiz', desc: 'Short assessment', icon: 'edit_note' },
+      { value: 'mid', name: 'Mid-Term', desc: 'Mid semester', icon: 'menu_book' },
+      { value: 'final', name: 'Final', desc: 'End of semester', icon: 'school' },
+      { value: 'assignment', name: 'Assignment', desc: 'Take-home task', icon: 'assignment' }
     ] as const;
   }
 

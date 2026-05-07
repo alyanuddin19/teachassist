@@ -419,6 +419,19 @@ body.theme-dark .student-name {
   color: var(--text);
 }
 
+body.theme-dark .result-summary,
+body.theme-dark .upload-box small,
+body.theme-dark .upload-content small,
+body.theme-dark .file-name,
+body.theme-dark .choice-label,
+body.theme-dark .progress-text,
+body.theme-dark .modal-label,
+body.theme-dark .assignment-group h4,
+body.theme-dark .gap-table td,
+body.theme-dark .gap-table td span {
+  color: var(--text-muted);
+}
+
 body.theme-dark .gap-table tbody tr {
   background: rgba(23, 36, 61, 0.96);
 }
@@ -442,6 +455,11 @@ body.theme-dark .difficulty-row button {
   background: rgba(134, 164, 255, 0.12);
   color: var(--text);
   border-color: rgba(144, 173, 228, 0.16);
+}
+
+body.theme-dark .modal-label,
+body.theme-dark .assignment-group h4 {
+  color: var(--text);
 }
 
 @media (max-width: 1080px) and (orientation: portrait) {

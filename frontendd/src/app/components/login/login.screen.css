@@ -360,6 +360,12 @@ body.theme-dark .login-card {
   border-color: rgba(144, 173, 228, 0.18);
 }
 
+body.theme-dark .login-card.signup-focus,
+body.theme-dark .signup-panel,
+body.theme-dark .signup-panel-focus {
+  background: rgba(18, 29, 50, 0.97) !important;
+}
+
 body.theme-dark h2,
 body.theme-dark .subtitle,
 body.theme-dark .field-label,
@@ -410,6 +416,10 @@ body.theme-dark .role-btn {
 
 body.theme-dark .signup-badge {
   color: #cfe0ff;
+}
+
+body.theme-dark .teacher-signup {
+  border-top-color: rgba(144, 173, 228, 0.14);
 }
 
 body.theme-dark .signup-panel-head,

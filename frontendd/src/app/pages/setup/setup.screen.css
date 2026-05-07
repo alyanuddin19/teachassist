@@ -505,6 +505,129 @@
   margin-top: 0;
 }
 
+.profile-loader-card {
+  display: grid;
+  place-items: center;
+  gap: 12px;
+  min-height: 260px;
+  text-align: center;
+}
+
+.profile-loader-card h3 {
+  font-size: 1.25rem;
+}
+
+.profile-loader-card p {
+  max-width: 36ch;
+}
+
+.profile-loader-orb {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), #4069d9);
+  box-shadow: 0 0 36px rgba(38, 72, 184, 0.24);
+  animation: orbPulse 1.5s ease infinite;
+}
+
+.profile-loader-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.profile-loader-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: dotBounce 1.4s ease infinite;
+}
+
+.profile-loader-dots span:nth-child(2) {
+  animation-delay: .2s;
+}
+
+.profile-loader-dots span:nth-child(3) {
+  animation-delay: .4s;
+}
+
+body.theme-dark .profile-banner h2,
+body.theme-dark .section-head h3,
+body.theme-dark .record-top h4,
+body.theme-dark .student-head h5,
+body.theme-dark .empty-state h4,
+body.theme-dark .submission-summary strong,
+body.theme-dark .profile-loader-card h3 {
+  color: var(--text);
+}
+
+body.theme-dark .profile-banner p,
+body.theme-dark .record-top p,
+body.theme-dark .student-empty,
+body.theme-dark .student-meta,
+body.theme-dark .student-row span,
+body.theme-dark .notification-summary p,
+body.theme-dark .course-state,
+body.theme-dark .profile-loader-card p {
+  color: var(--text-muted);
+}
+
+body.theme-dark .notification-card,
+body.theme-dark .student-row,
+body.theme-dark .review-result {
+  background: rgba(21, 35, 61, 0.96);
+  border-color: rgba(144, 173, 228, 0.16);
+}
+
+body.theme-dark .notification-btn,
+body.theme-dark .notification-icon,
+body.theme-dark .close-btn,
+body.theme-dark .record-toggle,
+body.theme-dark .course-pill {
+  background: rgba(134, 164, 255, 0.12);
+  border-color: rgba(144, 173, 228, 0.18);
+  color: #e6eeff;
+}
+
+body.theme-dark .clear-btn {
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(248, 113, 113, 0.2);
+  color: #fecaca;
+}
+
+body.theme-dark .profile-state.success,
+body.theme-dark .course-state.success {
+  color: #86efac;
+}
+
+body.theme-dark .student-row strong,
+body.theme-dark .submission-body p strong,
+body.theme-dark .review-result strong,
+body.theme-dark .notification-summary strong {
+  color: var(--text);
+}
+
+body.theme-dark .submission-body p,
+body.theme-dark .review-result p,
+body.theme-dark .submission-summary span {
+  color: var(--text-muted);
+}
+
+body.theme-dark .submission-body a {
+  color: #b7c7ff;
+}
+
+@keyframes orbPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: scale(.6); opacity: .45; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
 @media (max-width: 1080px) {
   .setup-layout {
     grid-template-columns: 1fr;

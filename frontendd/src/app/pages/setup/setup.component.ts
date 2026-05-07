@@ -151,15 +151,18 @@ export class SetupComponent implements OnInit {
 
   loadProfile(): void {
     this.profileLoaded = false;
+    this.loading = true;
     this.loadError = '';
 
     this.api.getTeacherProfile(this.teacherName).subscribe({
       next: (profile) => {
         this.applyProfile(profile);
         this.profileLoaded = true;
+        this.loading = false;
       },
       error: (err) => {
         this.profileLoaded = true;
+        this.loading = false;
         this.loadError = err.error?.detail || 'Unable to load your profile right now.';
       }
     });

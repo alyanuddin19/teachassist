@@ -333,6 +333,40 @@
   font-weight: 700;
 }
 
+body.theme-dark .student-name,
+body.theme-dark .task-card h4,
+body.theme-dark .task-question h5,
+body.theme-dark .submission-result h5 {
+  color: var(--text);
+}
+
+body.theme-dark .student-code,
+body.theme-dark .task-source,
+body.theme-dark .task-card p,
+body.theme-dark .question-text,
+body.theme-dark .task-description,
+body.theme-dark .task-meta,
+body.theme-dark .empty-card p,
+body.theme-dark .result-line {
+  color: var(--text-muted);
+}
+
+body.theme-dark .student-avatar {
+  color: #dce8ff;
+  background: rgba(134, 164, 255, 0.12);
+  border-color: rgba(144, 173, 228, 0.16);
+}
+
+body.theme-dark .submission-result strong,
+body.theme-dark .result-line strong {
+  color: var(--text);
+}
+
+body.theme-dark .submission-result a,
+body.theme-dark .task-question a {
+  color: #b7c7ff;
+}
+
 @media (max-width: 768px) {
   .student-shell {
     padding: 20px;

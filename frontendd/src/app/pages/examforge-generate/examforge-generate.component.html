@@ -107,7 +107,9 @@
             <label class="exam-type-card" *ngFor="let type of examTypeCards">
               <input type="radio" name="examType" [checked]="examType === type.value" (change)="onExamTypeSelect(type.value)" />
               <div class="exam-type-inner">
-                <div class="exam-type-icon">{{ type.icon }}</div>
+                <div class="exam-type-icon">
+                  <span class="material-symbols-rounded">{{ type.icon }}</span>
+                </div>
                 <div class="exam-type-name">{{ type.name }}</div>
                 <div class="exam-type-desc">{{ type.desc }}</div>
               </div>

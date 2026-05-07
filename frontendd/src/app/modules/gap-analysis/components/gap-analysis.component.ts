@@ -458,6 +458,9 @@ export class GapAnalysisComponent implements OnInit {
     const labels = this.result.gap_results.map((r: any) => `${r.question} (${r.clo})`);
     const failed = this.result.gap_results.map((r: any) => r.gap_percentage);
     const passed = failed.map((f: number) => 100 - f);
+    const darkMode = typeof document !== 'undefined' && document.body.classList.contains('theme-dark');
+    const axisColor = darkMode ? '#d7e3ff' : '#43546d';
+    const gridColor = darkMode ? 'rgba(144, 173, 228, 0.14)' : 'rgba(103, 128, 173, 0.16)';
     const canvas = document.getElementById('classChart') as HTMLCanvasElement;
     if (!canvas) return;
     this.chart = new Chart(canvas, {
@@ -470,12 +473,22 @@ export class GapAnalysisComponent implements OnInit {
         ]
       },
       options: {
-        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false, color: axisColor,
         scales: {
-          x: { max: 100, stacked: true, title: { display: true, text: 'Class %' } },
-          y: { stacked: true }
+          x: {
+            max: 100,
+            stacked: true,
+            title: { display: true, text: 'Class %', color: axisColor },
+            ticks: { color: axisColor },
+            grid: { color: gridColor }
+          },
+          y: {
+            stacked: true,
+            ticks: { color: axisColor },
+            grid: { color: gridColor }
+          }
         },
-        plugins: { legend: { position: 'top' } }
+        plugins: { legend: { position: 'top', labels: { color: axisColor } } }
       }
     });
   }
