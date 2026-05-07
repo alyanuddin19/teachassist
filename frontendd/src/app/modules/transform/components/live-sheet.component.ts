@@ -23,6 +23,8 @@ export class LiveSheetComponent implements OnInit, OnDestroy {
 
   private subscriptions = new Subscription();
   private currentTeacherContext: TeacherContext = { teacher_name: '' };
+  private activeLoadRequestId = 0;
+  private activeTeacherLoad = '';
 
   constructor(
     private api: TransformService,
@@ -41,18 +43,16 @@ export class LiveSheetComponent implements OnInit, OnDestroy {
 
     this.subscriptions.add(
       this.api.marksheetSaved$.subscribe(() => {
-        this.loadMarksheets();
+        this.loadMarksheets(true);
       })
     );
-
-    this.loadMarksheets();
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
 
-  loadMarksheets(): void {
+  loadMarksheets(force = false): void {
     const teacherName = (this.currentTeacherContext.teacher_name || '').trim();
 
     this.loadError = '';
@@ -60,11 +60,18 @@ export class LiveSheetComponent implements OnInit, OnDestroy {
     if (!teacherName) {
       this.marksheets = [];
       this.isLoading = false;
+      this.activeTeacherLoad = '';
       this.cdr.detectChanges();
       return;
     }
 
+    if (!force && this.isLoading && this.activeTeacherLoad === teacherName) {
+      return;
+    }
+
     this.isLoading = true;
+    this.activeTeacherLoad = teacherName;
+    const requestId = ++this.activeLoadRequestId;
     this.cdr.detectChanges();
 
     this.api
@@ -72,17 +79,26 @@ export class LiveSheetComponent implements OnInit, OnDestroy {
       .pipe(
         timeout(8000),
         finalize(() => {
+          if (requestId !== this.activeLoadRequestId) {
+            return;
+          }
           this.isLoading = false;
           this.cdr.detectChanges();
         })
       )
       .subscribe({
         next: (sheets: MarksheetSummary[]) => {
+          if (requestId !== this.activeLoadRequestId) {
+            return;
+          }
           this.marksheets = Array.isArray(sheets) ? sheets : [];
           this.loadError = '';
           this.cdr.detectChanges();
         },
         error: (error) => {
+          if (requestId !== this.activeLoadRequestId) {
+            return;
+          }
           console.error('Error loading marksheets:', error);
           this.marksheets = [];
           this.loadError = 'Could not load saved sheets.';

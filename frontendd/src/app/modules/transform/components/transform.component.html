@@ -12,7 +12,7 @@
   <app-transform-teacher-form></app-transform-teacher-form>
 
   <div class="records-overlay" *ngIf="showRecords" (click)="closeRecords()"></div>
-  <section class="records-panel" *ngIf="showRecords">
+  <section class="records-panel" *ngIf="showRecords" (click)="$event.stopPropagation()">
     <div class="records-panel-head">
       <div>
         <span class="section-kicker">Saved Marksheets</span>

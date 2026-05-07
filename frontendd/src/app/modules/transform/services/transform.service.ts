@@ -130,8 +130,14 @@ export class TransformService {
   constructor(private http: HttpClient) {}
 
   setTeacherContext(context: TeacherContext): void {
-    localStorage.setItem('transform_teacher_name', context.teacher_name);
-    this.teacherContextSubject.next(context);
+    const nextTeacherName = (context.teacher_name || '').trim();
+    localStorage.setItem('transform_teacher_name', nextTeacherName);
+
+    if (this.teacherContextSubject.value.teacher_name === nextTeacherName) {
+      return;
+    }
+
+    this.teacherContextSubject.next({ teacher_name: nextTeacherName });
   }
 
   clearTeacherContext(): void {
