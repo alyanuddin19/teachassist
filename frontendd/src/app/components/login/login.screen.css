@@ -63,6 +63,11 @@ body.theme-dark .login-page::after {
   width: min(100%, 680px);
 }
 
+.login-card.dark-mode-card {
+  background: rgba(16, 26, 46, 0.96);
+  border-color: rgba(144, 173, 228, 0.18);
+}
+
 .theme-toggle-btn {
   margin-left: auto;
   margin-bottom: 16px;
@@ -314,6 +319,14 @@ h2 {
   margin-top: 0;
 }
 
+.signup-panel.dark-mode-panel,
+.login-card.dark-mode-card .signup-panel,
+.login-card.dark-mode-card .signup-panel-focus {
+  background: rgba(24, 37, 63, 0.96) !important;
+  border-color: rgba(144, 173, 228, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
 .signup-panel-head {
   display: flex;
   justify-content: space-between;
@@ -364,6 +377,42 @@ body.theme-dark .login-card.signup-focus,
 body.theme-dark .signup-panel,
 body.theme-dark .signup-panel-focus {
   background: rgba(18, 29, 50, 0.97) !important;
+}
+
+.login-card.dark-mode-card h2,
+.login-card.dark-mode-card .subtitle,
+.login-card.dark-mode-card .field-label,
+.login-card.dark-mode-card .notice,
+.login-card.dark-mode-card .signup-panel-head h3,
+.login-card.dark-mode-card .signup-badge {
+  color: var(--text);
+}
+
+.login-card.dark-mode-card .field-label {
+  opacity: 0.98;
+}
+
+.login-card.dark-mode-card .signup-badge {
+  background: rgba(134, 164, 255, 0.14);
+}
+
+.login-card.dark-mode-card .login-input {
+  background: rgba(26, 40, 68, 0.96);
+  border-color: rgba(144, 173, 228, 0.2);
+  color: var(--text);
+}
+
+.login-card.dark-mode-card .login-input:focus {
+  background: rgba(31, 48, 80, 0.98);
+}
+
+.login-card.dark-mode-card .password-toggle,
+.login-card.dark-mode-card .theme-toggle-btn,
+.login-card.dark-mode-card .signup-toggle,
+.login-card.dark-mode-card .collapse-btn {
+  background: rgba(134, 164, 255, 0.12);
+  border-color: rgba(144, 173, 228, 0.18);
+  color: #e6eeff;
 }
 
 body.theme-dark h2,
