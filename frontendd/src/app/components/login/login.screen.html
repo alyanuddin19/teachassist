@@ -1,10 +1,5 @@
 <div class="login-page">
-  <div class="login-card" [class.signup-focus]="role === 'teacher' && teacherSignupOpen" [class.dark-mode-card]="darkMode">
-    <button type="button" class="theme-toggle-btn" (click)="toggleTheme()">
-      <span class="material-symbols-rounded">{{ darkMode ? 'light_mode' : 'dark_mode' }}</span>
-      <span>{{ darkMode ? 'Light Mode' : 'Dark Mode' }}</span>
-    </button>
-
+  <div class="login-card" [class.signup-focus]="role === 'teacher' && teacherSignupOpen">
     <div class="login-intro" *ngIf="!(role === 'teacher' && teacherSignupOpen)">
       <div class="logo">
         <div class="cap">
@@ -79,7 +74,7 @@
       </div>
     </div>
 
-    <section class="signup-panel signup-panel-focus" [class.dark-mode-panel]="darkMode" *ngIf="role === 'teacher' && teacherSignupOpen">
+    <section class="signup-panel signup-panel-focus" *ngIf="role === 'teacher' && teacherSignupOpen">
       <div class="signup-panel-head">
         <div>
           <span class="signup-badge">Teacher Signup</span>

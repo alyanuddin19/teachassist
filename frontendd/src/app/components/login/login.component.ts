@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
-import { ThemeService } from '../../core/services/theme.service';
 
 type LoginRole = 'teacher' | 'student' | 'admin' | 'hod';
 
@@ -29,16 +28,13 @@ export class LoginComponent {
   success: string | null = null;
   loading = false;
   signupLoading = false;
-  darkMode = false;
 
   constructor(
     private router: Router,
-    private api: ApiService,
-    private themeService: ThemeService
+    private api: ApiService
   ) {
     this.username = '';
     this.password = '';
-    this.darkMode = this.themeService.isDarkMode();
   }
 
   setRole(role: LoginRole): void {
@@ -99,7 +95,7 @@ export class LoginComponent {
         }
 
         const teacherName = res.teacher_name || username;
-        this.resetSessionPreservingTheme();
+        this.resetSession();
         localStorage.setItem('userRole', 'teacher');
         localStorage.setItem('teacherName', teacherName);
         localStorage.setItem('teacherId', String(res.teacher_id ?? ''));
@@ -133,7 +129,7 @@ export class LoginComponent {
           return;
         }
 
-        this.resetSessionPreservingTheme();
+        this.resetSession();
         localStorage.setItem('userRole', 'admin');
         localStorage.setItem('adminName', res.admin_name || 'System Admin');
         this.router.navigate(['/admin/dashboard']);
@@ -160,7 +156,7 @@ export class LoginComponent {
           return;
         }
 
-        this.resetSessionPreservingTheme();
+        this.resetSession();
         localStorage.setItem('userRole', 'hod');
         localStorage.setItem('hodName', res.hod_name || username);
         localStorage.setItem('hodId', String(res.hod_id ?? ''));
@@ -196,7 +192,7 @@ export class LoginComponent {
 
         const studentCode = res.student_code || username.toUpperCase();
         const studentName = res.student_name || studentCode;
-        this.resetSessionPreservingTheme();
+        this.resetSession();
         localStorage.setItem('userRole', 'student');
         localStorage.setItem('studentCode', studentCode);
         localStorage.setItem('studentName', studentName);
@@ -263,17 +259,8 @@ export class LoginComponent {
     });
   }
 
-  toggleTheme(): void {
-    this.themeService.toggleTheme();
-    this.darkMode = this.themeService.isDarkMode();
-  }
-
-  private resetSessionPreservingTheme(): void {
-    const theme = localStorage.getItem('appTheme');
+  private resetSession(): void {
     localStorage.clear();
     sessionStorage.clear();
-    if (theme) {
-      localStorage.setItem('appTheme', theme);
-    }
   }
 }

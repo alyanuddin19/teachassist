@@ -63,12 +63,8 @@ export class GenerateExamComponent {
       return;
     }
 
-    const theme = localStorage.getItem('appTheme');
     localStorage.clear();
     sessionStorage.clear();
-    if (theme) {
-      localStorage.setItem('appTheme', theme);
-    }
     this.router.navigate(['/login']);
   }
 

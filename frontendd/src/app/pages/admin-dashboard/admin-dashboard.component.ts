@@ -6,7 +6,6 @@ import {
   CreatedHodResponse,
   CreatedStudentResponse
 } from '../../core/services/api.service';
-import { ThemeService } from '../../core/services/theme.service';
 
 type AdminPanel = 'hod' | 'student' | 'course';
 
@@ -25,7 +24,6 @@ export class AdminDashboardComponent implements OnInit {
   savingHod = false;
   savingStudent = false;
   savingCourse = false;
-  darkMode = false;
   createdHod: CreatedHodResponse['hod'] | null = null;
   createdStudent: CreatedStudentResponse['student'] | null = null;
   createdCourse: CreatedCourseResponse['course'] | null = null;
@@ -54,8 +52,7 @@ export class AdminDashboardComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private api: ApiService,
-    private themeService: ThemeService
+    private api: ApiService
   ) {}
 
   ngOnInit(): void {
@@ -65,7 +62,6 @@ export class AdminDashboardComponent implements OnInit {
     }
 
     this.adminName = localStorage.getItem('adminName') || 'System Admin';
-    this.darkMode = this.themeService.isDarkMode();
     this.syncViewportState();
   }
 
@@ -209,17 +205,8 @@ export class AdminDashboardComponent implements OnInit {
     if (!window.confirm('Are you sure you want to log out?')) {
       return;
     }
-    const theme = localStorage.getItem('appTheme');
     localStorage.clear();
     sessionStorage.clear();
-    if (theme) {
-      localStorage.setItem('appTheme', theme);
-    }
     this.router.navigate(['/login']);
-  }
-
-  toggleTheme(): void {
-    this.themeService.toggleTheme();
-    this.darkMode = this.themeService.isDarkMode();
   }
 }

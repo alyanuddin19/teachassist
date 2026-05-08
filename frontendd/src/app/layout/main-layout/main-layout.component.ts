@@ -1,6 +1,5 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-main-layout',
@@ -13,11 +12,9 @@ export class MainLayoutComponent implements OnInit {
   teacherName = '';
   teacherUid = '';
   teacherDepartment = '';
-  darkMode = false;
 
   constructor(
-    private router: Router,
-    private themeService: ThemeService
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -30,7 +27,6 @@ export class MainLayoutComponent implements OnInit {
     this.teacherName = localStorage.getItem('teacherName') || 'Teacher';
     this.teacherUid = localStorage.getItem('teacherUid') || '';
     this.teacherDepartment = localStorage.getItem('teacherDepartment') || '';
-    this.darkMode = this.themeService.isDarkMode();
     this.syncViewportState();
   }
 
@@ -65,10 +61,5 @@ export class MainLayoutComponent implements OnInit {
     localStorage.clear();
     sessionStorage.clear();
     this.router.navigate(['/login']);
-  }
-
-  toggleTheme(): void {
-    this.themeService.toggleTheme();
-    this.darkMode = this.themeService.isDarkMode();
   }
 }

@@ -13,12 +13,8 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const preservedTheme = localStorage.getItem('appTheme');
     localStorage.clear();
     sessionStorage.clear();
-    if (preservedTheme) {
-      localStorage.setItem('appTheme', preservedTheme);
-    }
     this.themeService.initializeTheme();
 
     if (this.router.url !== '/login') {
