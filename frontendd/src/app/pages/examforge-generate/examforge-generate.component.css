@@ -82,6 +82,19 @@
 .btn-primary:disabled, .btn-secondary:disabled, .btn-outline:disabled, .btn-ghost:disabled { opacity: .45; pointer-events: none; }
 .btn-secondary { min-height: 46px; padding: 0 18px; background: transparent; border: 1px solid rgba(96,122,174,.18); color: #61779f; font-size: .9rem; font-weight: 700; }
 .prompt-content { font-family: "IBM Plex Mono", Consolas, monospace; font-size: .82rem; line-height: 1.7; color: #51698f; padding: 1.25rem; overflow-x: auto; white-space: pre-wrap; word-break: break-word; max-height: 360px; overflow-y: auto; }
+.prompt-editor {
+  width: 100%;
+  min-height: 320px;
+  border: none;
+  resize: vertical;
+  padding: 1.25rem;
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: .82rem;
+  line-height: 1.7;
+  color: #51698f;
+  background: #fbfdff;
+  outline: none;
+}
 .generate-option-box { display: flex; align-items: center; gap: 1.25rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(36,74,165,.08), rgba(63,103,216,.07)); border: 1px solid rgba(36,74,165,.14); border-radius: 24px; margin-bottom: 1.5rem; flex-wrap: wrap; }
 .generate-option-icon { width: 56px; height: 56px; border-radius: 18px; background: rgba(36,74,165,.12); display: grid; place-items: center; color: #244aa5; flex-shrink: 0; }
 .generate-option-text { flex: 1; min-width: 220px; }
@@ -130,6 +143,7 @@ body.theme-dark .theory-qtype-input label,
 body.theme-dark .theory-marks-input label,
 body.theme-dark .theory-blooms-input label,
 body.theme-dark .prompt-content,
+body.theme-dark .prompt-editor,
 body.theme-dark .generate-option-text p,
 body.theme-dark .loading-card p {
   color: var(--text-muted);

@@ -1,0 +1,36 @@
+<button type="button" class="ai-fab" (click)="toggle()" [attr.aria-expanded]="open" aria-label="Open AI assistant">
+  <span class="material-symbols-rounded">smart_toy</span>
+  <span>AI</span>
+</button>
+
+<section class="ai-panel" *ngIf="open">
+  <div class="ai-panel-head">
+    <div>
+      <div class="ai-kicker">{{ title }}</div>
+      <h3>TeachAssist AI</h3>
+    </div>
+    <button type="button" class="ai-close" (click)="close()" aria-label="Close AI assistant">
+      <span class="material-symbols-rounded">close</span>
+    </button>
+  </div>
+
+  <div class="ai-messages">
+    <article class="ai-message" *ngFor="let message of messages" [class.user]="message.role === 'user'">
+      <div class="ai-message-role">{{ message.role === 'user' ? 'You' : 'AI' }}</div>
+      <div class="ai-message-body">{{ message.content }}</div>
+    </article>
+    <div class="ai-state" *ngIf="sending">Thinking...</div>
+    <div class="ai-state error" *ngIf="error">{{ error }}</div>
+  </div>
+
+  <div class="ai-compose">
+    <textarea
+      [(ngModel)]="draft"
+      rows="3"
+      placeholder="Ask about this dashboard or your workflow..."
+      (keydown.enter)="!$event.shiftKey && ($event.preventDefault(), send())"></textarea>
+    <button type="button" class="ai-send" (click)="send()" [disabled]="sending || !draft.trim()">
+      {{ sending ? 'Sending...' : 'Send' }}
+    </button>
+  </div>
+</section>

@@ -6,6 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { LoginComponent } from './components/login/login.component';
+import { AiAssistantComponent } from './components/ai-assistant/ai-assistant.component';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 import { SetupComponent } from './pages/setup/setup.component';
 import { StudentTasksComponent } from './pages/student-tasks/student-tasks.component';
@@ -18,6 +19,7 @@ import { ExamforgeGenerateComponent } from './pages/examforge-generate/examforge
 @NgModule({
   declarations: [
     AppComponent,
+    AiAssistantComponent,
     LoginComponent,
     MainLayoutComponent,
     SetupComponent,

@@ -230,7 +230,11 @@
             <span class="prompt-label">AI Prompt</span>
             <button class="btn-copy" type="button" (click)="copyPrompt()">Copy Prompt</button>
           </div>
-          <pre class="prompt-content">{{ generatedPrompt }}</pre>
+          <textarea
+            class="prompt-editor"
+            [(ngModel)]="generatedPrompt"
+            rows="16"
+            placeholder="Your generated prompt will appear here, and you can edit it before sending it to Gemini."></textarea>
         </div>
 
         <div class="generate-option-box">

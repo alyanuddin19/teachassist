@@ -5,7 +5,7 @@ from uuid import uuid4
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
-from app.services.prompt_generator.ai_generator import generate_exam, list_available_models
+from app.services.prompt_generator.ai_generator import chat_assistant, generate_exam, list_available_models
 from app.services.prompt_generator.file_parser import parse_file
 from app.services.prompt_generator.image_analyzer import analyze_all_images, is_llava_available
 from app.services.prompt_generator.pdf_exporter import export_to_pdf
@@ -131,6 +131,7 @@ def generate_exam_route(data: dict):
     session = sessions[session_id]
     if "prompt" not in session:
         raise HTTPException(status_code=400, detail="Please generate a prompt first.")
+    prompt_override = (data.get("prompt") or "").strip()
 
     try:
         max_images = 20
@@ -175,12 +176,14 @@ def generate_exam_route(data: dict):
 
         exam_content = generate_exam(
             document_content=combined_content,
-            prompt=session["prompt"],
+            prompt=prompt_override or session["prompt"],
             exam_type=session["exam_type"],
             mcq_count=session.get("mcq_count", 0),
             mcq_marks=session.get("mcq_marks", 1),
             theory_questions=session.get("theory_questions", []),
         )
+        if prompt_override:
+            session["prompt"] = prompt_override
         session["exam_content"] = exam_content
         return {
             "exam_content": exam_content,
@@ -191,6 +194,24 @@ def generate_exam_route(data: dict):
         raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to generate exam: {exc}") from exc
+
+
+@router.post("/chat")
+def prompt_generator_chat(data: dict):
+    message = (data.get("message") or "").strip()
+    if not message:
+        raise HTTPException(status_code=400, detail="Message is required.")
+
+    try:
+        reply = chat_assistant(
+            message=message,
+            history=data.get("history") or [],
+            role=(data.get("role") or "teacher").strip().lower(),
+            page=(data.get("page") or "").strip(),
+        )
+        return {"reply": reply, "model": "gemini-flash-latest"}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @router.post("/save-exam")

@@ -252,7 +252,10 @@ export class ExamforgeGenerateComponent {
     this.generateExamBusy = true;
     this.showLoading('Generating Exam Paper...', 'AI is analyzing your document and crafting questions');
     try {
-      const response = await firstValueFrom(this.api.generatePromptGeneratorExam({ session_id: this.sessionId }));
+      const response = await firstValueFrom(this.api.generatePromptGeneratorExam({
+        session_id: this.sessionId,
+        prompt: this.generatedPrompt
+      }));
       this.examContent = this.boldBloomsKeywords(response.exam_content);
       this.updatePreview();
       this.hideLoading();

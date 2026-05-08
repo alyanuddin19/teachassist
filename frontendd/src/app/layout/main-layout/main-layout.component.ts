@@ -1,5 +1,5 @@
 import { Component, HostListener, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 
 @Component({
   selector: 'app-main-layout',
@@ -12,6 +12,7 @@ export class MainLayoutComponent implements OnInit {
   teacherName = '';
   teacherUid = '';
   teacherDepartment = '';
+  currentPageLabel = 'teacher dashboard';
 
   constructor(
     private router: Router
@@ -28,6 +29,12 @@ export class MainLayoutComponent implements OnInit {
     this.teacherUid = localStorage.getItem('teacherUid') || '';
     this.teacherDepartment = localStorage.getItem('teacherDepartment') || '';
     this.syncViewportState();
+    this.updateCurrentPageLabel();
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.updateCurrentPageLabel();
+      }
+    });
   }
 
   toggleSidebar() {
@@ -52,6 +59,23 @@ export class MainLayoutComponent implements OnInit {
   private syncViewportState(): void {
     this.isMobileView = window.innerWidth <= 960;
     this.sidebarOpen = this.isMobileView ? false : true;
+  }
+
+  private updateCurrentPageLabel(): void {
+    const url = this.router.url || '';
+    if (url.includes('gap-analysis')) {
+      this.currentPageLabel = 'gap analysis';
+      return;
+    }
+    if (url.includes('transform')) {
+      this.currentPageLabel = 'transform';
+      return;
+    }
+    if (url.includes('generate')) {
+      this.currentPageLabel = 'generate exam';
+      return;
+    }
+    this.currentPageLabel = 'teacher profile';
   }
 
   logout(): void {

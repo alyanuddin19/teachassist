@@ -76,6 +76,56 @@ If multiple source files are represented in the context, distribute the paper ev
         raise RuntimeError(f"Gemini generation failed: {message}") from exc
 
 
+def chat_assistant(
+    message: str,
+    history: list[dict] | None = None,
+    role: str = "teacher",
+    page: str = "",
+) -> str:
+    client = _get_client()
+    conversation = []
+
+    if history:
+        for item in history[-8:]:
+            speaker = (item.get("role") or "user").strip().lower()
+            text = (item.get("content") or "").strip()
+            if not text:
+                continue
+            label = "Assistant" if speaker == "assistant" else "User"
+            conversation.append(f"{label}: {text}")
+
+    page_context = f"Current dashboard: {page}." if page else ""
+    full_prompt = f"""You are the TeachAssist in-app AI helper.
+You support a {role} inside an education portal.
+Keep responses concise, practical, and easy to scan.
+Prefer short paragraphs or flat bullets.
+If the user asks about using the current system, answer based on the context you were given.
+{page_context}
+
+Conversation so far:
+{chr(10).join(conversation) if conversation else "No prior conversation."}
+
+User: {message}
+Assistant:"""
+
+    try:
+        response = client.generate_content(full_prompt)
+        if not getattr(response, "parts", None):
+            raise RuntimeError(f"Gemini blocked the response. Feedback: {getattr(response, 'prompt_feedback', None)}")
+
+        generated = (response.text or "").strip()
+        if not generated:
+            raise RuntimeError("Gemini returned an empty response. Please try again.")
+        return generated
+    except Exception as exc:
+        message_text = str(exc)
+        if "API_KEY" in message_text or "api key" in message_text.lower():
+            raise RuntimeError("Invalid or missing Gemini API key. Check GEMINI_API_KEY in backend/.env") from exc
+        if "quota" in message_text.lower() or "429" in message_text:
+            raise RuntimeError("Gemini free-tier rate limit hit. Wait a minute and try again.") from exc
+        raise RuntimeError(f"Gemini assistant failed: {message_text}") from exc
+
+
 def list_available_models() -> list:
     try:
         load_dotenv(Path(__file__).resolve().parents[3] / ".env")

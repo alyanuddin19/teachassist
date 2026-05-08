@@ -29,6 +29,11 @@ export interface PromptGeneratorExamResponse {
   llava_used: boolean;
 }
 
+export interface AiAssistantResponse {
+  reply: string;
+  model: string;
+}
+
 export interface LoginResponse {
   status: 'found' | 'not_found' | 'invalid_password' | 'pending_setup';
   teacher_id?: number;
@@ -262,9 +267,21 @@ export class ApiService {
     );
   }
 
-  generatePromptGeneratorExam(data: { session_id: string }) {
+  generatePromptGeneratorExam(data: { session_id: string; prompt?: string }) {
     return this.http.post<PromptGeneratorExamResponse>(
       `${this.BASE_URL}/prompt-generator/generate-exam`,
+      data
+    );
+  }
+
+  chatWithPromptGeneratorAi(data: {
+    message: string;
+    history: { role: 'user' | 'assistant'; content: string }[];
+    role: string;
+    page: string;
+  }) {
+    return this.http.post<AiAssistantResponse>(
+      `${this.BASE_URL}/prompt-generator/chat`,
       data
     );
   }
