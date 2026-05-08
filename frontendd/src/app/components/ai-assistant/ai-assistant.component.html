@@ -28,7 +28,7 @@
       [(ngModel)]="draft"
       rows="3"
       placeholder="Ask about this dashboard or your workflow..."
-      (keydown.enter)="!$event.shiftKey && ($event.preventDefault(), send())"></textarea>
+      (keydown.enter)="onComposerEnter($event)"></textarea>
     <button type="button" class="ai-send" (click)="send()" [disabled]="sending || !draft.trim()">
       {{ sending ? 'Sending...' : 'Send' }}
     </button>

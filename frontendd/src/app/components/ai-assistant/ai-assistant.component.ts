@@ -34,6 +34,15 @@ export class AiAssistantComponent {
     this.error = '';
   }
 
+  onComposerEnter(event: KeyboardEvent): void {
+    if (event.shiftKey) {
+      return;
+    }
+
+    event.preventDefault();
+    this.send();
+  }
+
   close(): void {
     this.open = false;
     this.error = '';
