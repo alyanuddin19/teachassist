@@ -34,12 +34,13 @@ export class AiAssistantComponent {
     this.error = '';
   }
 
-  onComposerEnter(event: KeyboardEvent): void {
-    if (event.shiftKey) {
+  onComposerEnter(event: Event): void {
+    const keyboardEvent = event as KeyboardEvent;
+    if (keyboardEvent.shiftKey) {
       return;
     }
 
-    event.preventDefault();
+    keyboardEvent.preventDefault();
     this.send();
   }
 
