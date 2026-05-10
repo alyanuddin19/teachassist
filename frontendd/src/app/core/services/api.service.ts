@@ -287,6 +287,7 @@ export class ApiService {
     history: { role: 'user' | 'assistant'; content: string }[];
     role: string;
     page: string;
+    context?: string;
   }) {
     return this.http.post<AiAssistantResponse>(
       `${this.BASE_URL}/prompt-generator/chat`,

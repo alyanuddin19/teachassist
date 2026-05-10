@@ -208,6 +208,7 @@ def prompt_generator_chat(data: dict):
             history=data.get("history") or [],
             role=(data.get("role") or "teacher").strip().lower(),
             page=(data.get("page") or "").strip(),
+            context=(data.get("context") or "").strip(),
         )
         return {"reply": reply, "model": "gemini-flash-latest"}
     except Exception as exc:

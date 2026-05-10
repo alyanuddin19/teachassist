@@ -81,6 +81,7 @@ def chat_assistant(
     history: list[dict] | None = None,
     role: str = "teacher",
     page: str = "",
+    context: str = "",
 ) -> str:
     client = _get_client()
     conversation = []
@@ -95,6 +96,7 @@ def chat_assistant(
             conversation.append(f"{label}: {text}")
 
     page_context = f"Current dashboard: {page}." if page else ""
+    live_context = f"\nCurrent visible page state:\n{context}\n" if context else ""
     full_prompt = f"""You are the TeachAssist in-app AI helper.
 You support a {role} inside an education portal.
 Keep responses concise, practical, and easy to scan.
@@ -102,7 +104,9 @@ Prefer short paragraphs or flat bullets.
 Do not use markdown heading symbols, asterisks, bold markers, hash symbols, or decorative formatting.
 Return plain readable text only.
 If the user asks about using the current system, answer based on the context you were given.
+Treat the visible page state as the current truth about what the user is looking at.
 {page_context}
+{live_context}
 
 Conversation so far:
 {chr(10).join(conversation) if conversation else "No prior conversation."}
