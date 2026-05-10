@@ -69,15 +69,18 @@ def export_to_pdf(content: str, output_path: str, exam_type: str = "exam", filen
             story.append(Spacer(1, 4))
             continue
         if stripped.startswith("# "):
-            story.append(Paragraph(_clean_md(stripped[2:]), heading1_style))
+            story.append(_safe_paragraph(_clean_md(stripped[2:]), heading1_style))
             continue
         if stripped.startswith("## "):
-            story.append(Paragraph(_clean_md(stripped[3:]), heading2_style))
+            story.append(_safe_paragraph(_clean_md(stripped[3:]), heading2_style))
             continue
         if stripped.startswith("### "):
-            story.append(Paragraph(f"<b>{_clean_md(stripped[4:])}</b>", body_style))
+            story.append(_safe_paragraph(f"<b>{_clean_md(stripped[4:])}</b>", body_style))
             continue
-        story.append(Paragraph(_md_to_reportlab(stripped), body_style))
+        story.append(_safe_paragraph(_md_to_reportlab(stripped), body_style))
+
+    if not story:
+        story.append(_safe_paragraph("No exam content was available to export.", body_style))
 
     doc.build(story)
 
@@ -97,6 +100,23 @@ def _md_to_reportlab(text: str) -> str:
     text = re.sub(r"\*(.*?)\*", r"<i>\1</i>", text)
     text = re.sub(r"`(.*?)`", r"<font face=\"Courier\">\1</font>", text)
     return text
+
+
+def _safe_paragraph(text: str, style):
+    try:
+        from reportlab.platypus import Paragraph
+
+        return Paragraph(text, style)
+    except Exception:
+        from reportlab.platypus import Paragraph
+
+        plain_text = (
+            _normalize_pdf_text(text)
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+        )
+        return Paragraph(plain_text, style)
 
 
 def _normalize_pdf_text(text: str) -> str:
