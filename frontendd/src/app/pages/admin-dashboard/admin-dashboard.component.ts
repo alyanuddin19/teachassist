@@ -23,10 +23,12 @@ export class AdminDashboardComponent implements OnInit {
   success = '';
   savingHod = false;
   savingStudent = false;
+  importingStudents = false;
   savingCourse = false;
   createdHod: CreatedHodResponse['hod'] | null = null;
   createdStudent: CreatedStudentResponse['student'] | null = null;
   createdCourse: CreatedCourseResponse['course'] | null = null;
+  selectedStudentImportFile: File | null = null;
 
   hodForm = {
     fullName: '',
@@ -167,6 +169,38 @@ export class AdminDashboardComponent implements OnInit {
       error: (err) => {
         this.savingStudent = false;
         this.error = err.error?.detail || 'Unable to add student right now.';
+      }
+    });
+  }
+
+  onStudentImportSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.selectedStudentImportFile = input.files?.[0] || null;
+  }
+
+  importStudents(): void {
+    this.error = '';
+    this.success = '';
+    this.createdStudent = null;
+
+    if (!this.selectedStudentImportFile) {
+      this.error = 'Please select an Excel sheet first.';
+      return;
+    }
+
+    const form = new FormData();
+    form.append('file', this.selectedStudentImportFile);
+
+    this.importingStudents = true;
+    this.api.importStudentsFromExcel(form).subscribe({
+      next: (res) => {
+        this.importingStudents = false;
+        this.success = `${res.imported_count} students imported, ${res.updated_count} updated, ${res.skipped_count} skipped. Department/batch tables: ${res.auxiliary_tables.join(', ') || 'none'}.`;
+        this.selectedStudentImportFile = null;
+      },
+      error: (err) => {
+        this.importingStudents = false;
+        this.error = err.error?.detail || 'Unable to import students right now.';
       }
     });
   }

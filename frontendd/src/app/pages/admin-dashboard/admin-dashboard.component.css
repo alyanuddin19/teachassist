@@ -299,6 +299,80 @@
   animation: fadeSlideUp 280ms var(--ease);
 }
 
+.import-card {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  background: rgba(247, 249, 255, 0.92);
+}
+
+.import-copy h4 {
+  margin: 0 0 8px;
+}
+
+.import-copy p {
+  margin: 0;
+  max-width: 72ch;
+  color: #5f7597;
+  line-height: 1.6;
+}
+
+.import-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.import-picker {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 0 16px;
+  border-radius: 16px;
+  border: 1px solid #d6e1fb;
+  background: #edf3ff;
+  color: #17314f;
+  font-weight: 700;
+  cursor: pointer;
+  max-width: 100%;
+}
+
+.import-picker input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.import-picker span {
+  display: block;
+  max-width: 320px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.secondary-btn {
+  min-height: 52px;
+  padding: 0 18px;
+  border: 1px solid rgba(38, 72, 184, 0.12);
+  border-radius: 16px;
+  background: rgba(231, 237, 252, 0.92);
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.secondary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .result-card h4 {
   margin: 0 0 12px;
 }
@@ -416,6 +490,7 @@
   }
 
   .primary-btn,
+  .secondary-btn,
   .sidebar-nav button,
   .logout-btn {
     min-height: 52px;

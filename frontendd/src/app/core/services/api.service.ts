@@ -209,6 +209,14 @@ export interface CreatedStudentResponse {
   };
 }
 
+export interface ImportedStudentsResponse {
+  status: 'imported';
+  imported_count: number;
+  updated_count: number;
+  skipped_count: number;
+  auxiliary_tables: string[];
+}
+
 export interface CreatedTeacherResponse {
   status: 'assigned' | 'already_assigned' | 'updated';
   teacher: {
@@ -481,6 +489,13 @@ export class ApiService {
     return this.http.post<CreatedStudentResponse>(
       `${this.BASE_URL}/admin/students`,
       data
+    );
+  }
+
+  importStudentsFromExcel(form: FormData) {
+    return this.http.post<ImportedStudentsResponse>(
+      `${this.BASE_URL}/admin/students/import`,
+      form
     );
   }
 

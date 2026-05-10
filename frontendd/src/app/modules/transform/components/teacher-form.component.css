@@ -12,6 +12,10 @@
   margin-bottom: 24px;
 }
 
+.hero-card.compact-hero {
+  display: none;
+}
+
 .compact-hero {
   display: inline-flex;
   min-width: 260px;

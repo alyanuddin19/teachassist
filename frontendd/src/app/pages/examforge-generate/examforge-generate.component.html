@@ -223,12 +223,22 @@
             <h2 class="step-title">Generated Prompt</h2>
             <p class="step-desc">Review, copy, or proceed to generate your exam</p>
           </div>
+          <button class="btn-outline saved-prompts-trigger" type="button" (click)="toggleSavedPrompts()">
+            <span class="material-symbols-rounded">collections_bookmark</span>
+            Saved Prompts
+          </button>
         </div>
 
         <div class="prompt-box">
           <div class="prompt-toolbar">
             <span class="prompt-label">AI Prompt</span>
-            <button class="btn-copy" type="button" (click)="copyPrompt()">Copy Prompt</button>
+            <div class="prompt-toolbar-actions">
+              <button class="btn-copy" type="button" (click)="saveCurrentPrompt()">
+                <span class="material-symbols-rounded">bookmark_add</span>
+                Save Prompt
+              </button>
+              <button class="btn-copy" type="button" (click)="copyPrompt()">Copy Prompt</button>
+            </div>
           </div>
           <textarea
             class="prompt-editor"
@@ -236,6 +246,49 @@
             rows="16"
             placeholder="Your generated prompt will appear here, and you can edit it before sending it to Gemini."></textarea>
         </div>
+
+        <div class="saved-prompts-overlay" *ngIf="showSavedPrompts" (click)="closeSavedPrompts()"></div>
+        <section class="saved-prompts-panel" *ngIf="showSavedPrompts" (click)="$event.stopPropagation()">
+          <div class="saved-prompts-head">
+            <div>
+              <span class="prompt-label">Saved Prompt Library</span>
+              <h3>Saved Prompts</h3>
+            </div>
+            <button class="btn-secondary" type="button" (click)="closeSavedPrompts()">Close</button>
+          </div>
+
+          <div class="saved-prompts-grid">
+            <aside class="saved-prompts-list">
+              <button
+                type="button"
+                class="saved-prompt-item"
+                *ngFor="let prompt of savedPrompts"
+                [class.active]="activeSavedPrompt?.id === prompt.id"
+                (click)="openSavedPrompt(prompt)">
+                <strong>{{ prompt.title }}</strong>
+                <span>{{ prompt.fileNames.join(', ') || 'Untitled files' }}</span>
+              </button>
+              <div class="empty-saved-prompts" *ngIf="!savedPrompts.length">No saved prompts yet.</div>
+            </aside>
+
+            <div class="saved-prompt-preview" *ngIf="activeSavedPrompt; else selectPromptState">
+              <div class="saved-prompt-meta">
+                <h4>{{ activeSavedPrompt.title }}</h4>
+                <p>{{ activeSavedPrompt.fileNames.join(', ') }}</p>
+              </div>
+              <textarea class="saved-prompt-text" [value]="activeSavedPrompt.prompt" readonly></textarea>
+              <div class="saved-prompt-actions">
+                <button class="btn-outline" type="button" (click)="copySavedPrompt(activeSavedPrompt)">Copy</button>
+                <button class="btn-outline" type="button" (click)="useSavedPrompt(activeSavedPrompt)">Load Prompt</button>
+                <button class="btn-primary" type="button" (click)="generateExamFromSavedPrompt(activeSavedPrompt)">Generate Exam</button>
+              </div>
+            </div>
+
+            <ng-template #selectPromptState>
+              <div class="empty-saved-prompts preview-empty">Select a saved prompt to view it here.</div>
+            </ng-template>
+          </div>
+        </section>
 
         <div class="generate-option-box">
           <div class="generate-option-icon">

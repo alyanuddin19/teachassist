@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, FileResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, func
+from sqlalchemy import or_, func, text
 from dotenv import load_dotenv
 from io import BytesIO
 from datetime import datetime, timezone
@@ -13,6 +13,7 @@ import os
 import json
 import random
 import smtplib
+import pandas as pd
 from email.message import EmailMessage
 
 from groq import Groq
@@ -130,6 +131,104 @@ def generate_unique_uid(prefix: str, model, field_name: str, db: Session) -> str
 
 def build_student_email(roll_no: str) -> str:
     return f"{normalize_text(roll_no, uppercase=True)}@students.uitu.edu.pk"
+
+
+def build_student_batch_table_name(department: str, batch: str) -> str:
+    department_slug = re.sub(r"[^a-z0-9]+", "_", (department or "general").strip().lower()).strip("_") or "general"
+    batch_slug = re.sub(r"[^a-z0-9]+", "_", (batch or "batch").strip().lower()).strip("_") or "batch"
+    return f"students_{department_slug}_{batch_slug}"
+
+
+def ensure_student_batch_table(table_name: str, db: Session) -> None:
+    db.execute(text(f"""
+        CREATE TABLE IF NOT EXISTS {table_name} (
+            LIKE students INCLUDING DEFAULTS INCLUDING CONSTRAINTS
+        )
+    """))
+    db.execute(text(f"CREATE UNIQUE INDEX IF NOT EXISTS {table_name}_roll_no_idx ON {table_name} (roll_no)"))
+    db.execute(text(f"CREATE UNIQUE INDEX IF NOT EXISTS {table_name}_username_idx ON {table_name} (username)"))
+    db.commit()
+
+
+def mirror_student_to_batch_table(student: models.Student, table_name: str, db: Session) -> None:
+    db.execute(
+        text(f"""
+            INSERT INTO {table_name} (
+                id, student_name, roll_no, username, password, contact_no, email,
+                program, teacher_id, semester, section, batch, department, created_at
+            )
+            VALUES (
+                :id, :student_name, :roll_no, :username, :password, :contact_no, :email,
+                :program, :teacher_id, :semester, :section, :batch, :department, :created_at
+            )
+            ON CONFLICT (roll_no)
+            DO UPDATE SET
+                student_name = EXCLUDED.student_name,
+                username = EXCLUDED.username,
+                password = EXCLUDED.password,
+                contact_no = EXCLUDED.contact_no,
+                email = EXCLUDED.email,
+                program = EXCLUDED.program,
+                teacher_id = EXCLUDED.teacher_id,
+                semester = EXCLUDED.semester,
+                section = EXCLUDED.section,
+                batch = EXCLUDED.batch,
+                department = EXCLUDED.department
+        """),
+        {
+            "id": student.id,
+            "student_name": student.student_name,
+            "roll_no": student.roll_no,
+            "username": student.username,
+            "password": student.password,
+            "contact_no": student.contact_no,
+            "email": student.email,
+            "program": student.program,
+            "teacher_id": student.teacher_id,
+            "semester": student.semester,
+            "section": student.section,
+            "batch": student.batch,
+            "department": student.department,
+            "created_at": student.created_at,
+        }
+    )
+
+
+def parse_student_import_rows(file_bytes: bytes) -> list[dict]:
+    dataframe = pd.read_excel(BytesIO(file_bytes), engine="openpyxl")
+    normalized_columns = {
+        str(column).strip().lower().replace(" ", "_").replace("-", "_"): column
+        for column in dataframe.columns
+    }
+
+    def read_value(row, *candidates: str):
+        for candidate in candidates:
+            original = normalized_columns.get(candidate)
+            if original is not None:
+                value = row.get(original)
+                if pd.notna(value):
+                    return str(value).strip()
+        return ""
+
+    parsed_rows: list[dict] = []
+    for _, row in dataframe.iterrows():
+        student_name = read_value(row, "student_name", "full_name", "name")
+        roll_no = read_value(row, "roll_no", "roll_number", "student_id", "id")
+        if not student_name or not roll_no:
+            continue
+
+        parsed_rows.append({
+            "student_name": student_name,
+            "roll_no": roll_no.upper(),
+            "contact_no": read_value(row, "contact_no", "contact", "contact_number", "phone"),
+            "email": read_value(row, "email", "email_address"),
+            "program": read_value(row, "program", "programs", "programme"),
+            "department": read_value(row, "department", "dept").upper(),
+            "batch": read_value(row, "batch").upper(),
+            "section": read_value(row, "section").upper(),
+            "semester": read_value(row, "semester"),
+        })
+    return parsed_rows
 
 
 def send_credentials_email(recipient: str, subject: str, body: str) -> bool:
@@ -1190,6 +1289,88 @@ def create_student_from_admin(data: dict, db: Session = Depends(get_db)):
             "program": student.program or ""
         }
       }
+
+
+@app.post("/api/admin/students/import")
+async def import_students_from_excel(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    filename = (file.filename or "").lower()
+    if not filename.endswith(".xlsx"):
+        raise HTTPException(status_code=400, detail="Please upload an Excel sheet in .xlsx format.")
+
+    file_bytes = await file.read()
+    if not file_bytes:
+        raise HTTPException(status_code=400, detail="The uploaded Excel sheet is empty.")
+
+    try:
+        student_rows = parse_student_import_rows(file_bytes)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Could not read the Excel sheet: {exc}") from exc
+
+    if not student_rows:
+        raise HTTPException(status_code=400, detail="No valid student rows were found in the Excel sheet.")
+
+    imported_count = 0
+    updated_count = 0
+    skipped_count = 0
+    auxiliary_tables: set[str] = set()
+
+    for row in student_rows:
+        if not all([row["student_name"], row["roll_no"]]):
+            skipped_count += 1
+            continue
+
+        generated_email = row["email"] or build_student_email(row["roll_no"])
+        department = row["department"] or "GENERAL"
+        batch = row["batch"] or "UNASSIGNED"
+        program = row["program"] or department
+        semester_value = row["semester"]
+        semester = int(float(semester_value)) if semester_value not in ("", None) else None
+
+        existing = db.query(models.Student).filter(models.Student.roll_no == row["roll_no"]).first()
+        if existing:
+            existing.student_name = row["student_name"]
+            existing.username = row["roll_no"]
+            existing.contact_no = row["contact_no"] or existing.contact_no
+            existing.email = generated_email
+            existing.program = program
+            existing.department = department
+            existing.batch = batch
+            existing.section = row["section"] or existing.section
+            existing.semester = semester
+            student_record = existing
+            updated_count += 1
+        else:
+            student_record = models.Student(
+                student_name=row["student_name"],
+                roll_no=row["roll_no"],
+                username=row["roll_no"],
+                password=generate_easy_password(row["student_name"], "std"),
+                contact_no=row["contact_no"] or None,
+                email=generated_email,
+                program=program,
+                department=department,
+                batch=batch,
+                section=row["section"] or None,
+                semester=semester
+            )
+            db.add(student_record)
+            db.flush()
+            imported_count += 1
+
+        table_name = build_student_batch_table_name(department, batch)
+        ensure_student_batch_table(table_name, db)
+        auxiliary_tables.add(table_name)
+        mirror_student_to_batch_table(student_record, table_name, db)
+
+    db.commit()
+
+    return {
+        "status": "imported",
+        "imported_count": imported_count,
+        "updated_count": updated_count,
+        "skipped_count": skipped_count,
+        "auxiliary_tables": sorted(auxiliary_tables),
+    }
 
 
 @app.post("/api/admin/courses")

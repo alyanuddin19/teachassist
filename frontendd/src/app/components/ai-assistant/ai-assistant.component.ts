@@ -73,12 +73,27 @@ export class AiAssistantComponent {
     }).subscribe({
       next: (res) => {
         this.sending = false;
-        this.messages = [...this.messages, { role: 'assistant', content: res.reply }];
+        this.messages = [...this.messages, { role: 'assistant', content: this.normalizeAssistantReply(res.reply) }];
       },
       error: (err) => {
         this.sending = false;
         this.error = err.error?.detail || 'AI assistant is unavailable right now.';
       }
     });
+  }
+
+  private normalizeAssistantReply(content: string): string {
+    const normalized = (content || '')
+      .replace(/\r/g, '')
+      .replace(/^#{1,6}\s*/gm, '')
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/^\s*[-*]\s+/gm, '• ')
+      .replace(/^\s*>\s?/gm, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+
+    return normalized || 'I am here to help.';
   }
 }

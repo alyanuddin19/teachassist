@@ -18,6 +18,16 @@ interface ToastMessage {
   message: string;
 }
 
+interface SavedPromptItem {
+  id: string;
+  title: string;
+  prompt: string;
+  fileNames: string[];
+  sessionId: string | null;
+  sessionIds: string[];
+  createdAt: string;
+}
+
 interface BloomLevel {
   value: string;
   label: string;
@@ -30,6 +40,7 @@ interface BloomLevel {
   styleUrls: ['./examforge-generate.component.css']
 })
 export class ExamforgeGenerateComponent {
+  private readonly savedPromptsStorageKey = 'teachassist:saved-prompts';
   readonly bloomsLevels: BloomLevel[] = [
     { value: 'remember', label: 'L1 - Remember', keywords: ['Define', 'List', 'Memorize', 'Recall', 'Repeat', 'State', 'Identify', 'Name'] },
     { value: 'understand', label: 'L2 - Understand', keywords: ['Explain', 'Summarize', 'Paraphrase', 'Describe', 'Interpret', 'Classify', 'Compare'] },
@@ -61,6 +72,9 @@ export class ExamforgeGenerateComponent {
   examContent = '';
   previewMode = false;
   previewHtml = '';
+  showSavedPrompts = false;
+  savedPrompts: SavedPromptItem[] = [];
+  activeSavedPrompt: SavedPromptItem | null = null;
   uploadBusy = false;
   generatePromptBusy = false;
   generateExamBusy = false;
@@ -76,6 +90,7 @@ export class ExamforgeGenerateComponent {
 
   constructor(private api: ApiService) {
     this.initTheoryQuestions();
+    this.loadSavedPrompts();
   }
 
   get grandTotal(): number {
@@ -247,6 +262,79 @@ export class ExamforgeGenerateComponent {
     this.showToast('Prompt copied to clipboard', 'success');
   }
 
+  saveCurrentPrompt(): void {
+    if (!this.generatedPrompt.trim()) {
+      this.showToast('Generate a prompt first before saving it.', 'error');
+      return;
+    }
+
+    const record: SavedPromptItem = {
+      id: crypto?.randomUUID?.() || `${Date.now()}`,
+      title: this.buildSavedPromptTitle(),
+      prompt: this.generatedPrompt.trim(),
+      fileNames: this.selectedFiles.map((file) => file.name),
+      sessionId: this.sessionId,
+      sessionIds: [...this.sessionIds],
+      createdAt: new Date().toISOString()
+    };
+
+    this.savedPrompts = [record, ...this.savedPrompts].slice(0, 40);
+    this.persistSavedPrompts();
+    this.activeSavedPrompt = record;
+    this.showSavedPrompts = true;
+    this.showToast('Prompt saved successfully', 'success');
+  }
+
+  toggleSavedPrompts(): void {
+    this.showSavedPrompts = !this.showSavedPrompts;
+    if (this.showSavedPrompts && !this.activeSavedPrompt && this.savedPrompts.length) {
+      this.activeSavedPrompt = this.savedPrompts[0];
+    } else if (!this.showSavedPrompts) {
+      this.activeSavedPrompt = null;
+    }
+  }
+
+  openSavedPrompt(prompt: SavedPromptItem): void {
+    this.activeSavedPrompt = prompt;
+  }
+
+  closeSavedPrompts(): void {
+    this.showSavedPrompts = false;
+    this.activeSavedPrompt = null;
+  }
+
+  copySavedPrompt(prompt: SavedPromptItem): void {
+    navigator.clipboard.writeText(prompt.prompt);
+    this.showToast('Saved prompt copied to clipboard', 'success');
+  }
+
+  useSavedPrompt(prompt: SavedPromptItem): void {
+    this.generatedPrompt = prompt.prompt;
+    if (prompt.sessionId) {
+      this.sessionId = prompt.sessionId;
+    }
+    if (prompt.sessionIds?.length) {
+      this.sessionIds = [...prompt.sessionIds];
+    }
+    this.currentStep = 3;
+    this.showSavedPrompts = false;
+    this.activeSavedPrompt = null;
+    this.showToast('Saved prompt loaded', 'success');
+  }
+
+  generateExamFromSavedPrompt(prompt: SavedPromptItem): void {
+    this.generatedPrompt = prompt.prompt;
+    if (prompt.sessionId) {
+      this.sessionId = prompt.sessionId;
+    }
+    if (prompt.sessionIds?.length) {
+      this.sessionIds = [...prompt.sessionIds];
+    }
+    this.activeSavedPrompt = prompt;
+    this.showSavedPrompts = false;
+    void this.generateExamNow();
+  }
+
   async generateExamNow(): Promise<void> {
     if (!this.sessionId) { return; }
     this.generateExamBusy = true;
@@ -322,6 +410,43 @@ export class ExamforgeGenerateComponent {
       if (!existing.has(file.name)) { this.selectedFiles.push(file); existing.add(file.name); }
     }
     this.selectedFiles = [...this.selectedFiles];
+  }
+
+  private buildSavedPromptTitle(): string {
+    const stems = this.selectedFiles
+      .map((file) => file.name.replace(/\.[^.]+$/, ''))
+      .filter(Boolean);
+
+    if (!stems.length) {
+      return `Prompt ${this.savedPrompts.length + 1}`;
+    }
+
+    const combined = stems[0].replace(/\s+/g, '_');
+    const compact = combined.replace(/[^A-Za-z0-9_-]/g, '');
+    const suffix = stems.length > 1 ? `+${stems.length - 1}` : '';
+    const maxBaseLength = Math.max(4, 14 - suffix.length);
+    return `${compact.slice(0, maxBaseLength)}${suffix}`;
+  }
+
+  private loadSavedPrompts(): void {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+
+    try {
+      const raw = localStorage.getItem(this.savedPromptsStorageKey);
+      this.savedPrompts = raw ? JSON.parse(raw) : [];
+    } catch {
+      this.savedPrompts = [];
+    }
+  }
+
+  private persistSavedPrompts(): void {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+
+    localStorage.setItem(this.savedPromptsStorageKey, JSON.stringify(this.savedPrompts));
   }
 
   private initTheoryQuestions(): void {

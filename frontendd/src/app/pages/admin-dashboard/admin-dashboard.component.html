@@ -94,6 +94,22 @@
         </div>
       </div>
 
+      <div class="import-card">
+        <div class="import-copy">
+          <h4>Import Students From Excel</h4>
+          <p>Upload an `.xlsx` sheet and TeachAssist will save students in the main table and in department-batch tables such as `students_se_22fa`.</p>
+        </div>
+        <div class="import-actions">
+          <label class="import-picker">
+            <input type="file" accept=".xlsx" (change)="onStudentImportSelected($event)" />
+            <span>{{ selectedStudentImportFile?.name || 'Choose Excel Sheet' }}</span>
+          </label>
+          <button type="button" class="secondary-btn" (click)="importStudents()" [disabled]="importingStudents || !selectedStudentImportFile">
+            {{ importingStudents ? 'Importing...' : 'Import Students' }}
+          </button>
+        </div>
+      </div>
+
       <div class="form-grid">
         <label class="field-block">
           <span>Full Name</span>
