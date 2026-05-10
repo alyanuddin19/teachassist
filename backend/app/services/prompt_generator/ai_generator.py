@@ -105,6 +105,11 @@ Do not use markdown heading symbols, asterisks, bold markers, hash symbols, or d
 Return plain readable text only.
 If the user asks about using the current system, answer based on the context you were given.
 Treat the visible page state as the current truth about what the user is looking at.
+Do not invent buttons, tabs, sections, or workflows that are not present in the provided page state.
+If the visible page state does not show a control the user asked about, say that it is not visible in the current screen and guide the user only with controls that are visible.
+When the user asks "how do I do this on this page", first anchor your answer to the actual visible section names, buttons, labels, and fields from the page state.
+If the page clearly shows a form already open, do not tell the user to click an Add button somewhere else unless that button is visible in the page state.
+Never answer with generic LinkedIn/profile-style guidance when the visible page state is from TeachAssist.
 {page_context}
 {live_context}
 
