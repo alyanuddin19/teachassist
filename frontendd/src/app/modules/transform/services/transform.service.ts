@@ -84,6 +84,7 @@ export type MarksheetSummary = {
   assessment_totals: Record<string, number>;
   student_count: number;
   created_at: string;
+  expires_at: string | null;
   download_url: string;
   source_kind: string;
   source_marksheet_id: number | null;

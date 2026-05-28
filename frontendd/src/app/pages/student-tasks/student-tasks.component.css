@@ -64,6 +64,7 @@
 }
 
 .logout-btn,
+.password-btn,
 .theme-btn {
   border: none;
   border-radius: 999px;
@@ -75,6 +76,10 @@
   box-shadow: 0 12px 24px rgba(17, 58, 120, 0.2);
 }
 
+.password-btn {
+  background: linear-gradient(135deg, #0f766e, #0d9488);
+}
+
 .theme-btn {
   display: inline-flex;
   align-items: center;
@@ -82,6 +87,7 @@
 }
 
 .tasks-panel,
+.password-panel,
 .state-card,
 .empty-card,
 .task-card {
@@ -96,6 +102,12 @@
   animation: fadeSlideUp 520ms var(--ease);
 }
 
+.password-panel {
+  margin-bottom: 24px;
+  padding: 24px;
+  animation: fadeSlideUp 480ms var(--ease);
+}
+
 .panel-head {
   display: flex;
   justify-content: space-between;
@@ -107,6 +119,49 @@
 .panel-head h3 {
   margin: 0;
   font-size: 1.35rem;
+}
+
+.compact-head {
+  margin-bottom: 14px;
+}
+
+.password-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.password-grid label {
+  display: grid;
+  gap: 8px;
+  color: #49658a;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.password-grid input {
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  font: inherit;
+}
+
+.password-message {
+  margin-top: 12px;
+  font-weight: 700;
+}
+
+.password-message.success {
+  color: #15803d;
+}
+
+.password-message.error {
+  color: #b42318;
+}
+
+.password-submit {
+  margin-top: 14px;
 }
 
 .task-count {
@@ -341,6 +396,7 @@ body.theme-dark .submission-result h5 {
 }
 
 body.theme-dark .student-code,
+body.theme-dark .password-grid label,
 body.theme-dark .task-source,
 body.theme-dark .task-card p,
 body.theme-dark .question-text,
@@ -431,6 +487,7 @@ body.theme-dark .task-question a {
   }
 
   .logout-btn,
+  .password-btn,
   .theme-btn,
   .submit-btn,
   .delete-task-btn,
@@ -452,5 +509,11 @@ body.theme-dark .task-question a {
     width: 100%;
     justify-content: center;
     text-align: center;
+  }
+}
+
+@media (max-width: 900px) {
+  .password-grid {
+    grid-template-columns: 1fr;
   }
 }

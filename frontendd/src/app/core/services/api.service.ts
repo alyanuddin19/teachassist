@@ -425,6 +425,13 @@ export class ApiService {
     );
   }
 
+  changeStudentPassword(data: { student_id: number; current_password: string; new_password: string }) {
+    return this.http.post<{ status: string }>(
+      `${this.BASE_URL}/student/change-password`,
+      data
+    );
+  }
+
   getStudentTasks(studentId: number) {
     return this.http.get<{ student_id: number; student_code: string; student_name: string; tasks: StudentTask[] }>(
       `${this.BASE_URL}/student/tasks?student_id=${studentId}`

@@ -55,9 +55,16 @@
 }
 
 .subline,
-.saved-meta p {
+.saved-meta p,
+.retention-note {
   color: #64748b;
   line-height: 1.6;
+}
+
+.retention-note {
+  margin-top: 4px;
+  font-size: 0.84rem;
+  font-weight: 700;
 }
 
 .saved-meta h3 {
@@ -173,6 +180,7 @@ body.theme-dark .pill {
 }
 
 body.theme-dark .subline,
+body.theme-dark .retention-note,
 body.theme-dark .saved-meta p,
 body.theme-dark .empty-state,
 body.theme-dark .loading {

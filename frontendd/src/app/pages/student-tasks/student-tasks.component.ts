@@ -20,6 +20,13 @@ export class StudentTasksComponent implements OnInit {
   answerFiles: Record<number, File | null> = {};
   submitting: Record<number, boolean> = {};
   deleting: Record<number, boolean> = {};
+  showPasswordForm = false;
+  currentPassword = '';
+  newPassword = '';
+  confirmPassword = '';
+  passwordSaving = false;
+  passwordMessage = '';
+  passwordError = '';
 
   constructor(
     private api: ApiService,
@@ -110,6 +117,56 @@ export class StudentTasksComponent implements OnInit {
       error: (err) => {
         this.deleting[taskId] = false;
         this.error = err.error?.detail || 'Unable to delete this task.';
+      }
+    });
+  }
+
+  togglePasswordForm(): void {
+    this.showPasswordForm = !this.showPasswordForm;
+    this.passwordMessage = '';
+    this.passwordError = '';
+    if (!this.showPasswordForm) {
+      this.currentPassword = '';
+      this.newPassword = '';
+      this.confirmPassword = '';
+    }
+  }
+
+  changePassword(): void {
+    this.passwordMessage = '';
+    this.passwordError = '';
+
+    if (!this.currentPassword || !this.newPassword || !this.confirmPassword) {
+      this.passwordError = 'Please fill all password fields.';
+      return;
+    }
+
+    if (this.newPassword.length < 6) {
+      this.passwordError = 'New password must be at least 6 characters.';
+      return;
+    }
+
+    if (this.newPassword !== this.confirmPassword) {
+      this.passwordError = 'New password and confirmation do not match.';
+      return;
+    }
+
+    this.passwordSaving = true;
+    this.api.changeStudentPassword({
+      student_id: this.studentId,
+      current_password: this.currentPassword,
+      new_password: this.newPassword
+    }).subscribe({
+      next: () => {
+        this.passwordSaving = false;
+        this.currentPassword = '';
+        this.newPassword = '';
+        this.confirmPassword = '';
+        this.passwordMessage = 'Password changed successfully.';
+      },
+      error: (err) => {
+        this.passwordSaving = false;
+        this.passwordError = err.error?.detail || 'Unable to change password right now.';
       }
     });
   }

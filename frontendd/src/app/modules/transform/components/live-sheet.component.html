@@ -23,7 +23,7 @@
 
           <div class="sheet-actions">
             <button class="update-link" type="button" (click)="editMarksheet(sheet)" [disabled]="updatingMarksheetId === sheet.id">
-              {{ updatingMarksheetId === sheet.id ? 'Updating...' : 'Update' }}
+              {{ updatingMarksheetId === sheet.id ? 'Updating...' : 'Update Results' }}
             </button>
             <button class="delete-link" type="button" (click)="deleteMarksheet(sheet)" [disabled]="deletingMarksheetId === sheet.id">
               {{ deletingMarksheetId === sheet.id ? 'Deleting...' : 'Delete' }}
@@ -35,6 +35,7 @@
         <p class="subline">
           {{ sheet.student_count }} students | Total {{ sheet.total_marks }} | {{ sheet.created_at | date: 'medium' }}
         </p>
+        <p class="retention-note">{{ sheet.expiryLabel }}</p>
 
         <div class="pill-row">
           <span class="pill" *ngFor="let item of sheet.selectedOptionEntries; trackBy: trackByOption">{{ item[0] }}: {{ item[1] }}</span>

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, func, text
 from dotenv import load_dotenv
 from io import BytesIO
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from uuid import uuid4
 import re
@@ -38,6 +38,8 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import A4
 
 from app.routers import gap_analysis_clean
+
+TRANSFORM_MARKSHEET_RETENTION_DAYS = 28
 from app.routers import prompt_generator
 from app.routers import transformation
 from app.t2_transform_loader import load_t2_transform_app, load_t2_excel_builder
@@ -831,6 +833,31 @@ def student_login(data: dict, db: Session = Depends(get_db)):
     }
 
 
+@app.post("/api/student/change-password")
+def change_student_password(data: dict, db: Session = Depends(get_db)):
+    student_id = data.get("student_id")
+    current_password = data.get("current_password") or ""
+    new_password = data.get("new_password") or ""
+
+    if not student_id or not current_password or not new_password:
+        raise HTTPException(status_code=400, detail="Student ID, current password, and new password are required")
+
+    if len(new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters")
+
+    student = db.query(models.Student).filter(models.Student.id == student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    if student.password != current_password:
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+
+    student.password = new_password
+    db.commit()
+
+    return {"status": "password_changed"}
+
+
 @app.get("/api/student/tasks")
 def get_student_tasks(student_id: int, db: Session = Depends(get_db)):
     student = db.query(models.Student).filter(
@@ -1109,6 +1136,8 @@ def review_student_task(task_id: int, data: dict, db: Session = Depends(get_db))
     ).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
+
+    cleanup_expired_transform_marksheets(db, teacher.id)
 
     task.teacher_decision = decision
     task.teacher_feedback = feedback or None
@@ -1771,6 +1800,11 @@ def apply_reviewed_tasks_to_transform_marksheet(
         }
         for row in base_payload["student_marks"]
     }
+    student_rows_by_roll = {
+        normalize_text(row["roll_no"], uppercase=True): row
+        for row in student_rows_by_id.values()
+        if normalize_text(row.get("roll_no"), uppercase=True)
+    }
 
     reviewed_tasks = db.query(models.StudentTask).filter(
         models.StudentTask.teacher_id == teacher.id,
@@ -1779,9 +1813,6 @@ def apply_reviewed_tasks_to_transform_marksheet(
 
     applied_updates = 0
     for task in reviewed_tasks:
-        if marksheet.created_at and task.reviewed_at and task.reviewed_at < marksheet.created_at:
-            continue
-
         task_course_matches = False
         if task.course_id and task.course_id == marksheet.course_id:
             task_course_matches = True
@@ -1796,7 +1827,12 @@ def apply_reviewed_tasks_to_transform_marksheet(
         if not task_course_matches:
             continue
 
-        row = student_rows_by_id.get(task.student_id)
+        task_roll_no = normalize_text(task.assigned_roll_no, uppercase=True)
+        if not task_roll_no:
+            task_student = db.query(models.Student).filter(models.Student.id == task.student_id).first()
+            task_roll_no = normalize_text(task_student.roll_no if task_student else "", uppercase=True)
+
+        row = student_rows_by_roll.get(task_roll_no)
         if not row:
             continue
         clo_key = normalize_clo_label(task.clo or "")
@@ -1887,6 +1923,51 @@ def get_transform_marksheet_marks(marksheet_id: int, db: Session) -> list[models
     ).all()
 
 
+def transform_marksheet_expires_at(marksheet: models.TransformMarksheet) -> datetime | None:
+    if not marksheet.created_at:
+        return None
+    created_at = marksheet.created_at
+    if created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=timezone.utc)
+    return created_at + timedelta(days=TRANSFORM_MARKSHEET_RETENTION_DAYS)
+
+
+def transform_marksheet_is_expired(marksheet: models.TransformMarksheet) -> bool:
+    expires_at = transform_marksheet_expires_at(marksheet)
+    return bool(expires_at and datetime.now(timezone.utc) >= expires_at)
+
+
+def delete_transform_marksheet_record(marksheet: models.TransformMarksheet, db: Session) -> None:
+    db.query(models.TransformStudentAssessmentMark).filter(
+        models.TransformStudentAssessmentMark.marksheet_id == marksheet.id
+    ).delete(synchronize_session=False)
+
+    excel_path = marksheet.excel_file_path
+    db.delete(marksheet)
+    db.commit()
+
+    if excel_path:
+        try:
+            path = Path(excel_path)
+            if path.exists():
+                path.unlink()
+        except Exception:
+            pass
+
+
+def cleanup_expired_transform_marksheets(db: Session, teacher_id: int | None = None) -> None:
+    cutoff = datetime.now(timezone.utc) - timedelta(days=TRANSFORM_MARKSHEET_RETENTION_DAYS)
+    query = db.query(models.TransformMarksheet).filter(
+        models.TransformMarksheet.created_at.isnot(None),
+        models.TransformMarksheet.created_at < cutoff
+    )
+    if teacher_id is not None:
+        query = query.filter(models.TransformMarksheet.teacher_id == teacher_id)
+
+    for marksheet in query.all():
+        delete_transform_marksheet_record(marksheet, db)
+
+
 def build_transform_marksheet_payload(marksheet: models.TransformMarksheet, db: Session) -> dict:
     course = db.query(models.Course).filter(models.Course.id == marksheet.course_id).first()
     record = db.query(models.TeacherCourse).filter(models.TeacherCourse.id == marksheet.teacher_course_id).first()
@@ -1933,6 +2014,7 @@ def build_transform_marksheet_payload(marksheet: models.TransformMarksheet, db: 
         "assessment_totals": assessment_totals,
         "download_url": f"/api/transform/marksheets/{marksheet.id}/download",
         "created_at": marksheet.created_at.isoformat() if marksheet.created_at else None,
+        "expires_at": transform_marksheet_expires_at(marksheet).isoformat() if transform_marksheet_expires_at(marksheet) else None,
         "source_kind": marksheet.source_kind,
         "source_marksheet_id": marksheet.source_marksheet_id,
         "student_count": len(grouped_rows),
@@ -1967,6 +2049,7 @@ def build_transform_marksheet_summary_payload(marksheet: models.TransformMarkshe
         "assessment_totals": parse_transform_json(marksheet.assessment_totals, {}),
         "download_url": f"/api/transform/marksheets/{marksheet.id}/download",
         "created_at": marksheet.created_at.isoformat() if marksheet.created_at else None,
+        "expires_at": transform_marksheet_expires_at(marksheet).isoformat() if transform_marksheet_expires_at(marksheet) else None,
         "source_kind": marksheet.source_kind,
         "source_marksheet_id": marksheet.source_marksheet_id,
         "student_count": student_count,
@@ -2130,6 +2213,7 @@ def get_transform_course_students(record_id: int, teacher_name: str, db: Session
     teacher = db.query(models.Teacher).filter(models.Teacher.teacher_name == teacher_name).first()
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found")
+    cleanup_expired_transform_marksheets(db, teacher.id)
 
     record = db.query(models.TeacherCourse).filter(
         models.TeacherCourse.id == record_id,
@@ -2191,6 +2275,7 @@ def save_transform_marksheet(data: dict, db: Session = Depends(get_db)):
     teacher = db.query(models.Teacher).filter(models.Teacher.teacher_name == teacher_name).first()
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found")
+    cleanup_expired_transform_marksheets(db, teacher.id)
 
     record = db.query(models.TeacherCourse).filter(
         models.TeacherCourse.id == teacher_course_id,
@@ -2259,6 +2344,7 @@ def update_transform_marksheet(marksheet_id: int, data: dict, db: Session = Depe
     teacher = db.query(models.Teacher).filter(models.Teacher.teacher_name == teacher_name).first()
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found")
+    cleanup_expired_transform_marksheets(db, teacher.id)
 
     marksheet = db.query(models.TransformMarksheet).filter(
         models.TransformMarksheet.id == marksheet_id,
@@ -2266,6 +2352,9 @@ def update_transform_marksheet(marksheet_id: int, data: dict, db: Session = Depe
     ).first()
     if not marksheet:
         raise HTTPException(status_code=404, detail="Marksheet not found")
+    if transform_marksheet_is_expired(marksheet):
+        delete_transform_marksheet_record(marksheet, db)
+        raise HTTPException(status_code=404, detail="Marksheet expired after 28 days and was deleted")
 
     record = db.query(models.TeacherCourse).filter(
         models.TeacherCourse.id == teacher_course_id,
@@ -2314,18 +2403,18 @@ def update_transform_marksheet(marksheet_id: int, data: dict, db: Session = Depe
 
 
 @app.get("/api/transform/marksheets")
-def list_transform_marksheets(teacher_name: str, limit: int = 50, db: Session = Depends(get_db)):
+def list_transform_marksheets(teacher_name: str, db: Session = Depends(get_db)):
     teacher = db.query(models.Teacher).filter(models.Teacher.teacher_name == teacher_name).first()
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found")
+    cleanup_expired_transform_marksheets(db, teacher.id)
 
-    limit = max(1, min(limit, 50))
     marksheets = db.query(models.TransformMarksheet).filter(
         models.TransformMarksheet.teacher_id == teacher.id
     ).order_by(
         models.TransformMarksheet.created_at.desc(),
         models.TransformMarksheet.id.desc()
-    ).limit(limit).all()
+    ).all()
 
     return {
         "marksheets": [build_transform_marksheet_summary_payload(sheet, db) for sheet in marksheets]
@@ -2337,6 +2426,7 @@ def get_transform_marksheet_detail(marksheet_id: int, teacher_name: str, db: Ses
     teacher = db.query(models.Teacher).filter(models.Teacher.teacher_name == teacher_name).first()
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found")
+    cleanup_expired_transform_marksheets(db, teacher.id)
 
     marksheet = db.query(models.TransformMarksheet).filter(
         models.TransformMarksheet.id == marksheet_id,
@@ -2344,6 +2434,9 @@ def get_transform_marksheet_detail(marksheet_id: int, teacher_name: str, db: Ses
     ).first()
     if not marksheet:
         raise HTTPException(status_code=404, detail="Marksheet not found")
+    if transform_marksheet_is_expired(marksheet):
+        delete_transform_marksheet_record(marksheet, db)
+        raise HTTPException(status_code=404, detail="Marksheet expired after 28 days and was deleted")
 
     return build_transform_marksheet_payload(marksheet, db)
 
@@ -2355,6 +2448,9 @@ def download_transform_marksheet(marksheet_id: int, db: Session = Depends(get_db
     ).first()
     if not marksheet or not marksheet.excel_file_path:
         raise HTTPException(status_code=404, detail="Marksheet file not found")
+    if transform_marksheet_is_expired(marksheet):
+        delete_transform_marksheet_record(marksheet, db)
+        raise HTTPException(status_code=404, detail="Marksheet expired after 28 days and was deleted")
     return FileResponse(
         path=marksheet.excel_file_path,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -2367,6 +2463,7 @@ def delete_transform_marksheet(marksheet_id: int, teacher_name: str, db: Session
     teacher = db.query(models.Teacher).filter(models.Teacher.teacher_name == teacher_name).first()
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found")
+    cleanup_expired_transform_marksheets(db, teacher.id)
 
     marksheet = db.query(models.TransformMarksheet).filter(
         models.TransformMarksheet.id == marksheet_id,
@@ -2374,22 +2471,11 @@ def delete_transform_marksheet(marksheet_id: int, teacher_name: str, db: Session
     ).first()
     if not marksheet:
         raise HTTPException(status_code=404, detail="Marksheet not found")
+    if transform_marksheet_is_expired(marksheet):
+        delete_transform_marksheet_record(marksheet, db)
+        raise HTTPException(status_code=404, detail="Marksheet expired after 28 days and was deleted")
 
-    db.query(models.TransformStudentAssessmentMark).filter(
-        models.TransformStudentAssessmentMark.marksheet_id == marksheet.id
-    ).delete(synchronize_session=False)
-
-    excel_path = marksheet.excel_file_path
-    db.delete(marksheet)
-    db.commit()
-
-    if excel_path:
-        try:
-            path = Path(excel_path)
-            if path.exists():
-                path.unlink()
-        except Exception:
-            pass
+    delete_transform_marksheet_record(marksheet, db)
 
     return {"status": "deleted", "marksheet_id": marksheet_id}
 
@@ -2400,6 +2486,7 @@ def generate_updated_transform_marksheet(marksheet_id: int, data: dict, db: Sess
     teacher = db.query(models.Teacher).filter(models.Teacher.teacher_name == teacher_name).first()
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found")
+    cleanup_expired_transform_marksheets(db, teacher.id)
 
     base_marksheet = db.query(models.TransformMarksheet).filter(
         models.TransformMarksheet.id == marksheet_id,
@@ -2407,6 +2494,9 @@ def generate_updated_transform_marksheet(marksheet_id: int, data: dict, db: Sess
     ).first()
     if not base_marksheet:
         raise HTTPException(status_code=404, detail="Base marksheet not found")
+    if transform_marksheet_is_expired(base_marksheet):
+        delete_transform_marksheet_record(base_marksheet, db)
+        raise HTTPException(status_code=404, detail="Marksheet expired after 28 days and was deleted")
 
     applied_updates, updated_payload = apply_reviewed_tasks_to_transform_marksheet(base_marksheet, teacher, db)
     if applied_updates == 0:

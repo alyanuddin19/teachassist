@@ -8,6 +8,7 @@ import { MarksheetSummary, TeacherContext, TransformService } from '../services/
 type MarksheetListItem = MarksheetSummary & {
   selectedOptionEntries: [string, string][];
   downloadLink: string;
+  expiryLabel: string;
 };
 
 @Component({
@@ -146,7 +147,7 @@ export class LiveSheetComponent implements OnInit, OnDestroy {
       error: (error) => {
         this.updatingMarksheetId = null;
         if (error?.error?.detail === 'No new reviewed task changes were available for this sheet.') {
-          this.updateStatus = 'No new reviewed-task changes were pending for this sheet.';
+          this.updateStatus = 'No reviewed PASS/FAIL changes matched students in this sheet by roll number.';
           this.api.requestEditMarksheet(sheet.id);
         } else {
           this.updateStatus = 'Could not refresh this marksheet right now.';
@@ -191,7 +192,22 @@ export class LiveSheetComponent implements OnInit, OnDestroy {
     return (Array.isArray(sheets) ? sheets : []).map((sheet) => ({
       ...sheet,
       selectedOptionEntries: Object.entries(sheet.selected_options || {}),
-      downloadLink: this.api.getDownloadUrl(sheet.download_url, sheet.export_file_name || 'marksheet')
+      downloadLink: this.api.getDownloadUrl(sheet.download_url, sheet.export_file_name || 'marksheet'),
+      expiryLabel: this.buildExpiryLabel(sheet.expires_at)
     }));
+  }
+
+  private buildExpiryLabel(expiresAt: string | null | undefined): string {
+    if (!expiresAt) {
+      return `Auto-deletes after ${28} days`;
+    }
+
+    const expiryTime = new Date(expiresAt).getTime();
+    if (Number.isNaN(expiryTime)) {
+      return `Auto-deletes after ${28} days`;
+    }
+
+    const daysLeft = Math.max(0, Math.ceil((expiryTime - Date.now()) / 86400000));
+    return daysLeft === 1 ? 'Deletes tomorrow' : `Deletes in ${daysLeft} days`;
   }
 }

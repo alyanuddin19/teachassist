@@ -11,9 +11,38 @@
     </div>
 
     <div class="student-header-actions">
+      <button type="button" class="password-btn" (click)="togglePasswordForm()">
+        {{ showPasswordForm ? 'Close Password' : 'Change Password' }}
+      </button>
       <button type="button" class="logout-btn" (click)="logout()">Logout</button>
     </div>
   </header>
+
+  <section class="password-panel" *ngIf="showPasswordForm">
+    <div class="panel-head compact-head">
+      <h3>Change Password</h3>
+      <span class="task-count">Student account</span>
+    </div>
+    <div class="password-grid">
+      <label>
+        <span>Current Password</span>
+        <input type="password" [(ngModel)]="currentPassword" autocomplete="current-password" />
+      </label>
+      <label>
+        <span>New Password</span>
+        <input type="password" [(ngModel)]="newPassword" autocomplete="new-password" />
+      </label>
+      <label>
+        <span>Confirm Password</span>
+        <input type="password" [(ngModel)]="confirmPassword" autocomplete="new-password" />
+      </label>
+    </div>
+    <div class="password-message success" *ngIf="passwordMessage">{{ passwordMessage }}</div>
+    <div class="password-message error" *ngIf="passwordError">{{ passwordError }}</div>
+    <button type="button" class="submit-btn password-submit" (click)="changePassword()" [disabled]="passwordSaving">
+      {{ passwordSaving ? 'Saving...' : 'Update Password' }}
+    </button>
+  </section>
 
   <section class="tasks-panel">
     <div class="panel-head">
