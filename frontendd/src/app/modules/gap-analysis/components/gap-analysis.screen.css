@@ -321,6 +321,11 @@ canvas {
   flex-wrap: wrap;
 }
 
+.generated-actions {
+  justify-content: center;
+  align-items: center;
+}
+
 .count-choices button,
 .difficulty-row button {
   min-width: 40px;
@@ -347,6 +352,12 @@ canvas {
 
 .done-text {
   color: #1d7f62;
+}
+
+.send-status {
+  color: #1d7f62;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .modal-actions {
@@ -379,17 +390,56 @@ canvas {
 .student-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 14px;
   margin-bottom: 12px;
   padding-bottom: 12px;
   border-bottom: 1px solid rgba(103, 128, 173, 0.16);
+}
+
+.student-title-cluster,
+.student-send-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.student-send-controls {
+  justify-content: flex-end;
 }
 
 .student-name {
   font-size: 1rem;
   font-weight: 700;
   color: var(--text);
+}
+
+.roll-chip,
+.reference-upload {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  max-width: 260px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(103, 128, 173, 0.22);
+  color: #16345f;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.reference-upload {
+  border-style: dashed;
+  color: var(--primary-strong);
+  cursor: pointer;
+}
+
+.compact-upload {
+  min-height: 40px;
+  max-width: 180px;
 }
 
 .assignment-group {
@@ -455,6 +505,13 @@ body.theme-dark .difficulty-row button {
   background: rgba(134, 164, 255, 0.12);
   color: var(--text);
   border-color: rgba(144, 173, 228, 0.16);
+}
+
+body.theme-dark .roll-chip,
+body.theme-dark .reference-upload {
+  background: rgba(18, 29, 50, 0.92);
+  border-color: rgba(144, 173, 228, 0.18);
+  color: var(--text);
 }
 
 body.theme-dark .modal-label,
@@ -538,5 +595,13 @@ body.theme-dark .assignment-group h4 {
 
   .student-header {
     align-items: flex-start;
+  }
+
+  .student-send-controls,
+  .student-send-controls .small-btn,
+  .roll-chip,
+  .reference-upload {
+    width: 100%;
+    max-width: none;
   }
 }

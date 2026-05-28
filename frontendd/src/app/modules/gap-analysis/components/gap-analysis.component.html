@@ -227,6 +227,18 @@
               <div *ngIf="generatedStudents[s.student_name] && !loadingStudents[s.student_name]" class="generated-actions">
                 <span class="done-text">Done</span>
                 <button class="secondary-btn small-btn" type="button" (click)="openGenerateModal(s)">Regenerate</button>
+                <label class="reference-upload compact-upload">
+                  <input type="file" hidden accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg" (change)="onReferenceFile(s.student_name, $event)" />
+                  {{ referenceFiles[s.student_name]?.name || 'Attach File' }}
+                </label>
+                <button
+                  class="primary-btn small-btn"
+                  type="button"
+                  (click)="sendGeneratedTask(s)"
+                  [disabled]="sendingTasks[s.student_name] || !studentRollNos[s.student_name]">
+                  {{ sendingTasks[s.student_name] ? 'Sending...' : 'Send To Student' }}
+                </button>
+                <span *ngIf="sentTasks[s.student_name]" class="send-status">{{ sentTasks[s.student_name] }}</span>
               </div>
             </td>
           </tr>
@@ -236,8 +248,25 @@
       <div *ngFor="let s of weakOnlyStudents">
         <div *ngIf="generatedStudents[s.student_name]" class="student-assignment-card">
           <div class="student-header">
-            <span class="student-name">{{ s.student_name }}</span>
-            <span *ngFor="let clo of s.weak_clos" class="clo-badge inline-badge">{{ clo }}</span>
+            <div class="student-title-cluster">
+              <span class="student-name">{{ s.student_name }}</span>
+              <span *ngFor="let clo of s.weak_clos" class="clo-badge inline-badge">{{ clo }}</span>
+            </div>
+            <div class="student-send-controls">
+              <span class="roll-chip">{{ studentRollNos[s.student_name] || 'Roll number not found' }}</span>
+              <label class="reference-upload">
+                <input type="file" hidden accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg" (change)="onReferenceFile(s.student_name, $event)" />
+                {{ referenceFiles[s.student_name]?.name || 'Attach reference file' }}
+              </label>
+              <button
+                class="primary-btn small-btn"
+                type="button"
+                (click)="sendGeneratedTask(s)"
+                [disabled]="sendingTasks[s.student_name] || !studentRollNos[s.student_name]">
+                {{ sendingTasks[s.student_name] ? 'Sending...' : 'Send To Student' }}
+              </button>
+              <span *ngIf="sentTasks[s.student_name]" class="send-status">{{ sentTasks[s.student_name] }}</span>
+            </div>
           </div>
 
           <div *ngFor="let clo of getCloKeys(generatedStudents[s.student_name])" class="assignment-group">
