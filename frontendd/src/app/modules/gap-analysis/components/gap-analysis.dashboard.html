@@ -206,9 +206,29 @@
 
       <div *ngFor="let s of weakOnlyStudents">
         <div *ngIf="generatedStudents[s.student_name]" class="student-assignment-card" style="margin-top: 24px;">
-          <div class="student-header">
+          <div class="student-header" style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
             <span class="student-name">{{ s.student_name }}</span>
             <span *ngFor="let clo of s.weak_clos" class="clo-badge" style="margin-left: 8px;">{{ clo }}</span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <div style="min-height:40px; padding:0 12px; border-radius:12px; border:1px solid #d5dff2; display:flex; align-items:center; background:#fff; color:#16345f; font-weight:600;">
+                {{ studentRollNos[s.student_name] || 'Roll number not found' }}
+              </div>
+              <label style="min-height:40px; padding:0 12px; border-radius:12px; border:1px dashed #c6d3f3; display:flex; align-items:center; background:#fff; color:#1a237e; font-weight:600; cursor:pointer;">
+                <input type="file" hidden accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg" (change)="onReferenceFile(s.student_name, $event)" />
+                {{ referenceFiles[s.student_name]?.name || 'Attach reference file' }}
+              </label>
+              <button
+                (click)="sendGeneratedTask(s)"
+                [disabled]="sendingTasks[s.student_name] || !studentRollNos[s.student_name]"
+                style="min-height:40px; width:auto; padding:0 18px; border:none; border-radius:12px; background:#1a237e; color:#fff; font-weight:700;">
+                {{ sendingTasks[s.student_name] ? 'Sending...' : 'Send To Student' }}
+              </button>
+              <span *ngIf="sentTasks[s.student_name]" style="color:#1d7f62; font-weight:700;">
+                {{ sentTasks[s.student_name] }}
+              </span>
+            </div>
           </div>
 
           <div *ngFor="let clo of getCloKeys(generatedStudents[s.student_name])" style="margin-top: 16px;">
