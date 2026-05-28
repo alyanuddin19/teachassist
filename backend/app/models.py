@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Float
 from sqlalchemy.sql import func
 from .database import Base
 
@@ -165,6 +165,6 @@ class TransformStudentAssessmentMark(Base):
     marksheet_id = Column(Integer, ForeignKey("transform_marksheets.id"), nullable=False, index=True)
     student_id = Column(Integer, ForeignKey("students.id"), nullable=False, index=True)
     assessment_label = Column(String(150), nullable=False)
-    obtained_marks = Column(Integer, nullable=False, default=0)
+    obtained_marks = Column(Float, nullable=False, default=0)
     remarks = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

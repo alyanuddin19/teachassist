@@ -64,6 +64,23 @@ def parse_allowed_origins() -> list[str]:
 
 # ------------------ APP & DB ------------------
 Base.metadata.create_all(bind=engine)
+
+
+def ensure_transform_marks_decimal_storage() -> None:
+    try:
+        with engine.begin() as connection:
+            connection.execute(text(
+                """
+                ALTER TABLE transform_student_assessment_marks
+                ALTER COLUMN obtained_marks TYPE DOUBLE PRECISION
+                USING obtained_marks::double precision
+                """
+            ))
+    except Exception:
+        pass
+
+
+ensure_transform_marks_decimal_storage()
 app = FastAPI(title="TeachAssist Backend")
 
 app.include_router(gap_analysis_clean.router)
