@@ -1938,6 +1938,13 @@ def transform_marksheet_is_expired(marksheet: models.TransformMarksheet) -> bool
 
 
 def delete_transform_marksheet_record(marksheet: models.TransformMarksheet, db: Session) -> None:
+    db.query(models.TransformMarksheet).filter(
+        models.TransformMarksheet.source_marksheet_id == marksheet.id
+    ).update(
+        {models.TransformMarksheet.source_marksheet_id: None},
+        synchronize_session=False
+    )
+
     db.query(models.TransformStudentAssessmentMark).filter(
         models.TransformStudentAssessmentMark.marksheet_id == marksheet.id
     ).delete(synchronize_session=False)
@@ -2213,7 +2220,6 @@ def get_transform_course_students(record_id: int, teacher_name: str, db: Session
     teacher = db.query(models.Teacher).filter(models.Teacher.teacher_name == teacher_name).first()
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found")
-    cleanup_expired_transform_marksheets(db, teacher.id)
 
     record = db.query(models.TeacherCourse).filter(
         models.TeacherCourse.id == record_id,
