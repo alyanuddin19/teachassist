@@ -437,11 +437,6 @@ canvas {
   cursor: pointer;
 }
 
-.compact-upload {
-  min-height: 40px;
-  max-width: 180px;
-}
-
 .assignment-group {
   margin-top: 16px;
 }

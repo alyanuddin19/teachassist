@@ -227,18 +227,6 @@
               <div *ngIf="generatedStudents[s.student_name] && !loadingStudents[s.student_name]" class="generated-actions">
                 <span class="done-text">Done</span>
                 <button class="secondary-btn small-btn" type="button" (click)="openGenerateModal(s)">Regenerate</button>
-                <label class="reference-upload compact-upload">
-                  <input type="file" hidden accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg" (change)="onReferenceFile(s.student_name, $event)" />
-                  {{ referenceFiles[s.student_name]?.name || 'Attach File' }}
-                </label>
-                <button
-                  class="primary-btn small-btn"
-                  type="button"
-                  (click)="sendGeneratedTask(s)"
-                  [disabled]="sendingTasks[s.student_name] || !studentRollNos[s.student_name]">
-                  {{ sendingTasks[s.student_name] ? 'Sending...' : 'Send To Student' }}
-                </button>
-                <span *ngIf="sentTasks[s.student_name]" class="send-status">{{ sentTasks[s.student_name] }}</span>
               </div>
             </td>
           </tr>

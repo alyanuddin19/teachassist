@@ -1944,7 +1944,11 @@ def build_transform_marksheet_payload(marksheet: models.TransformMarksheet, db: 
 def build_transform_marksheet_summary_payload(marksheet: models.TransformMarksheet, db: Session) -> dict:
     course = db.query(models.Course).filter(models.Course.id == marksheet.course_id).first()
     record = db.query(models.TeacherCourse).filter(models.TeacherCourse.id == marksheet.teacher_course_id).first()
-    marks = get_transform_marksheet_marks(marksheet.id, db)
+    student_count = db.query(
+        func.count(func.distinct(models.TransformStudentAssessmentMark.student_id))
+    ).filter(
+        models.TransformStudentAssessmentMark.marksheet_id == marksheet.id
+    ).scalar() or 0
 
     return {
         "id": marksheet.id,
@@ -1965,7 +1969,7 @@ def build_transform_marksheet_summary_payload(marksheet: models.TransformMarkshe
         "created_at": marksheet.created_at.isoformat() if marksheet.created_at else None,
         "source_kind": marksheet.source_kind,
         "source_marksheet_id": marksheet.source_marksheet_id,
-        "student_count": len({mark.student_id for mark in marks}),
+        "student_count": student_count,
         "teacher_threshold_percentage": record.threshold_percentage if record and record.threshold_percentage is not None else 50
     }
 
@@ -2310,14 +2314,18 @@ def update_transform_marksheet(marksheet_id: int, data: dict, db: Session = Depe
 
 
 @app.get("/api/transform/marksheets")
-def list_transform_marksheets(teacher_name: str, db: Session = Depends(get_db)):
+def list_transform_marksheets(teacher_name: str, limit: int = 50, db: Session = Depends(get_db)):
     teacher = db.query(models.Teacher).filter(models.Teacher.teacher_name == teacher_name).first()
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found")
 
+    limit = max(1, min(limit, 50))
     marksheets = db.query(models.TransformMarksheet).filter(
         models.TransformMarksheet.teacher_id == teacher.id
-    ).order_by(models.TransformMarksheet.created_at.desc(), models.TransformMarksheet.id.desc()).all()
+    ).order_by(
+        models.TransformMarksheet.created_at.desc(),
+        models.TransformMarksheet.id.desc()
+    ).limit(limit).all()
 
     return {
         "marksheets": [build_transform_marksheet_summary_payload(sheet, db) for sheet in marksheets]

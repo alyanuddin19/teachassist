@@ -13,7 +13,7 @@
     <div class="empty-state" *ngIf="!isLoading && loadError">{{ loadError }}</div>
 
     <div class="saved-list" *ngIf="!isLoading && !loadError && marksheets.length; else emptySheets">
-      <article class="saved-item" *ngFor="let sheet of marksheets">
+      <article class="saved-item" *ngFor="let sheet of marksheets; trackBy: trackByMarksheetId">
         <div class="saved-meta">
           <div>
             <h3>{{ sheet.export_file_name || sheet.course_code }}</h3>
@@ -28,7 +28,7 @@
             <button class="delete-link" type="button" (click)="deleteMarksheet(sheet)" [disabled]="deletingMarksheetId === sheet.id">
               {{ deletingMarksheetId === sheet.id ? 'Deleting...' : 'Delete' }}
             </button>
-            <a class="download-link" [href]="getDownloadLink(sheet)">Download</a>
+            <a class="download-link" [href]="sheet.downloadLink">Download</a>
           </div>
         </div>
 
@@ -37,7 +37,7 @@
         </p>
 
         <div class="pill-row">
-          <span class="pill" *ngFor="let item of objectEntries(sheet.selected_options)">{{ item[0] }}: {{ item[1] }}</span>
+          <span class="pill" *ngFor="let item of sheet.selectedOptionEntries; trackBy: trackByOption">{{ item[0] }}: {{ item[1] }}</span>
         </div>
       </article>
     </div>

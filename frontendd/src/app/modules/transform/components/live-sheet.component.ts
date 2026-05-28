@@ -1,9 +1,14 @@
-﻿import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { finalize, Subscription, timeout } from 'rxjs';
 
 import { MarksheetSummary, TeacherContext, TransformService } from '../services/transform.service';
+
+type MarksheetListItem = MarksheetSummary & {
+  selectedOptionEntries: [string, string][];
+  downloadLink: string;
+};
 
 @Component({
   selector: 'app-transform-live-sheet',
@@ -11,9 +16,10 @@ import { MarksheetSummary, TeacherContext, TransformService } from '../services/
   imports: [CommonModule, FormsModule],
   templateUrl: './live-sheet.component.html',
   styleUrls: ['./live-sheet.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LiveSheetComponent implements OnInit, OnDestroy {
-  marksheets: MarksheetSummary[] = [];
+  marksheets: MarksheetListItem[] = [];
   downloadBase = '';
   isLoading = false;
   loadError = '';
@@ -49,6 +55,7 @@ export class LiveSheetComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.activeLoadRequestId++;
     this.subscriptions.unsubscribe();
   }
 
@@ -61,7 +68,7 @@ export class LiveSheetComponent implements OnInit, OnDestroy {
       this.marksheets = [];
       this.isLoading = false;
       this.activeTeacherLoad = '';
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
       return;
     }
 
@@ -72,18 +79,17 @@ export class LiveSheetComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.activeTeacherLoad = teacherName;
     const requestId = ++this.activeLoadRequestId;
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
 
     this.api
       .getMarksheets(teacherName)
       .pipe(
         timeout(8000),
         finalize(() => {
-          if (requestId !== this.activeLoadRequestId) {
-            return;
+          if (requestId === this.activeLoadRequestId) {
+            this.isLoading = false;
+            this.cdr.markForCheck();
           }
-          this.isLoading = false;
-          this.cdr.detectChanges();
         })
       )
       .subscribe({
@@ -91,9 +97,9 @@ export class LiveSheetComponent implements OnInit, OnDestroy {
           if (requestId !== this.activeLoadRequestId) {
             return;
           }
-          this.marksheets = Array.isArray(sheets) ? sheets : [];
+          this.marksheets = this.toListItems(sheets);
           this.loadError = '';
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         },
         error: (error) => {
           if (requestId !== this.activeLoadRequestId) {
@@ -102,30 +108,30 @@ export class LiveSheetComponent implements OnInit, OnDestroy {
           console.error('Error loading marksheets:', error);
           this.marksheets = [];
           this.loadError = 'Could not load saved sheets.';
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         },
       });
   }
 
-  getDownloadLink(sheet: MarksheetSummary): string {
-    return this.api.getDownloadUrl(sheet.download_url, sheet.export_file_name || 'marksheet');
+  trackByMarksheetId(_index: number, sheet: MarksheetListItem): number {
+    return sheet.id;
   }
 
-  objectEntries(obj: Record<string, string> | undefined | null): [string, string][] {
-    return Object.entries(obj || {});
+  trackByOption(_index: number, item: [string, string]): string {
+    return `${item[0]}:${item[1]}`;
   }
 
   editMarksheet(sheet: MarksheetSummary): void {
     const teacherName = (this.currentTeacherContext.teacher_name || '').trim();
     if (!teacherName) {
       this.updateStatus = 'Teacher session missing. Please log in again.';
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
       return;
     }
 
     this.updatingMarksheetId = sheet.id;
     this.updateStatus = '';
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
 
     this.api.generateUpdatedMarksheet(sheet.id, teacherName).subscribe({
       next: (response) => {
@@ -135,7 +141,7 @@ export class LiveSheetComponent implements OnInit, OnDestroy {
           : '';
         this.api.notifyMarksheetSaved();
         this.api.requestEditMarksheet(response.marksheet?.id || sheet.id);
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (error) => {
         this.updatingMarksheetId = null;
@@ -145,7 +151,7 @@ export class LiveSheetComponent implements OnInit, OnDestroy {
         } else {
           this.updateStatus = 'Could not refresh this marksheet right now.';
         }
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -154,7 +160,7 @@ export class LiveSheetComponent implements OnInit, OnDestroy {
     const teacherName = (this.currentTeacherContext.teacher_name || '').trim();
     if (!teacherName) {
       this.updateStatus = 'Teacher session missing. Please log in again.';
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
       return;
     }
 
@@ -164,20 +170,28 @@ export class LiveSheetComponent implements OnInit, OnDestroy {
 
     this.deletingMarksheetId = sheet.id;
     this.updateStatus = '';
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
 
     this.api.deleteMarksheet(sheet.id, teacherName).subscribe({
       next: () => {
         this.deletingMarksheetId = null;
         this.marksheets = this.marksheets.filter((item) => item.id !== sheet.id);
         this.updateStatus = `"${sheet.export_file_name || sheet.course_code}" deleted successfully.`;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (error: any) => {
         this.deletingMarksheetId = null;
         this.updateStatus = error?.error?.detail || 'Could not delete this marksheet right now.';
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
+  }
+
+  private toListItems(sheets: MarksheetSummary[] | null | undefined): MarksheetListItem[] {
+    return (Array.isArray(sheets) ? sheets : []).map((sheet) => ({
+      ...sheet,
+      selectedOptionEntries: Object.entries(sheet.selected_options || {}),
+      downloadLink: this.api.getDownloadUrl(sheet.download_url, sheet.export_file_name || 'marksheet')
+    }));
   }
 }
