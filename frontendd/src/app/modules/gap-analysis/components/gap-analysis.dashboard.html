@@ -178,13 +178,26 @@
               <span *ngIf="loadingStudents[s.student_name]" style="color: #e65100; font-weight: 600;">
                 Generating...
               </span>
-              <div *ngIf="generatedStudents[s.student_name] && !loadingStudents[s.student_name]" style="display:flex; gap:8px; align-items:center;">
+              <div *ngIf="generatedStudents[s.student_name] && !loadingStudents[s.student_name]" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:center;">
                 <span style="color: #2e7d32; font-weight: 600;">Done</span>
                 <button
                   (click)="openGenerateModal(s)"
                   style="padding: 4px 12px; background: #e65100; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">
                   Regenerate
                 </button>
+                <label style="min-height:36px; padding:0 12px; border-radius:10px; border:1px dashed #c6d3f3; display:flex; align-items:center; background:#fff; color:#1a237e; font-weight:600; cursor:pointer; font-size:12px;">
+                  <input type="file" hidden accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg" (change)="onReferenceFile(s.student_name, $event)" />
+                  {{ referenceFiles[s.student_name]?.name || 'Attach File' }}
+                </label>
+                <button
+                  (click)="sendGeneratedTask(s)"
+                  [disabled]="sendingTasks[s.student_name] || !studentRollNos[s.student_name]"
+                  style="padding: 4px 12px; background: #1a237e; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">
+                  {{ sendingTasks[s.student_name] ? 'Sending...' : 'Send To Student' }}
+                </button>
+                <span *ngIf="sentTasks[s.student_name]" style="color:#1d7f62; font-weight:600; font-size:12px;">
+                  {{ sentTasks[s.student_name] }}
+                </span>
               </div>
             </td>
           </tr>
