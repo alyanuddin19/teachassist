@@ -21,6 +21,7 @@ export interface PromptGeneratorPromptResponse {
   prompt: string;
   time_allowed: string;
   max_marks: number | null;
+  warnings?: string[];
 }
 
 export interface PromptGeneratorExamResponse {
@@ -267,7 +268,9 @@ export class ApiService {
     exam_type: string;
     mcq_count: number;
     mcq_marks: number;
+    mcq_blooms_label?: string;
     theory_questions: any[];
+    cis_session_id?: string | null;
   }) {
     return this.http.post<PromptGeneratorPromptResponse>(
       `${this.BASE_URL}/prompt-generator/generate-prompt`,

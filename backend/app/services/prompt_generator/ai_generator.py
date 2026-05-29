@@ -1,38 +1,61 @@
-"""Gemini-backed generator utility for the prompt generator module."""
+"""AI generator utility for the prompt generator module."""
 
 import os
 from pathlib import Path
 
-import google.generativeai as genai
 from dotenv import load_dotenv
+from groq import Groq
 
-GEMINI_MODEL = "models/gemini-flash-latest"
-GENERATION_CONFIG = {
-    "temperature": 0.7,
-    "top_p": 0.9,
-    "max_output_tokens": 8192,
+LLAMA_GENERATION_MODEL = "llama-3.3-70b-versatile"
+LLAMA_GENERATION_CONFIG = {
+    "temperature": 0.2,
+    "top_p": 0.85,
+    "max_tokens": 8192,
+    "seed": 42,
 }
-SAFETY_SETTINGS = [
-    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-]
+LLAMA_ASSISTANT_CONFIG = {
+    "temperature": 0.3,
+    "top_p": 0.85,
+    "max_tokens": 1200,
+    "seed": 42,
+}
 
 
-def _get_client():
+def clean_exam_markdown(text: str) -> str:
+    replacements = {
+        r"\leq": "<=",
+        r"\le": "<=",
+        r"\geq": ">=",
+        r"\ge": ">=",
+        r"\neq": "!=",
+        r"\times": "x",
+        r"\cdot": "*",
+        r"\in": "in",
+        r"\{": "{",
+        r"\}": "}",
+        r"\(": "(",
+        r"\)": ")",
+        r"\[": "[",
+        r"\]": "]",
+    }
+    cleaned = text or ""
+    for source, target in replacements.items():
+        cleaned = cleaned.replace(source, target)
+
+    cleaned = cleaned.replace("$$", "")
+    cleaned = cleaned.replace("$", "")
+    cleaned = cleaned.replace("\\", "")
+    return cleaned.strip()
+
+
+def _get_groq_client():
     load_dotenv(Path(__file__).resolve().parents[3] / ".env")
-    gemini_api_key = os.environ.get("GEMINI_API_KEY", "")
-    if not gemini_api_key:
+    groq_api_key = os.environ.get("GROQ_API_KEY", "")
+    if not groq_api_key:
         raise RuntimeError(
-            "GEMINI_API_KEY is not set. Add it to backend/.env as GEMINI_API_KEY=your_key_here."
+            "GROQ_API_KEY is not set. Add it to backend/.env as GROQ_API_KEY=your_key_here."
         )
-    genai.configure(api_key=gemini_api_key)
-    return genai.GenerativeModel(
-        model_name=GEMINI_MODEL,
-        generation_config=GENERATION_CONFIG,
-        safety_settings=SAFETY_SETTINGS,
-    )
+    return Groq(api_key=groq_api_key)
 
 
 def generate_exam(
@@ -42,11 +65,10 @@ def generate_exam(
     mcq_count: int,
     mcq_marks: float,
     theory_questions: list,
-    model: str = GEMINI_MODEL,
+    model: str = LLAMA_GENERATION_MODEL,
 ) -> str:
-    del exam_type, mcq_count, mcq_marks, theory_questions, model
+    del exam_type, mcq_count, mcq_marks, theory_questions
 
-    client = _get_client()
     full_prompt = f"""{prompt}
 
 === DOCUMENT CONTENT ===
@@ -55,25 +77,37 @@ def generate_exam(
 
 Now generate the complete exam paper based on the above document and instructions.
 Use proper markdown formatting with clear headings and question numbering.
+Do not use LaTeX delimiters or dollar signs for formulas; write math in plain text such as T = 3, I <= T, and r in {0, 1, 2}.
 If multiple source files are represented in the context, distribute the paper evenly across them instead of overusing one source.
 """
 
     try:
-        response = client.generate_content(full_prompt)
-        if not getattr(response, "parts", None):
-            raise RuntimeError(f"Gemini blocked the response. Feedback: {getattr(response, 'prompt_feedback', None)}")
-
-        generated = (response.text or "").strip()
+        client = _get_groq_client()
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a precise university exam generator. Follow the provided structure exactly. "
+                        "Use only the uploaded document context. Keep CLO tags, marks, Bloom levels, and section counts consistent."
+                    ),
+                },
+                {"role": "user", "content": full_prompt},
+            ],
+            **LLAMA_GENERATION_CONFIG,
+        )
+        generated = clean_exam_markdown(response.choices[0].message.content or "")
         if not generated:
-            raise RuntimeError("Gemini returned an empty response. Please try again.")
+            raise RuntimeError("LLaMA returned an empty response. Please try again.")
         return generated
     except Exception as exc:
         message = str(exc)
         if "API_KEY" in message or "api key" in message.lower():
-            raise RuntimeError("Invalid or missing Gemini API key. Check GEMINI_API_KEY in backend/.env") from exc
+            raise RuntimeError("Invalid or missing Groq API key. Check GROQ_API_KEY in backend/.env") from exc
         if "quota" in message.lower() or "429" in message:
-            raise RuntimeError("Gemini free-tier rate limit hit. Wait a minute and try again.") from exc
-        raise RuntimeError(f"Gemini generation failed: {message}") from exc
+            raise RuntimeError("Groq rate limit hit. Wait a minute and try again.") from exc
+        raise RuntimeError(f"LLaMA 3.3 70B generation failed: {message}") from exc
 
 
 def chat_assistant(
@@ -83,7 +117,6 @@ def chat_assistant(
     page: str = "",
     context: str = "",
 ) -> str:
-    client = _get_client()
     conversation = []
 
     if history:
@@ -97,12 +130,13 @@ def chat_assistant(
 
     page_context = f"Current dashboard: {page}." if page else ""
     live_context = f"\nCurrent visible page state:\n{context}\n" if context else ""
-    full_prompt = f"""You are Gemini, answering inside the TeachAssist app.
+    full_prompt = f"""You are the TeachAssist in-app assistant powered by LLaMA 3.3 70B.
 The user is a {role} in an education portal.
-Answer naturally and helpfully, like Gemini, but stay grounded in the current app screen when the user asks about what is visible or what to do on this page.
-Use the provided page state only as context, not as something to repeat unless it helps answer the question.
-Do not invent buttons, tabs, fields, or workflows that are not present in the provided page state.
-If the current screen does not show the control the user asked about, clearly say it is not visible on this page and answer using only what is actually shown.
+Answer naturally and helpfully, but stay grounded in the current app screen when the user asks about what is visible or what to do on this page.
+Use the current dashboard name, visible page state, and conversation history to understand context before answering.
+Do not invent buttons, tabs, fields, records, workflows, or system behavior that are not present in the provided page state.
+If the current screen does not show the control or record the user asked about, clearly say it is not visible on this page and answer using only what is actually shown.
+If the user asks about TeachAssist behavior beyond the current page, answer from the known app modules only: Profile, Generate, Transform, Gap Analysis, student tasks, marksheets, CLO/CIS mapping, and reports.
 Avoid markdown heading symbols, asterisks, bold markers, or decorative formatting. Return clean readable text.
 {page_context}
 {live_context}
@@ -114,34 +148,37 @@ User: {message}
 Assistant:"""
 
     try:
-        response = client.generate_content(full_prompt)
-        if not getattr(response, "parts", None):
-            raise RuntimeError(f"Gemini blocked the response. Feedback: {getattr(response, 'prompt_feedback', None)}")
-
-        generated = (response.text or "").strip()
+        client = _get_groq_client()
+        response = client.chat.completions.create(
+            model=LLAMA_GENERATION_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a page-aware assistant inside TeachAssist. "
+                        "Use supplied page context first, be concise, and do not hallucinate UI controls."
+                    ),
+                },
+                {"role": "user", "content": full_prompt},
+            ],
+            **LLAMA_ASSISTANT_CONFIG,
+        )
+        generated = (response.choices[0].message.content or "").strip()
         if not generated:
-            raise RuntimeError("Gemini returned an empty response. Please try again.")
+            raise RuntimeError("LLaMA returned an empty response. Please try again.")
         return generated
     except Exception as exc:
         message_text = str(exc)
         if "API_KEY" in message_text or "api key" in message_text.lower():
-            raise RuntimeError("Invalid or missing Gemini API key. Check GEMINI_API_KEY in backend/.env") from exc
+            raise RuntimeError("Invalid or missing Groq API key. Check GROQ_API_KEY in backend/.env") from exc
         if "quota" in message_text.lower() or "429" in message_text:
-            raise RuntimeError("Gemini free-tier rate limit hit. Wait a minute and try again.") from exc
-        raise RuntimeError(f"Gemini assistant failed: {message_text}") from exc
+            raise RuntimeError("Groq rate limit hit. Wait a minute and try again.") from exc
+        raise RuntimeError(f"LLaMA 3.3 70B assistant failed: {message_text}") from exc
 
 
 def list_available_models() -> list:
-    try:
-        load_dotenv(Path(__file__).resolve().parents[3] / ".env")
-        gemini_api_key = os.environ.get("GEMINI_API_KEY", "")
-        if not gemini_api_key:
-            return ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.0-pro"]
-        genai.configure(api_key=gemini_api_key)
-        return [
-            model.name.replace("models/", "")
-            for model in genai.list_models()
-            if "generateContent" in model.supported_generation_methods
-        ]
-    except Exception:
-        return ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.0-pro"]
+    return [
+        LLAMA_GENERATION_MODEL,
+        "llama-3.1-70b-versatile",
+        "llama-3.1-8b-instant",
+    ]

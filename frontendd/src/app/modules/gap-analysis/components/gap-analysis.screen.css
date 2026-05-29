@@ -188,6 +188,140 @@
   border: 1px solid rgba(103, 128, 173, 0.16);
 }
 
+.heatmap-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.heatmap-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-box {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  display: inline-block;
+  border: 1px solid rgba(20, 42, 89, 0.08);
+}
+
+.heatmap-scroll {
+  margin-top: 16px;
+  overflow: auto;
+  border-radius: 20px;
+  border: 1px solid rgba(103, 128, 173, 0.16);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.heatmap-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.heatmap-table th,
+.heatmap-table td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid rgba(103, 128, 173, 0.14);
+  border-right: 1px solid rgba(103, 128, 173, 0.12);
+}
+
+.heatmap-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #183d82;
+  color: #ffffff;
+  font-size: 0.82rem;
+}
+
+.heatmap-table th small {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.7rem;
+  opacity: 0.78;
+}
+
+.heatmap-table .student-col {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  min-width: 180px;
+  max-width: 240px;
+  text-align: left;
+  background: #eef4ff;
+  color: #16345c;
+}
+
+.heatmap-table thead .student-col {
+  z-index: 4;
+  background: #183d82;
+  color: #ffffff;
+}
+
+.heatmap-table tbody .student-col span,
+.heatmap-table tbody .student-col small {
+  display: block;
+}
+
+.heatmap-table tbody .student-col span {
+  font-weight: 800;
+}
+
+.heatmap-table tbody .student-col small {
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.heatmap-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  min-height: 34px;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 900;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.heatmap-weak {
+  background: #c62828;
+}
+
+.heatmap-risk {
+  background: #f4a62a;
+  color: #3d2700;
+}
+
+.heatmap-pass {
+  background: #3f9e61;
+}
+
+.heatmap-strong {
+  background: #166b46;
+}
+
 canvas {
   display: block;
 }
@@ -500,6 +634,23 @@ body.theme-dark .difficulty-row button {
   background: rgba(134, 164, 255, 0.12);
   color: var(--text);
   border-color: rgba(144, 173, 228, 0.16);
+}
+
+body.theme-dark .heatmap-scroll,
+body.theme-dark .heatmap-table .student-col {
+  background: rgba(18, 29, 50, 0.96);
+  color: var(--text);
+}
+
+body.theme-dark .heatmap-table th,
+body.theme-dark .heatmap-table td {
+  border-color: rgba(144, 173, 228, 0.14);
+}
+
+body.theme-dark .heatmap-table thead th,
+body.theme-dark .heatmap-table thead .student-col {
+  background: #183d82;
+  color: #ffffff;
 }
 
 body.theme-dark .roll-chip,

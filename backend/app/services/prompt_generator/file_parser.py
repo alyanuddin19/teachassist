@@ -1,17 +1,59 @@
-"""Parse PDF, DOCX, PPT/PPTX, TXT, and LaTeX files into text plus embedded images."""
+"""Parse PDF, DOC/DOCX, PPT/PPTX, TXT, and LaTeX files into text plus embedded images."""
+
+import re
 
 
 def parse_file(file_path: str, file_type: str) -> tuple[str, list[tuple[bytes, str]]]:
     file_type = file_type.lower()
     if file_type == "pdf":
         return _parse_pdf(file_path)
+    if file_type == "doc":
+        return _parse_legacy_office(file_path, "DOC")
     if file_type == "docx":
         return _parse_docx(file_path)
-    if file_type in ("ppt", "pptx"):
+    if file_type == "ppt":
+        return _parse_legacy_office(file_path, "PPT")
+    if file_type == "pptx":
         return _parse_pptx(file_path)
     if file_type in ("txt", "tex", "latex"):
         return _parse_text_file(file_path)
     raise ValueError(f"Unsupported file type: {file_type}")
+
+
+def _parse_legacy_office(file_path: str, label: str) -> tuple[str, list[tuple[bytes, str]]]:
+    with open(file_path, "rb") as file_handle:
+        data = file_handle.read()
+
+    chunks: list[str] = []
+    for encoding in ("utf-16le", "latin-1"):
+        decoded = data.decode(encoding, errors="ignore")
+        decoded = decoded.replace("\x00", " ")
+        matches = re.findall(r"[A-Za-z0-9][A-Za-z0-9\s,.;:!?()\[\]{}%/\-+*=<>]{5,}", decoded)
+        chunks.extend(match.strip() for match in matches)
+
+    cleaned: list[str] = []
+    seen: set[str] = set()
+    for chunk in chunks:
+        text = re.sub(r"\s+", " ", chunk).strip()
+        if len(text) < 12:
+            continue
+        alpha_ratio = sum(char.isalpha() for char in text) / max(len(text), 1)
+        if alpha_ratio < 0.25:
+            continue
+        key = text.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        cleaned.append(text)
+
+    content = "\n".join(cleaned)
+    if len(content) < 50:
+        raise RuntimeError(
+            f"Could not extract readable text from this old .{label.lower()} file. "
+            f"Please open it in Microsoft Office and save it as .{'docx' if label == 'DOC' else 'pptx'}."
+        )
+
+    return content, []
 
 
 def _parse_pdf(file_path: str) -> tuple[str, list[tuple[bytes, str]]]:
@@ -75,7 +117,10 @@ def _parse_pdf(file_path: str) -> tuple[str, list[tuple[bytes, str]]]:
 def _parse_docx(file_path: str) -> tuple[str, list[tuple[bytes, str]]]:
     from docx import Document
 
-    doc = Document(file_path)
+    try:
+        doc = Document(file_path)
+    except Exception as exc:
+        raise RuntimeError("Could not read DOCX file. Please make sure it is a valid .docx file, not an old .doc file renamed to .docx.") from exc
     paragraphs: list[str] = []
     images: list[tuple[bytes, str]] = []
 
@@ -108,7 +153,10 @@ def _parse_pptx(file_path: str) -> tuple[str, list[tuple[bytes, str]]]:
     from pptx import Presentation
     from pptx.enum.shapes import MSO_SHAPE_TYPE
 
-    presentation = Presentation(file_path)
+    try:
+        presentation = Presentation(file_path)
+    except Exception as exc:
+        raise RuntimeError("Could not read PPTX file. Please make sure it is a valid .pptx file, not an old .ppt file renamed to .pptx.") from exc
     slide_text: list[str] = []
     images: list[tuple[bytes, str]] = []
 

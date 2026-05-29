@@ -41,6 +41,7 @@ export class GapAnalysisComponent implements OnInit {
   isCompactPortrait = false;
   sectionState: Record<string, boolean> = {
     chart: true,
+    heatmap: true,
     questionTable: true,
     cloTable: true
   };
@@ -196,12 +197,39 @@ export class GapAnalysisComponent implements OnInit {
     return this.weakStudents.filter(s => s.has_weakness);
   }
 
-  toggleSection(section: 'chart' | 'questionTable' | 'cloTable'): void {
+  toggleSection(section: 'chart' | 'heatmap' | 'questionTable' | 'cloTable'): void {
     this.sectionState[section] = !this.sectionState[section];
   }
 
-  isSectionOpen(section: 'chart' | 'questionTable' | 'cloTable'): boolean {
+  isSectionOpen(section: 'chart' | 'heatmap' | 'questionTable' | 'cloTable'): boolean {
     return !this.isCompactPortrait || !!this.sectionState[section];
+  }
+
+  get heatmapQuestions(): any[] {
+    return this.result?.heatmap?.questions || [];
+  }
+
+  get heatmapStudents(): any[] {
+    return this.result?.heatmap?.students || [];
+  }
+
+  getHeatmapCell(questionId: string, student: any): any {
+    return (student?.cells || []).find((cell: any) => cell.question === questionId) || null;
+  }
+
+  heatmapCellClass(cell: any): string {
+    const percentage = Number(cell?.percentage || 0);
+    if (percentage >= 80) return 'heatmap-strong';
+    const threshold = this.thresholdPercentage ?? 50;
+    if (percentage >= threshold) return 'heatmap-pass';
+    if (percentage >= Math.max(threshold - 20, 0)) return 'heatmap-risk';
+    return 'heatmap-weak';
+  }
+
+  heatmapCellTitle(cell: any): string {
+    if (!cell) return '';
+    const status = cell.below_threshold ? 'Below threshold' : 'Cleared threshold';
+    return `${cell.question} ${cell.clo || ''}: ${cell.score}/${cell.max_marks} (${cell.percentage}%) - ${status}`;
   }
 
   sendGeneratedTask(student: any) {
@@ -510,6 +538,7 @@ export class GapAnalysisComponent implements OnInit {
     const expanded = !this.isCompactPortrait;
     this.sectionState = {
       chart: expanded,
+      heatmap: expanded,
       questionTable: expanded,
       cloTable: expanded
     };

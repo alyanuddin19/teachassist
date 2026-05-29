@@ -36,6 +36,8 @@
 .upload-progress-bar { margin-top: 1rem; height: 4px; background: rgba(96,122,174,.16); border-radius: 999px; overflow: hidden; }
 .upload-progress-fill { height: 100%; background: linear-gradient(135deg, #244aa5 0%, #3f67d8 100%); border-radius: 999px; transition: width .25s ease; }
 .upload-progress-label { display: block; font-size: .8rem; color: #61779f; margin-top: .45rem; text-align: center; }
+.cis-upload-block { margin-top: 1.5rem; }
+.cis-upload-zone { padding: 2rem; }
 .config-section { margin-bottom: 1.5rem; background: #fbfdff; border: 1px solid rgba(96,122,174,.12); border-radius: 24px; padding: 1.5rem; }
 .config-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; }
 .config-label { font-size: .9rem; font-weight: 800; color: #61779f; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 1rem; display: block; }
@@ -218,6 +220,11 @@
 .generate-option-text h3 { font-size: 1.06rem; font-weight: 800; margin-bottom: .2rem; color: #18355f; }
 .generate-option-text p { font-size: .88rem; color: #61779f; }
 .generate-option-actions { display: flex; gap: .75rem; flex-wrap: wrap; }
+.clo-warning-panel { display: flex; gap: 1rem; padding: 1.15rem 1.25rem; margin-bottom: 1.25rem; border-radius: 20px; background: #fff8e8; border: 2px solid #f4b942; color: #5d3f00; box-shadow: 0 14px 28px rgba(160, 103, 0, .12); }
+.clo-warning-icon { width: 42px; height: 42px; border-radius: 14px; background: #f4b942; color: #3b2700; display: grid; place-items: center; flex-shrink: 0; }
+.clo-warning-icon .material-symbols-rounded { font-size: 1.35rem; }
+.clo-warning-body h3 { margin: 0 0 .45rem; font-size: 1rem; font-weight: 900; color: #5d3f00; }
+.clo-warning-body p { margin: .35rem 0; font-size: .9rem; line-height: 1.55; font-weight: 700; }
 .editor-pane, .preview-pane { border: 1px solid rgba(96,122,174,.14); border-top: none; border-radius: 0 0 18px 18px; overflow: hidden; }
 .exam-editor { width: 100%; min-height: 520px; background: #fbfdff; border: none; color: #18355f; font-size: .88rem; line-height: 1.75; padding: 1.5rem; resize: vertical; outline: none; }
 .preview-pane { background: #fbfdff; min-height: 520px; }
@@ -314,6 +321,7 @@ body.theme-dark .toast {
 body.theme-dark .config-section,
 body.theme-dark .prompt-box,
 body.theme-dark .generate-option-box,
+body.theme-dark .clo-warning-panel,
 body.theme-dark .preview-pane,
 body.theme-dark .editor-pane {
   background: rgba(18, 29, 50, 0.96);
@@ -359,7 +367,9 @@ body.theme-dark .btn-primary {
 body.theme-dark .preview-content,
 body.theme-dark .preview-content h1,
 body.theme-dark .preview-content h2,
-body.theme-dark .preview-content h3 {
+body.theme-dark .preview-content h3,
+body.theme-dark .clo-warning-body h3,
+body.theme-dark .clo-warning-body p {
   color: var(--text);
 }
 

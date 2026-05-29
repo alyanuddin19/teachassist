@@ -85,7 +85,7 @@ def _extract_weeks_from_text(text: str) -> List[Dict[str, Any]]:
                         weeks.append({"week": week_no, "topics": topic})
                 break
     weeks.sort(key=lambda x: x["week"])
-    print(f"✅ CIS se {len(weeks)} weeks extract hue")
+    print(f"CIS se {len(weeks)} weeks extract hue")
     for w in weeks:
         print(f"  Week {w['week']}: {w['topics'][:80]}...")
     return weeks
@@ -97,7 +97,7 @@ def _extract_weeks_from_text(text: str) -> List[Dict[str, Any]]:
 
 def extract_clo_taxonomy(text: str) -> Dict[str, str]:
     """
-    CIS text se CLO → taxonomy level (C1/C2/C3) mapping nikalo.
+    CIS text se CLO → taxonomy level (C1-C6) mapping nikalo.
 
     CIS mein aksar yeh format hota hai:
       CLO 1 | Explain fundamentals... | C1 | ...
@@ -118,7 +118,7 @@ def extract_clo_taxonomy(text: str) -> Dict[str, str]:
         # Pattern 1: "CLO-1 ... C1" or "CLO 1 ... C1" anywhere in line
         # Handles table rows like: "1. | Explain ... | C1 | ..."
         clo_match = re.search(
-            r'(?:CLO[\s\-\.]?)?(\d+)[^\n]*?\b(C[123])\b',
+            r'(?:CLO[\s\-\.]?)?(\d+)[^\n]*?\b(C[1-6])\b',
             line, re.IGNORECASE
         )
         if clo_match:
@@ -127,7 +127,7 @@ def extract_clo_taxonomy(text: str) -> Dict[str, str]:
             key      = f"CLO-{clo_num}"
             if key not in clo_taxonomy:
                 clo_taxonomy[key] = taxonomy
-                print(f"🎯 Taxonomy found: {key} → {taxonomy} | Line: {line[:80]}")
+                print(f"Taxonomy found: {key} -> {taxonomy} | Line: {line[:80]}")
             continue
 
         # Pattern 2: pipe-separated table row
@@ -135,10 +135,10 @@ def extract_clo_taxonomy(text: str) -> Dict[str, str]:
         # e.g. "1 | Explain fundamentals | C1 | PLO1 | 3"
         if '|' in line:
             parts = [p.strip() for p in line.split('|')]
-            # Find C1/C2/C3 in any cell
+            # Find C1-C6 in any cell
             c_match = None
             for part in parts:
-                m = re.fullmatch(r'C[123]', part, re.IGNORECASE)
+                m = re.fullmatch(r'C[1-6]', part, re.IGNORECASE)
                 if m:
                     c_match = m.group(0).upper()
                     break
@@ -150,11 +150,11 @@ def extract_clo_taxonomy(text: str) -> Dict[str, str]:
                         key = f"CLO-{num_m.group(1)}"
                         if key not in clo_taxonomy:
                             clo_taxonomy[key] = c_match
-                            print(f"🎯 Taxonomy (table): {key} → {c_match} | Line: {line[:80]}")
+                            print(f"Taxonomy (table): {key} -> {c_match} | Line: {line[:80]}")
                         break
 
     if not clo_taxonomy:
-        print("⚠️  No CLO taxonomy found in CIS — will fallback to CLO number mapping")
+        print("No CLO taxonomy found in CIS - will fallback to CLO number mapping")
 
     return clo_taxonomy
 

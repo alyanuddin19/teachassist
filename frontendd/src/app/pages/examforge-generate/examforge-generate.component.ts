@@ -59,17 +59,21 @@ export class ExamforgeGenerateComponent {
 
   currentStep = 1;
   selectedFiles: File[] = [];
+  cisFile: File | null = null;
   sessionId: string | null = null;
   sessionIds: string[] = [];
+  cisSessionId: string | null = null;
   examType: ExamType | null = null;
   mcqEnabled = true;
   theoryEnabled = true;
   mcqCount = 10;
   mcqMarks = 1;
+  mcqBloom = 'remember';
   theoryCount = 3;
   theoryQuestions: TheoryQuestion[] = [];
   generatedPrompt = '';
   examContent = '';
+  promptWarnings: string[] = [];
   previewMode = false;
   previewHtml = '';
   showSavedPrompts = false;
@@ -142,8 +146,20 @@ export class ExamforgeGenerateComponent {
     this.selectedFiles = [...this.selectedFiles];
   }
 
+  onCisSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.cisFile = input.files?.[0] || null;
+    this.cisSessionId = null;
+    input.value = '';
+  }
+
+  removeCisFile(): void {
+    this.cisFile = null;
+    this.cisSessionId = null;
+  }
+
   async uploadFiles(): Promise<void> {
-    if (!this.selectedFiles.length || this.uploadBusy) { return; }
+    if (!this.selectedFiles.length || !this.cisFile || this.uploadBusy) { return; }
     this.uploadBusy = true;
     this.uploadProgress = 0;
     this.uploadProgressLabel = '';
@@ -160,6 +176,11 @@ export class ExamforgeGenerateComponent {
         sessionIds.push(response.session_id);
         this.uploadProgress = Math.round(((index + 1) / this.selectedFiles.length) * 100);
       }
+      this.uploadProgressLabel = `Uploading CIS "${this.cisFile.name}"...`;
+      const cisForm = new FormData();
+      cisForm.append('file', this.cisFile);
+      const cisResponse = await firstValueFrom(this.api.uploadPromptGeneratorFile(cisForm));
+      this.cisSessionId = cisResponse.session_id;
       this.sessionId = sessionIds[0];
       this.sessionIds = sessionIds;
       this.uploadProgressLabel = 'All files uploaded successfully';
@@ -239,14 +260,20 @@ export class ExamforgeGenerateComponent {
       const response = await firstValueFrom(this.api.generatePromptGeneratorPrompt({
         session_id: this.sessionId,
         session_ids: this.sessionIds,
+        cis_session_id: this.cisSessionId,
         exam_type: this.examType,
         mcq_count: this.mcqEnabled && this.examType !== 'assignment' ? this.mcqCount : 0,
         mcq_marks: this.mcqEnabled && this.examType !== 'assignment' ? this.mcqMarks : 0,
+        mcq_blooms_label: this.getBloomLabel(this.mcqBloom),
         theory_questions: enrichedTheory
       }));
       this.generatedPrompt = response.prompt;
+      this.promptWarnings = response.warnings || [];
       this.hideLoading();
       this.goToStep(3);
+      if (this.promptWarnings.length) {
+        this.showToast('CLO warning found. Review it before generating the exam.', 'error');
+      }
       this.showToast('Prompt ready', 'success');
     } catch (error: any) {
       this.hideLoading();
@@ -344,7 +371,7 @@ export class ExamforgeGenerateComponent {
         session_id: this.sessionId,
         prompt: this.generatedPrompt
       }));
-      this.examContent = this.boldBloomsKeywords(response.exam_content);
+      this.examContent = this.boldBloomsKeywords(this.cleanExamMath(response.exam_content));
       this.updatePreview();
       this.hideLoading();
       this.goToStep(4);
@@ -402,7 +429,7 @@ export class ExamforgeGenerateComponent {
   }
 
   private handleFiles(files: File[]): void {
-    const allowed = ['pdf', 'docx', 'ppt', 'pptx'];
+    const allowed = ['pdf', 'doc', 'docx', 'ppt', 'pptx'];
     const existing = new Set(this.selectedFiles.map((file) => file.name));
     for (const file of files) {
       const extension = file.name.split('.').pop()?.toLowerCase() || '';
@@ -410,6 +437,10 @@ export class ExamforgeGenerateComponent {
       if (!existing.has(file.name)) { this.selectedFiles.push(file); existing.add(file.name); }
     }
     this.selectedFiles = [...this.selectedFiles];
+  }
+
+  getBloomLabel(value: string): string {
+    return (this.bloomsLevels.find((item) => item.value === value) || this.bloomsLevels[0]).label;
   }
 
   private buildSavedPromptTitle(): string {
@@ -481,6 +512,25 @@ export class ExamforgeGenerateComponent {
     html = html.replace(/(<\/h[1-6]>)<\/p>/g, '$1');
     html = html.replace(/<p>(<hr>)<\/p>/g, '$1');
     return html;
+  }
+
+  private cleanExamMath(markdown: string): string {
+    return (markdown || '')
+      .replace(/\\leq?/g, '<=')
+      .replace(/\\geq?/g, '>=')
+      .replace(/\\neq/g, '!=')
+      .replace(/\\times/g, 'x')
+      .replace(/\\cdot/g, '*')
+      .replace(/\\in/g, 'in')
+      .replace(/\\\{/g, '{')
+      .replace(/\\\}/g, '}')
+      .replace(/\\\(/g, '(')
+      .replace(/\\\)/g, ')')
+      .replace(/\\\[/g, '[')
+      .replace(/\\\]/g, ']')
+      .replace(/\$\$/g, '')
+      .replace(/\$/g, '')
+      .replace(/\\/g, '');
   }
 
   private escapeHtml(text: string): string {

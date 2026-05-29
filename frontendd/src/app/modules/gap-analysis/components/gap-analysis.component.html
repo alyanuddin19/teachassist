@@ -75,6 +75,60 @@
       </div>
     </section>
 
+    <section class="result-block" *ngIf="heatmapQuestions.length && heatmapStudents.length">
+      <button class="result-toggle" *ngIf="isCompactPortrait" type="button" (click)="toggleSection('heatmap')">
+        <span>Question-wise Student Performance</span>
+        <span>{{ isSectionOpen('heatmap') ? 'Hide' : 'Show' }}</span>
+      </button>
+
+      <div *ngIf="isSectionOpen('heatmap')">
+        <div class="heatmap-head">
+          <div>
+            <h2 class="title">Question-wise Student Performance</h2>
+            <p class="result-summary">Each cell shows obtained percentage for a student in a question. Darker red means a stronger gap.</p>
+          </div>
+          <div class="heatmap-legend" aria-label="Heatmap legend">
+            <span><i class="legend-box heatmap-weak"></i>Weak</span>
+            <span><i class="legend-box heatmap-risk"></i>Near Threshold</span>
+            <span><i class="legend-box heatmap-pass"></i>Pass</span>
+            <span><i class="legend-box heatmap-strong"></i>Strong</span>
+          </div>
+        </div>
+
+        <div class="heatmap-scroll">
+          <table class="heatmap-table">
+            <thead>
+              <tr>
+                <th class="student-col">Student</th>
+                <th *ngFor="let question of heatmapQuestions">
+                  <span>{{ question.id }}</span>
+                  <small>{{ question.clo }}</small>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let student of heatmapStudents">
+                <th class="student-col">
+                  <span>{{ student.name }}</span>
+                  <small *ngIf="student.roll_no">{{ student.roll_no }}</small>
+                </th>
+                <td *ngFor="let question of heatmapQuestions">
+                  <ng-container *ngIf="getHeatmapCell(question.id, student) as cell">
+                    <span
+                      class="heatmap-cell"
+                      [ngClass]="heatmapCellClass(cell)"
+                      [title]="heatmapCellTitle(cell)">
+                      {{ cell.percentage }}%
+                    </span>
+                  </ng-container>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
     <section class="result-block">
       <button class="result-toggle" *ngIf="isCompactPortrait" type="button" (click)="toggleSection('questionTable')">
         <span>Question-wise Results</span>

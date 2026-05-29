@@ -97,6 +97,38 @@ def analyze_gaps(
             'below_total_threshold': total < threshold_total_marks
         })
 
+    heatmap_questions = [
+        {
+            'id': q['id'],
+            'clo': q.get('clo'),
+            'max_marks': round(float(q['max_marks']), 2),
+            'threshold_marks': round(float(q['max_marks']) * (threshold_percentage / 100.0), 2)
+        }
+        for q in questions
+    ]
+    heatmap_students = []
+    for s in students:
+        cells = []
+        for q in questions:
+            qid = q['id']
+            max_marks = float(q['max_marks'])
+            score = float(s.get('marks', {}).get(qid, 0))
+            percentage = round((score / max_marks) * 100, 2) if max_marks else 0.0
+            threshold_marks = max_marks * (threshold_percentage / 100.0)
+            cells.append({
+                'question': qid,
+                'clo': q.get('clo'),
+                'score': round(score, 2),
+                'max_marks': round(max_marks, 2),
+                'percentage': percentage,
+                'below_threshold': score < threshold_marks
+            })
+        heatmap_students.append({
+            'name': s.get('name', 'Unknown'),
+            'roll_no': s.get('roll_no', ''),
+            'cells': cells
+        })
+
     return {
         'threshold_percentage': {'threshold': f'{threshold_percentage}%'},
         'gap_results': gap_results,
@@ -106,5 +138,9 @@ def analyze_gaps(
             'total_max_marks': round(total_max, 2),
             'threshold_total_marks': round(threshold_total_marks, 2),
             'students': student_totals
+        },
+        'heatmap': {
+            'questions': heatmap_questions,
+            'students': heatmap_students
         }
     }

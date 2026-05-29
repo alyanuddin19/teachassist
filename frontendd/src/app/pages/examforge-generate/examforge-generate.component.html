@@ -46,12 +46,12 @@
           <div class="step-number">01</div>
           <div>
             <h2 class="step-title">Upload Your Documents</h2>
-            <p class="step-desc">Upload one or more files - PDF, DOCX, PPT, PPTX</p>
+            <p class="step-desc">Upload one or more files - PDF, DOC, DOCX, PPT, PPTX</p>
           </div>
         </div>
 
         <label class="upload-zone" (dragover)="$event.preventDefault()" (drop)="onFilesDropped($event)">
-          <input type="file" hidden multiple accept=".pdf,.docx,.ppt,.pptx" (change)="onFilesSelected($event)">
+          <input type="file" hidden multiple accept=".pdf,.doc,.docx,.ppt,.pptx" (change)="onFilesSelected($event)">
           <div class="upload-icon">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
@@ -61,6 +61,7 @@
           <p class="upload-sub">or click to browse - multiple files supported</p>
           <div class="upload-formats">
             <span class="format-badge">PDF</span>
+            <span class="format-badge">DOC</span>
             <span class="format-badge">DOCX</span>
             <span class="format-badge">PPT</span>
             <span class="format-badge">PPTX</span>
@@ -80,13 +81,40 @@
           </div>
         </div>
 
+        <div class="cis-upload-block">
+          <label class="config-label">Course Information Sheet (CIS)</label>
+          <label class="upload-zone cis-upload-zone">
+            <input type="file" hidden accept=".pdf,.doc,.docx" (change)="onCisSelected($event)">
+            <div class="upload-icon">
+              <span class="material-symbols-rounded">article</span>
+            </div>
+            <p class="upload-title">{{ cisFile ? 'CIS sheet ready' : 'Upload CIS sheet' }}</p>
+            <p class="upload-sub">Required for CLO extraction and CLO-to-cognitive-level mapping</p>
+            <div class="upload-formats">
+              <span class="format-badge">PDF</span>
+              <span class="format-badge">DOC</span>
+              <span class="format-badge">DOCX</span>
+            </div>
+          </label>
+
+          <div class="file-list" *ngIf="cisFile">
+            <div class="file-chip">
+              <span class="material-symbols-rounded">description</span>
+              <span class="file-chip-name">{{ cisFile.name }}</span>
+              <button class="file-chip-remove" type="button" (click)="removeCisFile()" aria-label="Remove CIS file">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="upload-progress-bar" *ngIf="uploadBusy || uploadProgressLabel">
           <div class="upload-progress-fill" [style.width.%]="uploadProgress"></div>
           <span class="upload-progress-label">{{ uploadProgressLabel }}</span>
         </div>
 
         <div class="step-actions">
-          <button class="btn-primary" type="button" [disabled]="!selectedFiles.length || uploadBusy" (click)="uploadFiles()">
+          <button class="btn-primary" type="button" [disabled]="!selectedFiles.length || !cisFile || uploadBusy" (click)="uploadFiles()">
             {{ uploadBusy ? 'Uploading...' : 'Upload & Continue' }}
           </button>
         </div>
@@ -146,6 +174,12 @@
               <div class="input-group">
                 <label class="input-label">MCQ Total</label>
                 <div class="marks-total-badge">{{ mcqTotal }} marks</div>
+              </div>
+              <div class="input-group">
+                <label class="input-label">MCQ Bloom's Level</label>
+                <select class="blooms-select" [(ngModel)]="mcqBloom">
+                  <option *ngFor="let level of bloomsLevels" [value]="level.value">{{ level.label }}</option>
+                </select>
               </div>
             </div>
           </div>
@@ -289,6 +323,16 @@
             </ng-template>
           </div>
         </section>
+
+        <div class="clo-warning-panel" *ngIf="promptWarnings.length">
+          <div class="clo-warning-icon">
+            <span class="material-symbols-rounded">warning</span>
+          </div>
+          <div class="clo-warning-body">
+            <h3>Bloom / CLO Warning</h3>
+            <p *ngFor="let warning of promptWarnings">{{ warning }}</p>
+          </div>
+        </div>
 
         <div class="generate-option-box">
           <div class="generate-option-icon">
