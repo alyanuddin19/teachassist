@@ -161,8 +161,8 @@ def extract_clo_taxonomy(text: str) -> Dict[str, str]:
 
 def extract_course_title(text: str) -> str:
     patterns = [
-        r'Course\s*(?:Title|Name)\s*[:\-]\s*(.+)',
-        r'Subject\s*(?:Title|Name)?\s*[:\-]\s*(.+)'
+        r'Course\s*(?:Title|Name)\s*[:\-\|]\s*(.+)',
+        r'Subject\s*(?:Title|Name)?\s*[:\-\|]\s*(.+)'
     ]
     for line in text.split('\n'):
         clean = line.strip()
@@ -172,6 +172,42 @@ def extract_course_title(text: str) -> str:
             match = re.search(pattern, clean, re.IGNORECASE)
             if match:
                 return match.group(1).strip()
+    return ""
+
+
+def _normalize_course_code(value: str) -> str:
+    parts = []
+    for part in re.split(r'\s*/\s*', value.strip().upper()):
+        clean = re.sub(r'\s+', '', part)
+        hyphenated = re.match(r'^([A-Z]{2,5})-(\d{2,4}[A-Z]?)$', clean)
+        compact = re.match(r'^([A-Z]{2,5})(\d{2,4}[A-Z]?)$', clean)
+        if hyphenated:
+            parts.append(f"{hyphenated.group(1)}-{hyphenated.group(2)}")
+        elif compact:
+            parts.append(f"{compact.group(1)}{compact.group(2)}")
+    return "/".join(parts)
+
+
+def extract_course_code(text: str) -> str:
+    patterns = [
+        r'Course\s*(?:Code|No|Number|ID)\s*[:\-\|]\s*(.+)',
+        r'Subject\s*Code\s*[:\-\|]\s*(.+)'
+    ]
+    code_pattern = re.compile(
+        r'\b([A-Z]{2,5}\s*-?\s*\d{2,4}[A-Z]?(?:\s*/\s*[A-Z]{2,5}\s*-?\s*\d{2,4}[A-Z]?)*)\b',
+        re.IGNORECASE
+    )
+    for line in text.split('\n'):
+        clean = line.strip()
+        if not clean:
+            continue
+        for pattern in patterns:
+            match = re.search(pattern, clean, re.IGNORECASE)
+            if match:
+                code_match = code_pattern.search(match.group(1))
+                if code_match:
+                    return _normalize_course_code(code_match.group(1))
+                return match.group(1).strip().upper()
     return ""
 
 
@@ -216,11 +252,13 @@ async def parse_cis_full(file: UploadFile) -> Dict[str, Any]:
     weeks        = _extract_weeks_from_text(text)
     clo_taxonomy = extract_clo_taxonomy(text)
     course_title = extract_course_title(text)
+    course_code  = extract_course_code(text)
 
     return {
         "weeks":        weeks,
         "clo_taxonomy": clo_taxonomy,
-        "course_title": course_title
+        "course_title": course_title,
+        "course_code":  course_code
     }
 
 

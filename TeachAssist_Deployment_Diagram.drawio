@@ -1,0 +1,136 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="teachassist-deployment-clean" name="TeachAssist Deployment Diagram">
+    <mxGraphModel dx="1873" dy="958" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=22;fontStyle=1;fontColor=#111827;align=center;verticalAlign=middle;" value="TeachAssist - Deployment Diagram" vertex="1">
+          <mxGeometry height="36" width="520" x="330" y="24" as="geometry" />
+        </mxCell>
+        <mxCell id="users-box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#94a3b8;fontStyle=1;fontColor=#111827;verticalAlign=top;spacingTop=8;" value="Users" vertex="1">
+          <mxGeometry height="500" width="135" x="40" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="teacher" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#2563eb;strokeColor=#2563eb;fontColor=#111827;" value="Teacher" vertex="1">
+          <mxGeometry height="62" width="32" x="88" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="student" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#16a34a;strokeColor=#16a34a;fontColor=#111827;" value="Student" vertex="1">
+          <mxGeometry height="62" width="32" x="88" y="265" as="geometry" />
+        </mxCell>
+        <mxCell id="hod" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#f97316;strokeColor=#f97316;fontColor=#111827;" value="HOD" vertex="1">
+          <mxGeometry height="62" width="32" x="88" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#9333ea;strokeColor=#9333ea;fontColor=#111827;" value="Admin" vertex="1">
+          <mxGeometry height="62" width="32" x="88" y="495" as="geometry" />
+        </mxCell>
+        <mxCell id="client-node" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#2563eb;fontColor=#111827;align=center;verticalAlign=top;spacingTop=12;" value="&lt;&lt;device&gt;&gt;&lt;br&gt;&lt;b&gt;Client Device&lt;/b&gt;&lt;br&gt;Laptop / Desktop / Mobile" vertex="1">
+          <mxGeometry height="210" width="205" x="235" y="235" as="geometry" />
+        </mxCell>
+        <mxCell id="browser" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2563eb;fontColor=#111827;align=center;verticalAlign=middle;arcSize=11;" value="&lt;&lt;execution environment&gt;&gt;&lt;br&gt;&lt;b&gt;Web Browser&lt;/b&gt;&lt;br&gt;Runs Angular UI" vertex="1">
+          <mxGeometry height="100" width="135" x="270" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="frontend-node" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#059669;fontColor=#111827;align=center;verticalAlign=top;spacingTop=12;" value="&lt;&lt;deployment node&gt;&gt;&lt;br&gt;&lt;b&gt;Vercel Static Hosting&lt;/b&gt;&lt;br&gt;Angular Frontend" vertex="1">
+          <mxGeometry height="165" width="235" x="535" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="frontend-artifact" parent="1" style="shape=component;jettyWidth=8;jettyHeight=4;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#059669;fontColor=#111827;align=center;verticalAlign=middle;spacing=8;" value="&lt;&lt;artifact&gt;&gt;&lt;br&gt;Angular Build&lt;br&gt;HTML / CSS / JS" vertex="1">
+          <mxGeometry height="70" width="135" x="585" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="backend-node" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7ed;strokeColor=#ea580c;fontColor=#111827;align=center;verticalAlign=top;spacingTop=12;" value="&lt;&lt;deployment node&gt;&gt;&lt;br&gt;&lt;b&gt;Render Web Service&lt;/b&gt;&lt;br&gt;teachassist-backend" vertex="1">
+          <mxGeometry height="245" width="235" x="535" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="uvicorn" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ea580c;fontColor=#111827;align=center;verticalAlign=middle;" value="&amp;lt;&amp;gt;&lt;br&gt;Uvicorn Server" vertex="1">
+          <mxGeometry height="55" width="145" x="580" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="fastapi" parent="1" style="shape=component;jettyWidth=8;jettyHeight=4;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ea580c;fontColor=#111827;align=center;verticalAlign=middle;spacing=8;" value="&lt;&lt;artifact&gt;&gt;&lt;br&gt;FastAPI App&lt;br&gt;Routers + Services" vertex="1">
+          <mxGeometry height="70" width="145" x="580" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="db-node" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#059669;fontColor=#111827;align=center;verticalAlign=top;spacingTop=12;" value="&lt;&lt;database node&gt;&gt;&lt;br&gt;&lt;b&gt;Supabase PostgreSQL&lt;/b&gt;" vertex="1">
+          <mxGeometry height="155" width="235" x="895" y="115" as="geometry" />
+        </mxCell>
+        <mxCell id="db" parent="1" style="shape=cylinder3d;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffffff;strokeColor=#059669;fontColor=#111827;align=center;" value="Users&lt;br&gt;Courses&lt;br&gt;Tasks&lt;br&gt;Marksheets&lt;br&gt;Exam Records" vertex="1">
+          <mxGeometry height="75" width="105" x="960" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="file-node" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#475569;fontColor=#111827;align=center;verticalAlign=top;spacingTop=12;" value="&lt;div style=&quot;line-height: 40%;&quot;&gt;&amp;lt;&amp;gt;&lt;br&gt;&lt;b style=&quot;line-height: 140%;&quot;&gt;Backend File Storage&lt;/b&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="155" width="235" x="895" y="336" as="geometry" />
+        </mxCell>
+        <mxCell id="files" parent="1" style="shape=folder;tabWidth=45;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#475569;fontColor=#111827;align=center;verticalAlign=middle;" value="Uploaded CIS / Material&lt;br&gt;Generated PDFs&lt;br&gt;Excel Marksheets&lt;br&gt;Task Attachments" vertex="1">
+          <mxGeometry height="100" width="160" x="932.5" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="groq-node" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f3ff;strokeColor=#7c3aed;fontColor=#111827;align=center;verticalAlign=top;spacingTop=12;" value="&lt;&lt;external service&gt;&gt;&lt;br&gt;&lt;b&gt;Groq Cloud API&lt;/b&gt;" vertex="1">
+          <mxGeometry height="145" width="235" x="895" y="565" as="geometry" />
+        </mxCell>
+        <mxCell id="groq" parent="1" style="shape=component;jettyWidth=8;jettyHeight=4;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#7c3aed;fontColor=#111827;align=center;verticalAlign=middle;spacing=8;" value="&lt;&lt;service&gt;&gt;&lt;br&gt;LLaMA 3.3 70B&lt;br&gt;Exam Generation&lt;br&gt;AI Assistant" vertex="1">
+          <mxGeometry height="75" width="125" x="950" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#94a3b8;fontSize=12;fontColor=#111827;align=left;spacing=8;" value="&lt;b&gt;Color Legend&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#2563eb&quot;&gt;Blue&lt;/font&gt;: Teacher / exam flow&lt;br&gt;&lt;font color=&quot;#16a34a&quot;&gt;Green&lt;/font&gt;: Student task flow&lt;br&gt;&lt;font color=&quot;#f97316&quot;&gt;Orange&lt;/font&gt;: HOD access flow&lt;br&gt;&lt;font color=&quot;#9333ea&quot;&gt;Purple&lt;/font&gt;: Admin access flow&lt;br&gt;&lt;font color=&quot;#475569&quot;&gt;Gray&lt;/font&gt;: Deployment / data dependency" vertex="1">
+          <mxGeometry height="95" width="290" x="192.5" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="e-teacher-browser" edge="1" parent="1" source="teacher" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#2563eb;strokeWidth=2.2;endArrow=block;endFill=1;" target="browser" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="205" y="182" />
+              <mxPoint x="205" y="318" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-student-browser" edge="1" parent="1" source="student" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#16a34a;strokeWidth=2.2;endArrow=block;endFill=1;" target="browser" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="215" y="297" />
+              <mxPoint x="215" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-hod-browser" edge="1" parent="1" source="hod" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#f97316;strokeWidth=2.2;endArrow=block;endFill=1;" target="browser" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="205" y="412" />
+              <mxPoint x="205" y="360" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-admin-browser" edge="1" parent="1" source="admin" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#9333ea;strokeWidth=2.2;endArrow=block;endFill=1;" target="browser" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="215" y="527" />
+              <mxPoint x="215" y="375" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-browser-frontend" edge="1" parent="1" source="browser" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;" target="frontend-node" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="485" y="342" />
+              <mxPoint x="485" y="218" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-frontend-backend" edge="1" parent="1" source="frontend-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;" target="backend-node" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-backend-db" edge="1" parent="1" source="backend-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;" target="db-node" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="815" y="522" />
+              <mxPoint x="815" y="192" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-backend-files" edge="1" parent="1" source="backend-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;" target="file-node" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="833" y="540" />
+              <mxPoint x="833" y="413" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-backend-groq" edge="1" parent="1" source="backend-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#2563eb;strokeWidth=2.2;endArrow=block;endFill=1;" target="groq-node" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="815" y="620" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

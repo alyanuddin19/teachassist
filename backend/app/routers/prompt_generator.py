@@ -12,7 +12,7 @@ from app.services.prompt_generator.image_analyzer import analyze_all_images, is_
 from app.services.prompt_generator.pdf_exporter import export_to_pdf
 from app.services.prompt_generator.prompt_builder import build_prompt, get_constraints
 from app.services.prompt_generator.rag_utils import build_balanced_context, chunk_text
-from app.services.cis_parser import extract_clo_taxonomy
+from app.services.cis_parser import extract_clo_taxonomy, extract_course_code, extract_course_title
 
 
 router = APIRouter(prefix="/api/prompt-generator", tags=["prompt-generator"])
@@ -194,6 +194,60 @@ def _extract_cis_weeks(text: str) -> list[dict]:
     return weeks
 
 
+def _extract_cis_course_code(text: str) -> str:
+    return extract_course_code(text)
+
+
+def _extract_cis_course_title(text: str) -> str:
+    return extract_course_title(text)
+
+
+def _normalize_exam_header(exam_content: str, course_code: str, course_title: str) -> str:
+    target = course_code or "Not specified"
+    lines = (exam_content or "").splitlines()
+    if not lines:
+        return exam_content
+
+    for index, line in enumerate(lines[:12]):
+        title_match = re.match(r"^(#{1,6}\s+)([A-Z]{2,5}-\d{2,4}[A-Z]?)\s+(.+)$", line.strip())
+        if title_match:
+            prefix, _old_code, rest = title_match.groups()
+            lines[index] = f"{prefix}{course_code} {rest}" if course_code else f"{prefix}{rest}"
+            break
+
+    course_code_line_index = None
+    for index, line in enumerate(lines[:15]):
+        if re.search(r"\bCourse\s*(?:Code|No|Number|ID)\b", line, re.IGNORECASE):
+            course_code_line_index = index
+            break
+
+    replacement = f"### Course Code: {target}"
+    if course_code_line_index is not None:
+        lines[course_code_line_index] = replacement
+    else:
+        insert_at = 0
+        for index, line in enumerate(lines[:8]):
+            if line.strip().startswith("#"):
+                insert_at = index + 1
+                break
+        lines.insert(insert_at, replacement)
+
+    if course_title:
+        course_name_line_index = None
+        for index, line in enumerate(lines[:16]):
+            if re.search(r"\bCourse\s*(?:Name|Title)\b", line, re.IGNORECASE):
+                course_name_line_index = index
+                break
+        name_replacement = f"### Course Name: {course_title}"
+        if course_name_line_index is not None:
+            lines[course_name_line_index] = name_replacement
+        else:
+            insert_at = min((course_code_line_index or 0) + 1, len(lines))
+            lines.insert(insert_at, name_replacement)
+
+    return "\n".join(lines).strip()
+
+
 def _read_session_text(session_ids: list[str]) -> str:
     chunks = []
     for current_id in session_ids:
@@ -298,6 +352,8 @@ def _build_clo_mapping(
     text, _ = parse_file(cis_session["file_path"], cis_session["file_type"])
     clos = _extract_cis_clos(text)
     cis_weeks = _extract_cis_weeks(text)
+    course_code = _extract_cis_course_code(text)
+    course_title = _extract_cis_course_title(text)
     source_text = _read_session_text(source_session_ids)
     matched_weeks = _match_cis_weeks_to_source(cis_weeks, source_text)
     topic_text = _dominant_topic_text(source_text, matched_weeks)
@@ -347,6 +403,8 @@ def _build_clo_mapping(
         "coverage_cutoff": cutoff,
         "out_of_scope_weeks": out_of_scope_weeks,
         "warnings": warnings,
+        "course_code": course_code,
+        "course_title": course_title,
     }
 
 
@@ -530,6 +588,11 @@ def generate_exam_route(data: dict):
             mcq_count=session.get("mcq_count", 0),
             mcq_marks=session.get("mcq_marks", 1),
             theory_questions=session.get("theory_questions", []),
+        )
+        exam_content = _normalize_exam_header(
+            exam_content,
+            (session.get("clo_mapping") or {}).get("course_code", ""),
+            (session.get("clo_mapping") or {}).get("course_title", "")
         )
         if prompt_override:
             session["prompt"] = prompt_override

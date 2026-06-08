@@ -50,6 +50,7 @@
           </div>
         </div>
 
+        <label class="config-label">Course Material from which you want to generate assessment</label>
         <label class="upload-zone" (dragover)="$event.preventDefault()" (drop)="onFilesDropped($event)">
           <input type="file" hidden multiple accept=".pdf,.doc,.docx,.ppt,.pptx" (change)="onFilesSelected($event)">
           <div class="upload-icon">

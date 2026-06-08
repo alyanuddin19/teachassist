@@ -29,6 +29,8 @@ def build_prompt(
 
     constraints = get_constraints(exam_type)
     time_allowed = constraints["time"]
+    course_code = (clo_mapping or {}).get("course_code", "")
+    course_title = (clo_mapping or {}).get("course_title", "")
 
     total_mcq_marks = mcq_count * mcq_marks
     total_theory_marks = sum(question.get("marks", 0) for question in theory_questions)
@@ -37,7 +39,9 @@ def build_prompt(
     lines = [
         f"You are an expert academic examiner. Generate a professional {exam_label} paper based on the provided document content.",
         "",
-        f"Document     : {filename}",
+        f"Source Files : {filename}",
+        f"Course Code  : {course_code}" if course_code else "Course Code  : Not specified",
+        f"Course Name  : {course_title}" if course_title else "Course Name  : Not specified",
         f"Exam Type    : {exam_label}",
         f"Total Marks  : {grand_total}",
         f"Time Allowed : {time_allowed}",
@@ -172,7 +176,9 @@ def build_prompt(
         "5. Match question depth to the marks allocated and Bloom's level assigned.",
         "6. Use ONE action verb from the suggested list for each theory question.",
         "7. For CASE STUDY questions, output **Case Study:** followed by **Question:**.",
-        f"8. Include a proper exam header: Course Name (inferred from document), Exam Type ({exam_label}), Total Marks ({grand_total}), Time Allowed ({time_allowed}).",
+        f"8. Include a proper exam header: Course Code ({course_code or 'Not specified'}), Course Name (inferred from CIS/document), Exam Type ({exam_label}), Total Marks ({grand_total}), Time Allowed ({time_allowed}).",
+        "8a. Do not invent a course code, do not use a random number as the course code, and do not extract the course code from uploaded file names.",
+        "8b. Use only the Course Code value extracted from the actual CIS content above; if it is unavailable, write Course Code: Not specified.",
         "9. Format output as a clean, print-ready exam paper.",
         "10. Do NOT include answer keys in the exam paper body.",
         "10a. Do not use LaTeX math delimiters. Write formulas in plain readable text, for example T = 3, I <= T, r in {0, 1, 2}.",

@@ -40,6 +40,7 @@ from reportlab.lib.pagesizes import A4
 from app.routers import gap_analysis_clean
 
 TRANSFORM_MARKSHEET_RETENTION_DAYS = 28
+STUDENT_TASK_RETENTION_DAYS = 28
 from app.routers import prompt_generator
 from app.routers import transformation
 from app.t2_transform_loader import load_t2_transform_app, load_t2_excel_builder
@@ -81,6 +82,28 @@ def ensure_transform_marks_decimal_storage() -> None:
 
 
 ensure_transform_marks_decimal_storage()
+
+
+def ensure_retention_schema_columns() -> None:
+    try:
+        with engine.begin() as connection:
+            connection.execute(text(
+                """
+                ALTER TABLE transform_marksheets
+                ADD COLUMN IF NOT EXISTS source_kind VARCHAR(50) NOT NULL DEFAULT 'initial'
+                """
+            ))
+            connection.execute(text(
+                """
+                ALTER TABLE transform_marksheets
+                ADD COLUMN IF NOT EXISTS source_marksheet_id INTEGER NULL
+                """
+            ))
+    except Exception:
+        pass
+
+
+ensure_retention_schema_columns()
 app = FastAPI(title="TeachAssist Backend")
 
 app.include_router(gap_analysis_clean.router)
@@ -884,6 +907,8 @@ def get_student_tasks(student_id: int, db: Session = Depends(get_db)):
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
 
+    cleanup_expired_student_tasks(db, student_id=student.id)
+
     tasks = db.query(models.StudentTask).filter(
         models.StudentTask.student_id == student.id
     ).order_by(models.StudentTask.created_at.desc()).all()
@@ -911,17 +936,7 @@ def delete_student_task(task_id: int, student_id: int, db: Session = Depends(get
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    for file_path in [task.task_attachment_path, task.answer_attachment_path]:
-        if file_path:
-            try:
-                path = Path(file_path)
-                if path.exists():
-                    path.unlink()
-            except Exception:
-                pass
-
-    db.delete(task)
-    db.commit()
+    delete_student_task_record(task, db)
 
     return {"status": "deleted", "task_id": task_id}
 
@@ -934,6 +949,9 @@ def get_task_attachment(task_id: int, db: Session = Depends(get_db)):
 
     if not task or not task.answer_attachment_path:
         raise HTTPException(status_code=404, detail="Attachment not found")
+    if student_task_is_expired(task):
+        delete_student_task_record(task, db)
+        raise HTTPException(status_code=404, detail="Task expired after 28 days and was deleted")
 
     file_path = Path(task.answer_attachment_path)
     if not file_path.exists():
@@ -950,6 +968,9 @@ def get_task_reference(task_id: int, db: Session = Depends(get_db)):
 
     if not task or not task.task_attachment_path:
         raise HTTPException(status_code=404, detail="Reference file not found")
+    if student_task_is_expired(task):
+        delete_student_task_record(task, db)
+        raise HTTPException(status_code=404, detail="Task expired after 28 days and was deleted")
 
     file_path = Path(task.task_attachment_path)
     if not file_path.exists():
@@ -989,6 +1010,7 @@ async def assign_student_task(
     ).first()
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found")
+    cleanup_expired_student_tasks(db, teacher_id=teacher.id)
 
     student = db.query(models.Student).filter(
         models.Student.roll_no == student_roll_no
@@ -1056,6 +1078,9 @@ async def submit_student_task(
 
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
+    if student_task_is_expired(task):
+        delete_student_task_record(task, db)
+        raise HTTPException(status_code=404, detail="Task expired after 28 days and was deleted")
 
     if task.status not in {"assigned", "returned"}:
         raise HTTPException(status_code=400, detail="This task cannot be submitted right now")
@@ -1096,6 +1121,7 @@ def get_teacher_notifications(teacher_name: str, db: Session = Depends(get_db)):
 
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found")
+    cleanup_expired_student_tasks(db, teacher_id=teacher.id)
 
     tasks = db.query(models.StudentTask).filter(
         models.StudentTask.teacher_id == teacher.id,
@@ -1153,8 +1179,12 @@ def review_student_task(task_id: int, data: dict, db: Session = Depends(get_db))
     ).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
+    if student_task_is_expired(task):
+        delete_student_task_record(task, db)
+        raise HTTPException(status_code=404, detail="Task expired after 28 days and was deleted")
 
     cleanup_expired_transform_marksheets(db, teacher.id)
+    cleanup_expired_student_tasks(db, teacher_id=teacher.id)
 
     task.teacher_decision = decision
     task.teacher_feedback = feedback or None
@@ -1977,6 +2007,58 @@ def delete_transform_marksheet_record(marksheet: models.TransformMarksheet, db: 
                 path.unlink()
         except Exception:
             pass
+
+
+def task_expires_at(task: models.StudentTask) -> datetime | None:
+    if not task.created_at:
+        return None
+    created_at = task.created_at
+    if created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=timezone.utc)
+    return created_at + timedelta(days=STUDENT_TASK_RETENTION_DAYS)
+
+
+def student_task_is_expired(task: models.StudentTask) -> bool:
+    expires_at = task_expires_at(task)
+    return bool(expires_at and datetime.now(timezone.utc) >= expires_at)
+
+
+def delete_student_task_record(task: models.StudentTask, db: Session, commit: bool = True) -> None:
+    file_paths = [task.task_attachment_path, task.answer_attachment_path]
+    db.delete(task)
+    if commit:
+        db.commit()
+
+    for file_path in file_paths:
+        if file_path:
+            try:
+                path = Path(file_path)
+                if path.exists():
+                    path.unlink()
+            except Exception:
+                pass
+
+
+def cleanup_expired_student_tasks(
+    db: Session,
+    teacher_id: int | None = None,
+    student_id: int | None = None
+) -> None:
+    cutoff = datetime.now(timezone.utc) - timedelta(days=STUDENT_TASK_RETENTION_DAYS)
+    query = db.query(models.StudentTask).filter(
+        models.StudentTask.created_at.isnot(None),
+        models.StudentTask.created_at < cutoff
+    )
+    if teacher_id is not None:
+        query = query.filter(models.StudentTask.teacher_id == teacher_id)
+    if student_id is not None:
+        query = query.filter(models.StudentTask.student_id == student_id)
+
+    expired_tasks = query.all()
+    for task in expired_tasks:
+        delete_student_task_record(task, db, commit=False)
+    if expired_tasks:
+        db.commit()
 
 
 def cleanup_expired_transform_marksheets(db: Session, teacher_id: int | None = None) -> None:
