@@ -1,6 +1,7 @@
 # Secrets and environment files
 .env
 .env.*
+!backend/.env.example
 backend/.env
 frontendd/.env
 
