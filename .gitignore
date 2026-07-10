@@ -49,3 +49,4 @@ temp/
 # Database / local app state
 *.sqlite3
 *.db
+backups/
