@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Teacher Assist">
+  <rect width="64" height="64" rx="14" fill="#eef4ff"/>
+  <path d="M32 12 8 23l24 11 24-11L32 12Z" fill="#2745b3"/>
+  <path d="M18 29v10c0 6 6 11 14 11s14-5 14-11V29L32 36 18 29Z" fill="#2745b3"/>
+  <path d="M51 25v17" stroke="#facc15" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="51" cy="47" r="5" fill="#facc15"/>
+</svg>
