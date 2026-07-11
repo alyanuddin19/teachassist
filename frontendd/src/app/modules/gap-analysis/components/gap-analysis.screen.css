@@ -364,6 +364,8 @@ canvas {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  min-width: 58px;
   min-height: 30px;
   padding: 0 12px;
   border-radius: 999px;
@@ -371,6 +373,9 @@ canvas {
   color: #ffffff;
   font-size: 0.78rem;
   font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  word-break: keep-all;
 }
 
 .inline-badge {
@@ -382,11 +387,16 @@ canvas {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  min-width: 86px;
   min-height: 30px;
   padding: 0 12px;
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 800;
+  line-height: 1.15;
+  white-space: nowrap;
+  word-break: keep-all;
 }
 
 .no-gap {

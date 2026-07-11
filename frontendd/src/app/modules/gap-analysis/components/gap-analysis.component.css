@@ -104,7 +104,12 @@ button:disabled {
 
 /* CLO Badge Styling */
 .clo-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 58px;
+  min-height: 30px;
   padding: 5px 12px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -112,6 +117,9 @@ button:disabled {
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.5px;
+  line-height: 1;
+  white-space: nowrap;
+  word-break: keep-all;
 }
 
 /* Status Badges */
@@ -120,7 +128,13 @@ button:disabled {
   border-radius: 5px;
   font-weight: bold;
   font-size: 13px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 86px;
+  line-height: 1.15;
+  white-space: nowrap;
+  word-break: keep-all;
 }
 
 .no-gap {
