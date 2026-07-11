@@ -124,8 +124,19 @@ export class GapAnalysisComponent implements OnInit {
       teacherName
     ).subscribe({
       next: (res) => {
+        this.result = {
+          ...(this.result || {}),
+          ...res,
+          class_summary: res.class_summary || res.summary || this.result?.class_summary,
+          clo_results: res.clo_results || res.clo_overview || this.result?.clo_results || [],
+          gap_results: res.gap_results || this.result?.gap_results || [],
+          heatmap: res.heatmap || this.result?.heatmap || { questions: [], students: [] },
+          threshold_percentage: res.threshold_percentage || this.result?.threshold_percentage,
+          teacher_threshold_percentage: res.teacher_threshold_percentage ?? this.result?.teacher_threshold_percentage,
+          clo_warning: res.clo_warning || this.result?.clo_warning || ''
+        };
         this.weakStudents    = res.weak_students || [];
-        this.courseTitle     = res.course_title || this.courseTitle;
+        this.courseTitle     = res.course_title || res.course_name || this.courseTitle;
         this.detectedCourseCode = res.course_code || this.detectedCourseCode;
         this.thresholdPercentage = this.extractThresholdPercentage(res);
         this.cloWarning = res.clo_warning || this.cloWarning || '';
@@ -135,6 +146,8 @@ export class GapAnalysisComponent implements OnInit {
         this.recoGenerated   = true;
         this.showAssignments = true;
         this.loading         = false;
+        this.resetSectionState();
+        setTimeout(() => this.renderChart(), 300);
       },
       error: (err) => {
         alert('Error: ' + (err.error?.detail || 'Unknown error'));
