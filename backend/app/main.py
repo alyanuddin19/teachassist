@@ -46,6 +46,7 @@ from app.routers import prompt_generator
 from app.routers import transformation
 from app.routers import column_mapping
 from app.routers import standard_templates
+from app.routers import hod_insights
 from app.t2_transform_loader import load_t2_transform_app, load_t2_excel_builder
 
 
@@ -172,6 +173,7 @@ app.include_router(prompt_generator.router)
 app.include_router(transformation.router)
 app.include_router(column_mapping.router)
 app.include_router(standard_templates.router)
+app.include_router(hod_insights.router)
 
 t2_transform_app = load_t2_transform_app()
 if t2_transform_app is not None:

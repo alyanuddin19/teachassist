@@ -24,6 +24,7 @@
         <nav class="sidebar-nav">
           <button type="button" [class.active]="activeView === 'manage'" (click)="switchView('manage')">Manage</button>
           <button type="button" [class.active]="activeView === 'templates'" (click)="switchView('templates')">Templates</button>
+          <button type="button" [class.active]="activeView === 'insights'" (click)="switchView('insights')">Academic Insights</button>
         </nav>
       </div>
 
@@ -37,14 +38,17 @@
     <section class="surface-card hod-banner">
       <div>
         <span class="page-kicker">HOD Dashboard</span>
-        <h2>{{ activeView === 'templates' ? 'Standard Templates' : 'Assign Course To Teacher' }}</h2>
+        <h2>{{ activeView === 'insights' ? 'Academic Insights' : (activeView === 'templates' ? 'Standard Templates' : 'Assign Course To Teacher') }}</h2>
         <p *ngIf="activeView === 'manage'">Use a registered teacher username and link one course from the system catalog.</p>
         <p *ngIf="activeView === 'templates'">Upload and activate standard Excel templates for teacher transformations.</p>
+        <p *ngIf="activeView === 'insights'">Review saved Gap Analyzer reports by department, semester, course, teacher, and assessment.</p>
       </div>
     </section>
 
     <div class="status-line error" *ngIf="error">{{ error }}</div>
     <div class="status-line success" *ngIf="success">{{ success }}</div>
+    <div class="status-line error" *ngIf="insightError">{{ insightError }}</div>
+    <div class="status-line success" *ngIf="insightSuccess">{{ insightSuccess }}</div>
 
     <section class="surface-card" *ngIf="activeView === 'manage'">
       <div class="section-head">
@@ -173,7 +177,232 @@
         </div>
       </div>
     </section>
+
+    <section class="surface-card insights-panel" *ngIf="activeView === 'insights'">
+      <div class="section-head insights-head">
+        <div>
+          <span class="page-kicker">Analyze</span>
+          <h3>Academic Insights</h3>
+        </div>
+
+        <div class="insight-controls">
+          <label class="field-block">
+            <span>Department</span>
+            <select [(ngModel)]="selectedInsightDepartment" (change)="loadSemesterInsights()">
+              <option *ngFor="let dept of insightDepartments" [value]="dept">{{ dept }}</option>
+            </select>
+          </label>
+
+          <label class="field-block">
+            <span>Semester</span>
+            <select [(ngModel)]="selectedSemester" (change)="loadSemesterInsights()">
+              <option *ngFor="let semester of semesters" [value]="semester">Semester {{ semester }}</option>
+            </select>
+          </label>
+        </div>
+
+        <button type="button" class="snapshot-btn" (click)="toggleInsightRecords()">
+          {{ showInsightRecords ? 'Close Records' : 'View Records' }}
+        </button>
+      </div>
+
+      <div class="insight-loading" *ngIf="insightLoading">Loading academic insights...</div>
+
+      <div class="course-insight-table" *ngIf="!insightLoading">
+        <div class="insight-empty" *ngIf="!insightCourses.length">
+          No teacher-course records found for {{ selectedInsightDepartment }} semester {{ selectedSemester }}.
+        </div>
+
+        <table *ngIf="insightCourses.length">
+          <thead>
+            <tr>
+              <th>Course</th>
+              <th>Teacher</th>
+              <th>Section</th>
+              <th>Reports</th>
+              <th>Latest Insight</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let course of insightCourses" [class.selected-row]="selectedCourse?.teacher_course_id === course.teacher_course_id">
+              <td>
+                <strong>{{ course.course_code }}</strong>
+                <span>{{ course.course_name }}</span>
+              </td>
+              <td>{{ course.teacher_name || '-' }}</td>
+              <td>{{ course.section || '-' }}</td>
+              <td>{{ course.report_count }}</td>
+              <td>
+                <ng-container *ngIf="course.latest_summary; else noReport">
+                  {{ course.latest_assessment_title }} - Gap {{ course.latest_summary.weakest_clo_gap_percentage || 0 }}%
+                </ng-container>
+                <ng-template #noReport>No saved gap report</ng-template>
+              </td>
+              <td>
+                <button type="button" class="table-action" (click)="openCourseReports(course)">View Insights</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="report-workspace" *ngIf="selectedCourse">
+        <aside class="report-list">
+          <div class="report-list-head">
+            <strong>{{ selectedCourse.course_code }}</strong>
+            <span>{{ selectedCourse.teacher_name }}</span>
+          </div>
+
+          <button
+            type="button"
+            class="report-item"
+            *ngFor="let report of selectedReports"
+            [class.active]="selectedReport?.id === report.id"
+            (click)="selectReport(report)">
+            <strong>{{ report.assessment_title }}</strong>
+            <span>{{ report.assessment_type }} - {{ report.created_at | date:'mediumDate' }}</span>
+          </button>
+
+          <div class="insight-empty compact" *ngIf="!selectedReports.length">
+            No Gap Analyzer reports have been saved for this course yet.
+          </div>
+        </aside>
+
+        <article class="report-detail" *ngIf="selectedReport">
+          <div class="report-detail-head">
+            <div>
+              <span class="page-kicker">{{ selectedReport.assessment_type }}</span>
+              <h3>{{ selectedReport.assessment_title }}</h3>
+              <p>
+                {{ selectedReport.course_code }} - {{ selectedReport.course_name }} -
+                {{ selectedReport.teacher_name }} - Semester {{ selectedReport.semester }}
+              </p>
+            </div>
+            <div class="report-actions">
+              <a class="snapshot-btn link-btn" [href]="getReportDownloadLink(selectedReport)">Download Report</a>
+              <button type="button" class="snapshot-btn" (click)="saveSelectedSnapshot()">Save Record</button>
+            </div>
+          </div>
+
+          <div class="source-strip">
+            <span>Source: Gap Analyzer</span>
+            <span>Paper: {{ selectedReport.question_paper_name || '-' }}</span>
+            <span>Marksheet: {{ selectedReport.marksheet_name || '-' }}</span>
+            <span>CIS: {{ selectedReport.cis_file_name || 'Not uploaded' }}</span>
+          </div>
+
+          <div class="metric-grid">
+            <div>
+              <span>Average</span>
+              <strong>{{ selectedReport.summary.average_percentage }}%</strong>
+            </div>
+            <div>
+              <span>Pass Rate</span>
+              <strong>{{ selectedReport.summary.pass_rate }}%</strong>
+            </div>
+            <div>
+              <span>At Risk</span>
+              <strong>{{ selectedReport.summary.at_risk_students }}</strong>
+            </div>
+            <div>
+              <span>Weak CLOs</span>
+              <strong>{{ selectedReport.summary.weak_clo_count }}</strong>
+            </div>
+          </div>
+
+          <div class="quick-insight-line">
+            <span>Weakest CLO: <strong>{{ selectedReport.summary.weakest_clo || '-' }}</strong></span>
+            <span>Problem Question: <strong>{{ selectedReport.summary.most_problematic_question || '-' }}</strong></span>
+            <span>Students: <strong>{{ selectedReport.summary.student_count }}</strong></span>
+          </div>
+
+          <div class="chart-grid">
+            <div class="chart-card">
+              <h4>Pass vs At Risk</h4>
+              <canvas id="hodPassFailChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h4>CLO Gap</h4>
+              <canvas id="hodCloChart"></canvas>
+            </div>
+            <div class="chart-card wide">
+              <h4>Question-wise Gap</h4>
+              <canvas id="hodQuestionChart"></canvas>
+            </div>
+          </div>
+
+          <div class="mini-table-wrap" *ngIf="reportCloResults.length">
+            <h4>CLO-wise Detail</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>CLO</th>
+                  <th>Questions</th>
+                  <th>Students Below</th>
+                  <th>Gap %</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let clo of reportCloResults">
+                  <td>{{ clo.clo }}</td>
+                  <td>{{ clo.questions?.join(', ') }}</td>
+                  <td>{{ clo.students_below_threshold }}</td>
+                  <td>{{ clo.gap_percentage }}%</td>
+                  <td>{{ clo.status }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+    </section>
   </div>
+
+  <div class="records-overlay" *ngIf="showInsightRecords" (click)="closeInsightRecords()"></div>
+  <section class="records-panel" *ngIf="showInsightRecords" (click)="$event.stopPropagation()">
+    <div class="records-panel-head">
+      <div>
+        <span class="page-kicker">Saved Records</span>
+        <h3>HOD Records</h3>
+      </div>
+      <button class="close-panel-btn" type="button" (click)="closeInsightRecords()">Close</button>
+    </div>
+
+    <div class="insight-loading" *ngIf="snapshotLoading">Loading saved records...</div>
+
+    <div class="saved-snapshot-list" *ngIf="!snapshotLoading && savedSnapshots.length; else emptySnapshots">
+      <article class="saved-snapshot-item" *ngFor="let snapshot of savedSnapshots; trackBy: trackBySnapshotId">
+        <div class="saved-snapshot-main">
+          <div>
+            <h4>{{ snapshot.assessment_title || snapshot.assessment_type || 'Saved Record' }}</h4>
+            <p>{{ snapshot.course_code }} - {{ snapshot.course_name }}</p>
+            <p>{{ snapshot.teacher_name }} - Semester {{ snapshot.semester }} - {{ snapshot.created_at | date:'medium' }}</p>
+          </div>
+          <div class="saved-snapshot-actions">
+            <button type="button" class="template-delete-btn" title="Delete record" aria-label="Delete record" (click)="deleteHodSnapshot(snapshot)">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 6h18" />
+                <path d="M8 6V4h8v2" />
+                <path d="M6 6l1 15h10l1-15" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+              </svg>
+            </button>
+            <a class="snapshot-btn link-btn" [href]="snapshot.downloadLink">Download</a>
+          </div>
+        </div>
+        <p class="retention-note">{{ snapshot.expiryLabel }}</p>
+      </article>
+    </div>
+
+    <ng-template #emptySnapshots>
+      <div class="insight-empty" *ngIf="!snapshotLoading">
+        No saved HOD insight records yet.
+      </div>
+    </ng-template>
+  </section>
 </div>
 
 <app-ai-assistant role="hod" page="hod dashboard" title="HOD AI"></app-ai-assistant>

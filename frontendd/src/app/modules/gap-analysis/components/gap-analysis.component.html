@@ -1,4 +1,10 @@
 <div class="container">
+  <div class="records-head">
+    <button class="records-toggle" type="button" (click)="toggleRecords()">
+      {{ showRecords ? 'Close Records' : 'View Records' }}
+    </button>
+  </div>
+
   <h1>Gap Analysis</h1>
 
   <div class="card">
@@ -24,6 +30,20 @@
       </label>
     </div>
 
+    <div class="assessment-meta-grid">
+      <label>
+        <span>Assessment Type</span>
+        <select [(ngModel)]="selectedAssessmentType">
+          <option *ngFor="let type of assessmentTypes" [value]="type">{{ type }}</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Assessment Name</span>
+        <input [(ngModel)]="assessmentTitle" placeholder="Quiz 1, Assignment 2, Midterm" />
+      </label>
+    </div>
+
     <div class="analyze-center">
       <button class="primary-btn" (click)="analyze()" [disabled]="loading">
         {{ loading ? 'Analyzing...' : 'Analyze Gap' }}
@@ -38,10 +58,14 @@
         <p class="result-summary" *ngIf="courseTitle || detectedCourseCode">
           {{ detectedCourseCode || 'Course' }}<span *ngIf="courseTitle"> - {{ courseTitle }}</span>
           <span *ngIf="thresholdPercentage !== null"> - Threshold {{ thresholdPercentage }}%</span>
+          <span *ngIf="gapReportId"> - Record #{{ gapReportId }}</span>
         </p>
         <p class="result-summary error-text" *ngIf="cloWarning">{{ cloWarning }}</p>
       </div>
-      <button class="secondary-btn" (click)="exportToCSV()">Export CSV</button>
+      <div class="result-actions">
+        <button class="secondary-btn" *ngIf="gapReportId" (click)="saveCurrentRecord()">Save Record</button>
+        <button class="secondary-btn" (click)="exportToCSV()">Export CSV</button>
+      </div>
     </div>
 
     <div class="next-step-card" *ngIf="!recoGenerated">
@@ -248,7 +272,7 @@
     <div *ngIf="showAssignments && weakOnlyStudents.length > 0" class="assignments-section">
       <div class="assignments-head">
         <h2 class="title">Students Requiring Attention</h2>
-        <button class="secondary-btn" (click)="downloadPDF()">Download PDF</button>
+        <button class="secondary-btn" *ngIf="hasGeneratedAssignments" (click)="downloadPDF()">Download PDF</button>
       </div>
 
       <table class="gap-table">
@@ -339,3 +363,48 @@
     </div>
   </div>
 </div>
+
+<div class="records-overlay" *ngIf="showRecords" (click)="closeRecords()"></div>
+<section class="records-panel" *ngIf="showRecords" (click)="$event.stopPropagation()">
+  <div class="records-panel-head">
+    <div>
+      <span class="section-kicker">Saved Reports</span>
+      <h3>Gap Analysis Records</h3>
+    </div>
+    <button class="close-panel-btn" type="button" (click)="closeRecords()">Close</button>
+  </div>
+
+  <div class="records-loading" *ngIf="recordsLoading">Loading reports...</div>
+  <div class="records-empty" *ngIf="!recordsLoading && recordsError">{{ recordsError }}</div>
+
+  <div class="saved-report-list" *ngIf="!recordsLoading && !recordsError && savedReports.length; else emptyReports">
+    <article class="saved-report-item" *ngFor="let report of savedReports; trackBy: trackByReportId">
+      <div class="saved-report-main">
+        <div>
+          <h4>{{ report.assessment_title || report.assessment_type }}</h4>
+          <p>{{ report.course_code || 'Course' }} - {{ report.course_name || '-' }}</p>
+          <p>{{ report.assessment_type }} - {{ report.created_at | date:'medium' }}</p>
+        </div>
+        <div class="saved-report-actions">
+          <button type="button" class="delete-record-btn" title="Delete report" aria-label="Delete report" (click)="deleteSavedReport(report)">
+            <span class="material-symbols-rounded">delete</span>
+          </button>
+          <a class="download-record-link" [href]="report.downloadLink">Download</a>
+        </div>
+      </div>
+
+      <div class="saved-report-metrics">
+        <span>Average {{ report.summary?.average_percentage || 0 }}%</span>
+        <span>Pass {{ report.summary?.pass_rate || 0 }}%</span>
+        <span>Weak CLOs {{ report.summary?.weak_clo_count || 0 }}</span>
+      </div>
+      <p class="retention-note">{{ report.expiryLabel }}</p>
+    </article>
+  </div>
+
+  <ng-template #emptyReports>
+    <div class="records-empty" *ngIf="!recordsLoading && !recordsError">
+      No saved Gap Analysis reports found yet.
+    </div>
+  </ng-template>
+</section>

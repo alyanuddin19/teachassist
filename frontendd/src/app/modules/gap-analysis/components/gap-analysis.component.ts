@@ -1,5 +1,5 @@
 import { Component, HostListener, OnInit } from '@angular/core';
-import { GapAnalysisService } from '../services/gap-analysis.service';
+import { GapAnalysisSavedReport, GapAnalysisService } from '../services/gap-analysis.service';
 import { Chart, registerables } from 'chart.js';
 import jsPDF from 'jspdf';
 
@@ -17,6 +17,10 @@ export class GapAnalysisComponent implements OnInit {
   cisFile!: File;
   result: any   = null;
   loading       = false;
+  showRecords = false;
+  recordsLoading = false;
+  recordsError = '';
+  savedReports: Array<GapAnalysisSavedReport & { expiryLabel: string; downloadLink: string }> = [];
 
   // Modal
   showModal        = false;
@@ -36,6 +40,10 @@ export class GapAnalysisComponent implements OnInit {
   detectedCourseCode = '';
   thresholdPercentage: number | null = null;
   cloWarning = '';
+  gapReportId: number | null = null;
+  assessmentTypes = ['Quiz', 'Assignment', 'Midterm', 'Final'];
+  selectedAssessmentType = 'Quiz';
+  assessmentTitle = 'Quiz 1';
   recoGenerated    = false;
   showAssignments  = false;
   isCompactPortrait = false;
@@ -67,6 +75,68 @@ export class GapAnalysisComponent implements OnInit {
     this.referenceFiles[studentName] = e.target.files?.[0] || null;
   }
 
+  toggleRecords(): void {
+    this.showRecords = !this.showRecords;
+    if (this.showRecords) {
+      this.loadSavedReports();
+    }
+  }
+
+  closeRecords(): void {
+    this.showRecords = false;
+  }
+
+  loadSavedReports(): void {
+    const teacherName = this.currentTeacherName();
+    if (!teacherName) {
+      this.recordsError = 'Teacher session missing. Please log in again.';
+      this.savedReports = [];
+      return;
+    }
+
+    this.recordsLoading = true;
+    this.recordsError = '';
+    this.service.getSavedReports(teacherName).subscribe({
+      next: (res) => {
+        this.recordsLoading = false;
+        this.savedReports = (res.reports || []).map((report) => ({
+          ...report,
+          expiryLabel: this.buildExpiryLabel(report.expires_at),
+          downloadLink: this.service.getReportDownloadUrl(report.download_url, teacherName)
+        }));
+      },
+      error: (err) => {
+        this.recordsLoading = false;
+        this.savedReports = [];
+        this.recordsError = err.error?.detail || 'Could not load saved gap reports.';
+      }
+    });
+  }
+
+  deleteSavedReport(report: GapAnalysisSavedReport): void {
+    const teacherName = this.currentTeacherName();
+    if (!teacherName) {
+      this.recordsError = 'Teacher session missing. Please log in again.';
+      return;
+    }
+    if (!window.confirm(`Delete "${report.assessment_title || report.assessment_type}" from saved reports?`)) {
+      return;
+    }
+
+    this.service.deleteSavedReport(report.id, teacherName).subscribe({
+      next: () => {
+        this.savedReports = this.savedReports.filter((item) => item.id !== report.id);
+      },
+      error: (err) => {
+        this.recordsError = err.error?.detail || 'Could not delete this report.';
+      }
+    });
+  }
+
+  trackByReportId(_index: number, report: GapAnalysisSavedReport): number {
+    return report.id;
+  }
+
   analyze() {
     if (!this.questionPaper || !this.marksheet) {
       alert('Please upload both files');
@@ -81,21 +151,29 @@ export class GapAnalysisComponent implements OnInit {
     this.detectedCourseCode = '';
     this.thresholdPercentage = null;
     this.cloWarning = '';
+    this.gapReportId = null;
 
-    const teacherName = (localStorage.getItem('teacherName') || '').trim();
+    const teacherName = this.currentTeacherName();
     if (!teacherName) {
       alert('Teacher session missing. Please log in again.');
       this.loading = false;
       return;
     }
 
-    this.service.analyze(this.questionPaper, this.marksheet, teacherName).subscribe({
+    this.service.analyze(
+      this.questionPaper,
+      this.marksheet,
+      teacherName,
+      this.selectedAssessmentType,
+      this.normalizedAssessmentTitle()
+    ).subscribe({
       next: (res) => {
         this.result  = res;
         this.courseTitle = res.course_name || '';
         this.detectedCourseCode = res.course_code || '';
         this.thresholdPercentage = this.extractThresholdPercentage(res);
         this.cloWarning = res.clo_warning || '';
+        this.gapReportId = res.gap_report_id || null;
         this.loading = false;
         this.resetSectionState();
         setTimeout(() => this.renderChart(), 300);
@@ -109,7 +187,7 @@ export class GapAnalysisComponent implements OnInit {
 
   fetchWeakStudents() {
     if (!this.cisFile) { alert('Please upload CIS file first!'); return; }
-    const teacherName = (localStorage.getItem('teacherName') || '').trim();
+    const teacherName = this.currentTeacherName();
     if (!teacherName) {
       alert('Teacher session missing. Please log in again.');
       return;
@@ -121,7 +199,9 @@ export class GapAnalysisComponent implements OnInit {
       this.marksheet,
       this.cisFile,
       'Moderate',
-      teacherName
+      teacherName,
+      this.selectedAssessmentType,
+      this.normalizedAssessmentTitle()
     ).subscribe({
       next: (res) => {
         this.result = {
@@ -140,6 +220,7 @@ export class GapAnalysisComponent implements OnInit {
         this.detectedCourseCode = res.course_code || this.detectedCourseCode;
         this.thresholdPercentage = this.extractThresholdPercentage(res);
         this.cloWarning = res.clo_warning || this.cloWarning || '';
+        this.gapReportId = res.gap_report_id || this.gapReportId || null;
         for (const student of this.weakStudents) {
           this.studentRollNos[student.student_name] = student.roll_no || '';
         }
@@ -210,6 +291,18 @@ export class GapAnalysisComponent implements OnInit {
     return this.weakStudents.filter(s => s.has_weakness);
   }
 
+  get hasGeneratedAssignments(): boolean {
+    return Object.keys(this.generatedStudents || {}).length > 0;
+  }
+
+  saveCurrentRecord(): void {
+    if (!this.gapReportId) {
+      return;
+    }
+    this.showRecords = true;
+    this.loadSavedReports();
+  }
+
   toggleSection(section: 'chart' | 'heatmap' | 'questionTable' | 'cloTable'): void {
     this.sectionState[section] = !this.sectionState[section];
   }
@@ -246,7 +339,7 @@ export class GapAnalysisComponent implements OnInit {
   }
 
   sendGeneratedTask(student: any) {
-    const teacherName = (localStorage.getItem('teacherName') || '').trim();
+    const teacherName = this.currentTeacherName();
     const rollNo = (this.studentRollNos[student.student_name] || '').trim().toUpperCase();
     const assignment = this.generatedStudents[student.student_name];
 
@@ -308,6 +401,27 @@ export class GapAnalysisComponent implements OnInit {
       lines.push('');
     }
     return lines.join('\n').trim();
+  }
+
+  private normalizedAssessmentTitle(): string {
+    const title = this.assessmentTitle.trim();
+    return title || this.selectedAssessmentType;
+  }
+
+  private currentTeacherName(): string {
+    return (localStorage.getItem('teacherName') || '').trim();
+  }
+
+  private buildExpiryLabel(expiresAt: string | null | undefined): string {
+    if (!expiresAt) {
+      return 'Auto-deletes after 28 days';
+    }
+    const expiryTime = new Date(expiresAt).getTime();
+    if (Number.isNaN(expiryTime)) {
+      return 'Auto-deletes after 28 days';
+    }
+    const daysLeft = Math.max(0, Math.ceil((expiryTime - Date.now()) / 86400000));
+    return daysLeft === 1 ? 'Deletes tomorrow' : `Deletes in ${daysLeft} days`;
   }
 
   private extractThresholdPercentage(res: any): number {
