@@ -202,11 +202,17 @@ h1 {
 }
 
 .social-list a,
-.team-list a {
+.team-card {
   border-radius: 20px;
   padding: 18px;
   background: rgba(238, 242, 255, 0.9);
   border: 1px solid var(--line);
+}
+
+.team-card {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
 }
 
 .social-link {
@@ -254,6 +260,34 @@ h1 {
   margin-top: 6px;
   color: var(--muted);
   font-size: 13px;
+}
+
+.team-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.team-actions a {
+  flex: 1 1 76px;
+  min-width: 0;
+  border-radius: 999px;
+  padding: 10px 12px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 850;
+  border: 1px solid var(--line);
+}
+
+.team-actions a:first-child {
+  color: #1742a0;
+  background: #e7edff;
+}
+
+.team-actions a:last-child {
+  color: white;
+  background: linear-gradient(135deg, #173f96, #5b7cff);
+  box-shadow: 0 12px 24px rgba(23, 66, 160, 0.18);
 }
 
 .footer {
