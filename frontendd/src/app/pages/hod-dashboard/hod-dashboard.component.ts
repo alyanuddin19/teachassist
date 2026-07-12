@@ -164,11 +164,12 @@ export class HodDashboardComponent implements OnInit {
     this.templateFile = input.files?.[0] || null;
   }
 
-  loadTemplates(): void {
-    if (!this.department) {
+  loadTemplates(department = this.department): void {
+    const selectedDepartment = (department || '').trim().toUpperCase();
+    if (!selectedDepartment) {
       return;
     }
-    this.api.getHodTemplates(this.department).subscribe({
+    this.api.getHodTemplates(selectedDepartment).subscribe({
       next: (res) => this.templates = res.templates || [],
       error: () => this.templates = []
     });
@@ -198,16 +199,21 @@ export class HodDashboardComponent implements OnInit {
         this.templateSaving = false;
         this.success = 'Standard template saved.';
         this.selectedTemplate = res.template;
+        this.templates = [
+          res.template,
+          ...this.templates.filter((template) => template.id !== res.template.id)
+        ];
+        const savedDepartment = res.template.department || this.templateForm.department || this.department;
         this.templateForm = {
           name: '',
           description: '',
-          department: this.department,
+          department: savedDepartment,
           purpose: 'Marksheet',
           version: 1,
           isActive: false
         };
         this.templateFile = null;
-        this.loadTemplates();
+        this.loadTemplates(savedDepartment);
       },
       error: (err) => {
         this.templateSaving = false;
