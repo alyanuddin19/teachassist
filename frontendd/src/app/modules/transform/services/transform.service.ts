@@ -123,10 +123,12 @@ export class TransformService {
   });
   private marksheetSavedSubject = new Subject<void>();
   private editMarksheetSubject = new Subject<number>();
+  private openRecordsSubject = new Subject<void>();
 
   readonly teacherContext$ = this.teacherContextSubject.asObservable();
   readonly marksheetSaved$ = this.marksheetSavedSubject.asObservable();
   readonly editMarksheet$ = this.editMarksheetSubject.asObservable();
+  readonly openRecords$ = this.openRecordsSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -152,6 +154,10 @@ export class TransformService {
 
   requestEditMarksheet(marksheetId: number): void {
     this.editMarksheetSubject.next(marksheetId);
+  }
+
+  requestOpenRecords(): void {
+    this.openRecordsSubject.next();
   }
 
   getTeacherCourses(teacherName: string): Observable<TransformCoursesResponse> {

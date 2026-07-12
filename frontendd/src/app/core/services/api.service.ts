@@ -325,6 +325,41 @@ export interface HodCourseReportsResponse {
   reports: HodInsightReport[];
 }
 
+export interface StandardTemplateField {
+  id: number;
+  field_key: string;
+  display_name: string;
+  column_position: number;
+  required: boolean;
+  data_type: string;
+  missing_value_rule: string;
+  default_value: string;
+  formula_definition: string;
+  editable_by_teacher: boolean;
+  allow_multiple_source_mapping: boolean;
+  synonyms: string[];
+  description: string;
+  hidden: boolean;
+  blank_allowed: boolean;
+}
+
+export interface StandardTemplate {
+  id: number;
+  name: string;
+  description: string;
+  department: string;
+  purpose: string;
+  version: number;
+  status: string;
+  is_active: boolean;
+  archived: boolean;
+  original_filename: string;
+  sheet_name: string;
+  header_row: number | null;
+  data_start_row: number | null;
+  fields?: StandardTemplateField[];
+}
+
 /* ===============================
    API SERVICE
 ================================ */
@@ -674,6 +709,52 @@ export class ApiService {
     return this.http.post<{ status: string; snapshot_id: number; created_at: string | null }>(
       `${this.BASE_URL}/hod/academic-insights/reports/${reportId}/snapshot`,
       { hod_name: hodName }
+    );
+  }
+
+  getTemplateSettings() {
+    return this.http.get<{ purposes: string[]; missing_value_rules: Array<{ key: string; label: string }>; data_types: string[] }>(
+      `${this.BASE_URL}/transform/template-settings`
+    );
+  }
+
+  getHodTemplates(department: string) {
+    return this.http.get<{ templates: StandardTemplate[] }>(
+      `${this.BASE_URL}/hod/transformation-templates?department=${encodeURIComponent(department)}`
+    );
+  }
+
+  createHodTemplate(form: FormData) {
+    return this.http.post<{ template: StandardTemplate }>(
+      `${this.BASE_URL}/hod/transformation-templates`,
+      form
+    );
+  }
+
+  getHodTemplate(templateId: number) {
+    return this.http.get<{ template: StandardTemplate }>(
+      `${this.BASE_URL}/hod/transformation-templates/${templateId}`
+    );
+  }
+
+  updateHodTemplateFields(templateId: number, fields: StandardTemplateField[]) {
+    return this.http.post<{ fields: StandardTemplateField[] }>(
+      `${this.BASE_URL}/hod/transformation-templates/${templateId}/fields`,
+      { fields }
+    );
+  }
+
+  activateHodTemplate(templateId: number) {
+    return this.http.post<{ template: StandardTemplate }>(
+      `${this.BASE_URL}/hod/transformation-templates/${templateId}/activate`,
+      {}
+    );
+  }
+
+  archiveHodTemplate(templateId: number) {
+    return this.http.post<{ template: StandardTemplate }>(
+      `${this.BASE_URL}/hod/transformation-templates/${templateId}/archive`,
+      {}
     );
   }
 }

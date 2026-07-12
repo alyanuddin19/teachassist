@@ -22,11 +22,14 @@
           </div>
 
           <div class="sheet-actions">
-            <button class="update-link" type="button" (click)="editMarksheet(sheet)" [disabled]="updatingMarksheetId === sheet.id">
-              {{ updatingMarksheetId === sheet.id ? 'Updating...' : 'Update Results' }}
-            </button>
-            <button class="delete-link" type="button" (click)="deleteMarksheet(sheet)" [disabled]="deletingMarksheetId === sheet.id">
-              {{ deletingMarksheetId === sheet.id ? 'Deleting...' : 'Delete' }}
+            <button class="delete-link icon-delete" type="button" title="Delete sheet" aria-label="Delete sheet" (click)="deleteMarksheet(sheet)" [disabled]="deletingMarksheetId === sheet.id">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 6h18" />
+                <path d="M8 6V4h8v2" />
+                <path d="M6 6l1 15h10l1-15" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+              </svg>
             </button>
             <a class="download-link" [href]="sheet.downloadLink">Download</a>
           </div>

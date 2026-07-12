@@ -130,6 +130,13 @@ export class LiveSheetComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (sheet.source_kind === 'standard_mapping') {
+      this.updateStatus = '';
+      this.api.requestEditMarksheet(sheet.id);
+      this.cdr.markForCheck();
+      return;
+    }
+
     this.updatingMarksheetId = sheet.id;
     this.updateStatus = '';
     this.cdr.markForCheck();

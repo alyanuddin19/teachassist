@@ -6,7 +6,9 @@ import {
   CourseSuggestion,
   CreatedTeacherResponse,
   HodInsightCourse,
-  HodInsightReport
+  HodInsightReport,
+  StandardTemplate,
+  StandardTemplateField
 } from '../../core/services/api.service';
 
 Chart.register(...registerables);
@@ -25,7 +27,7 @@ export class HodDashboardComponent implements OnInit, OnDestroy {
   error = '';
   success = '';
   saving = false;
-  activeView: 'manage' | 'insights' = 'manage';
+  activeView: 'manage' | 'templates' | 'insights' = 'manage';
   courseSuggestions: CourseSuggestion[] = [];
   assignmentResult: CreatedTeacherResponse['teacher'] | null = null;
   insightLoading = false;
@@ -39,6 +41,10 @@ export class HodDashboardComponent implements OnInit, OnDestroy {
   selectedCourse: HodInsightCourse | null = null;
   selectedReports: HodInsightReport[] = [];
   selectedReport: HodInsightReport | null = null;
+  templates: StandardTemplate[] = [];
+  selectedTemplate: StandardTemplate | null = null;
+  templateFile: File | null = null;
+  templateSaving = false;
   private insightCharts: Chart<any, any, any>[] = [];
 
   form = {
@@ -46,6 +52,15 @@ export class HodDashboardComponent implements OnInit, OnDestroy {
     department: '',
     courseCode: '',
     courseName: ''
+  };
+
+  templateForm = {
+    name: '',
+    description: '',
+    department: '',
+    purpose: 'Marksheet',
+    version: 1,
+    isActive: false
   };
 
   constructor(
@@ -63,8 +78,10 @@ export class HodDashboardComponent implements OnInit, OnDestroy {
     this.hodUid = localStorage.getItem('hodUid') || '';
     this.department = localStorage.getItem('hodDepartment') || '';
     this.form.department = this.department;
+    this.templateForm.department = this.department;
     this.syncViewportState();
     this.loadInsightDepartments();
+    this.loadTemplates();
   }
 
   ngOnDestroy(): void {
@@ -100,11 +117,14 @@ export class HodDashboardComponent implements OnInit, OnDestroy {
     this.sidebarCollapsed = !this.sidebarCollapsed;
   }
 
-  switchView(view: 'manage' | 'insights'): void {
+  switchView(view: 'manage' | 'templates' | 'insights'): void {
     this.activeView = view;
     this.closeSidebar();
     if (view === 'insights' && !this.insightCourses.length) {
       this.loadSemesterInsights();
+    }
+    if (view === 'templates') {
+      this.loadTemplates();
     }
   }
 
@@ -331,6 +351,121 @@ export class HodDashboardComponent implements OnInit, OnDestroy {
       chart.destroy();
     }
     this.insightCharts = [];
+  }
+
+  onTemplateFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.templateFile = input.files?.[0] || null;
+  }
+
+  loadTemplates(): void {
+    if (!this.department) {
+      return;
+    }
+    this.api.getHodTemplates(this.department).subscribe({
+      next: (res) => this.templates = res.templates || [],
+      error: () => this.templates = []
+    });
+  }
+
+  createTemplate(): void {
+    this.error = '';
+    this.success = '';
+    if (!this.templateForm.name.trim() || !this.templateForm.department.trim()) {
+      this.error = 'Please enter template name and department.';
+      return;
+    }
+    this.templateSaving = true;
+    const formData = new FormData();
+    formData.append('name', this.templateForm.name.trim());
+    formData.append('description', this.templateForm.description.trim());
+    formData.append('department', this.templateForm.department.trim().toUpperCase());
+    formData.append('purpose', 'Marksheet');
+    formData.append('version', String(this.templateForm.version || 1));
+    formData.append('hod_id', localStorage.getItem('hodId') || '0');
+    formData.append('is_active', String(this.templateForm.isActive));
+    if (this.templateFile) {
+      formData.append('template_file', this.templateFile);
+    }
+    this.api.createHodTemplate(formData).subscribe({
+      next: (res) => {
+        this.templateSaving = false;
+        this.success = 'Standard template saved.';
+        this.selectedTemplate = res.template;
+        this.templateForm = {
+          name: '',
+          description: '',
+          department: this.department,
+          purpose: 'Marksheet',
+          version: 1,
+          isActive: false
+        };
+        this.templateFile = null;
+        this.loadTemplates();
+      },
+      error: (err) => {
+        this.templateSaving = false;
+        this.error = err.error?.detail || 'Unable to save template.';
+      }
+    });
+  }
+
+  openTemplate(template: StandardTemplate): void {
+    this.api.getHodTemplate(template.id).subscribe({
+      next: (res) => {
+        this.selectedTemplate = res.template;
+        this.templateForm = {
+          name: res.template.name || '',
+          description: res.template.description || '',
+          department: res.template.department || this.department,
+          purpose: 'Marksheet',
+          version: res.template.version || 1,
+          isActive: !!res.template.is_active
+        };
+        this.success = `${res.template.name} v${res.template.version} opened.`;
+      },
+      error: (err) => this.error = err.error?.detail || 'Unable to open template.'
+    });
+  }
+
+  activateTemplate(template: StandardTemplate): void {
+    this.templateSaving = true;
+    this.api.activateHodTemplate(template.id).subscribe({
+      next: () => {
+        this.templateSaving = false;
+        this.success = 'Template activated.';
+        this.loadTemplates();
+      },
+      error: (err) => {
+        this.templateSaving = false;
+        this.error = err.error?.detail || 'Unable to activate template.';
+      }
+    });
+  }
+
+  deleteTemplate(template: StandardTemplate): void {
+    if (!window.confirm(`Delete ${template.name} v${template.version}?`)) {
+      return;
+    }
+    this.templateSaving = true;
+    this.api.archiveHodTemplate(template.id).subscribe({
+      next: () => {
+        this.templateSaving = false;
+        this.success = 'Template deleted.';
+        if (this.selectedTemplate?.id === template.id) {
+          this.selectedTemplate = null;
+        }
+        this.loadTemplates();
+      },
+      error: (err) => {
+        this.templateSaving = false;
+        this.error = err.error?.detail || 'Unable to delete template.';
+      }
+    });
+  }
+
+  updateSynonyms(field: StandardTemplateField, value: string): void {
+    field.synonyms = value.split(',').map(item => item.trim()).filter(Boolean);
   }
 
   logout(): void {

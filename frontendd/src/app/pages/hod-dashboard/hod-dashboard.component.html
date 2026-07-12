@@ -23,6 +23,7 @@
 
         <nav class="sidebar-nav">
           <button type="button" [class.active]="activeView === 'manage'" (click)="switchView('manage')">Manage</button>
+          <button type="button" [class.active]="activeView === 'templates'" (click)="switchView('templates')">Templates</button>
           <button type="button" [class.active]="activeView === 'insights'" (click)="switchView('insights')">Academic Insights</button>
         </nav>
       </div>
@@ -37,8 +38,9 @@
     <section class="surface-card hod-banner">
       <div>
         <span class="page-kicker">HOD Dashboard</span>
-        <h2>{{ activeView === 'insights' ? 'Academic Insights' : 'Assign Course To Teacher' }}</h2>
+        <h2>{{ activeView === 'insights' ? 'Academic Insights' : (activeView === 'templates' ? 'Standard Templates' : 'Assign Course To Teacher') }}</h2>
         <p *ngIf="activeView === 'manage'">Use a registered teacher username and link one course from the system catalog.</p>
+        <p *ngIf="activeView === 'templates'">Upload and activate standard Excel templates for teacher transformations.</p>
         <p *ngIf="activeView === 'insights'">Review saved Gap Analyzer reports by department, semester, course, teacher, and assessment.</p>
       </div>
     </section>
@@ -98,6 +100,76 @@
         <p><strong>Department:</strong> {{ assignmentResult.department }}</p>
         <p><strong>Teacher UID:</strong> {{ assignmentResult.teacher_uid }}</p>
         <p><strong>Course:</strong> {{ assignmentResult.course_code }}<span *ngIf="assignmentResult.course_name"> · {{ assignmentResult.course_name }}</span></p>
+      </div>
+    </section>
+
+    <section class="surface-card" *ngIf="activeView === 'templates'">
+      <div class="section-head">
+        <div>
+          <span class="page-kicker">Standard Transformation Templates</span>
+          <h3>HOD-controlled Excel templates</h3>
+        </div>
+      </div>
+
+      <div class="template-grid">
+        <div class="template-form">
+          <label class="field-block">
+            <span>Template Name</span>
+            <input [(ngModel)]="templateForm.name" placeholder="Official OBE Marksheet" />
+          </label>
+
+          <label class="field-block">
+            <span>Description</span>
+            <input [(ngModel)]="templateForm.description" placeholder="Used for marksheet submissions" />
+          </label>
+
+          <label class="field-block">
+            <span>Department</span>
+            <input [(ngModel)]="templateForm.department" />
+          </label>
+
+          <label class="field-block">
+            <span>Version</span>
+            <input type="number" min="1" [(ngModel)]="templateForm.version" />
+          </label>
+
+          <label class="field-block">
+            <span>Excel Template File</span>
+            <input type="file" accept=".xlsx,.xls,.csv" (change)="onTemplateFileSelected($event)" />
+          </label>
+
+          <label class="check-row">
+            <input type="checkbox" [(ngModel)]="templateForm.isActive" />
+            Activate after upload
+          </label>
+
+          <button type="button" class="primary-btn" (click)="createTemplate()" [disabled]="templateSaving">
+            {{ templateSaving ? 'Saving...' : 'Save Standard Template' }}
+          </button>
+        </div>
+
+        <div class="template-list">
+          <h4>Template Versions</h4>
+          <div class="template-card" *ngFor="let template of templates">
+            <button type="button" class="template-card-main" (click)="openTemplate(template)">
+              <strong>{{ template.name }} v{{ template.version }}</strong>
+              <span>{{ template.status }}</span>
+              <small>{{ template.original_filename || 'Definition only' }}</small>
+            </button>
+            <button type="button" class="template-activate-btn" *ngIf="!template.is_active" (click)="activateTemplate(template)" [disabled]="templateSaving">
+              Activate
+            </button>
+            <button type="button" class="template-delete-btn" title="Delete template" aria-label="Delete template" (click)="deleteTemplate(template)">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 6h18" />
+                <path d="M8 6V4h8v2" />
+                <path d="M6 6l1 15h10l1-15" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
     </section>
 

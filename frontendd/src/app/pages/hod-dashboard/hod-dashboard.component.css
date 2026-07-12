@@ -341,6 +341,125 @@
   font-weight: 700;
 }
 
+.template-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  gap: 18px;
+  margin-top: 22px;
+}
+
+.template-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.template-form .primary-btn,
+.template-form .check-row {
+  grid-column: span 2;
+}
+
+.field-block input[type="file"] {
+  min-height: 54px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+  font: inherit;
+}
+
+.check-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  color: #334155;
+  min-height: 54px;
+}
+
+.check-row input {
+  width: auto;
+  min-height: auto;
+  margin: 0;
+}
+
+.template-list {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.template-list h4 {
+  margin: 0;
+}
+
+.template-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(247, 249, 255, 0.92);
+}
+
+.template-card-main {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  padding: 2px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.template-card strong {
+  color: var(--ink);
+}
+
+.template-card span,
+.template-card small {
+  color: #64748b;
+}
+
+.template-delete-btn {
+  width: 42px;
+  height: 42px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--danger);
+}
+
+.template-delete-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.template-delete-btn:hover {
+  background: rgba(220, 38, 38, 0.08);
+}
+
+.template-activate-btn {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgba(22, 163, 74, 0.24);
+  border-radius: 12px;
+  background: rgba(220, 252, 231, 0.9);
+  color: #15803d;
+  font-weight: 800;
+}
+
 .insights-panel {
   display: grid;
   gap: 22px;
@@ -645,11 +764,18 @@
   .insight-controls,
   .report-workspace,
   .metric-grid,
-  .chart-grid {
+  .chart-grid,
+  .template-grid,
+  .template-form {
     grid-template-columns: 1fr;
   }
 
   .chart-card.wide {
+    grid-column: span 1;
+  }
+
+  .template-form .primary-btn,
+  .template-form .check-row {
     grid-column: span 1;
   }
 

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Float
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Float, Boolean
 from sqlalchemy.sql import func
 from .database import Base
 
@@ -207,3 +207,66 @@ class HodInsightSnapshot(Base):
     teacher_name = Column(String(100), nullable=True)
     snapshot_json = Column(Text, nullable=False, default="{}")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class TransformationTemplate(Base):
+    __tablename__ = "transformation_templates"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(200), nullable=False, index=True)
+    description = Column(Text, nullable=True)
+    department = Column(String(100), nullable=False, index=True)
+    purpose = Column(String(100), nullable=False, index=True)
+    version = Column(Integer, nullable=False, default=1)
+    status = Column(String(50), nullable=False, default="draft")
+    original_filename = Column(String(255), nullable=True)
+    file_path = Column(Text, nullable=True)
+    sheet_name = Column(String(200), nullable=True)
+    header_row = Column(Integer, nullable=True)
+    data_start_row = Column(Integer, nullable=True)
+    created_by_hod_id = Column(Integer, ForeignKey("heads_of_department.id"), nullable=True, index=True)
+    parent_template_id = Column(Integer, ForeignKey("transformation_templates.id"), nullable=True)
+    is_active = Column(Boolean, nullable=False, default=False)
+    archived = Column(Boolean, nullable=False, default=False)
+    allowed_rules = Column(Text, nullable=False, default="{}")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class TransformationTemplateField(Base):
+    __tablename__ = "transformation_template_fields"
+
+    id = Column(Integer, primary_key=True, index=True)
+    template_id = Column(Integer, ForeignKey("transformation_templates.id"), nullable=False, index=True)
+    field_key = Column(String(200), nullable=False, index=True)
+    display_name = Column(String(200), nullable=False)
+    column_position = Column(Integer, nullable=False)
+    required = Column(Boolean, nullable=False, default=False)
+    data_type = Column(String(50), nullable=False, default="text")
+    missing_value_rule = Column(String(50), nullable=False, default="blank")
+    default_value = Column(Text, nullable=True)
+    formula_definition = Column(Text, nullable=True)
+    validation_definition = Column(Text, nullable=True)
+    editable_by_teacher = Column(Boolean, nullable=False, default=True)
+    allow_multiple_source_mapping = Column(Boolean, nullable=False, default=False)
+    synonyms = Column(Text, nullable=False, default="[]")
+    formatting_metadata = Column(Text, nullable=False, default="{}")
+    description = Column(Text, nullable=True)
+    hidden = Column(Boolean, nullable=False, default=False)
+    blank_allowed = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class TransformationJob(Base):
+    __tablename__ = "transformation_jobs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    teacher_id = Column(Integer, ForeignKey("teachers.id"), nullable=True, index=True)
+    template_id = Column(Integer, ForeignKey("transformation_templates.id"), nullable=False, index=True)
+    template_version = Column(Integer, nullable=False)
+    source_file_reference = Column(Text, nullable=True)
+    selected_source_sheet = Column(String(200), nullable=True)
+    status = Column(String(50), nullable=False, default="created")
+    mapping_summary = Column(Text, nullable=False, default="{}")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    completed_at = Column(DateTime(timezone=True), nullable=True)

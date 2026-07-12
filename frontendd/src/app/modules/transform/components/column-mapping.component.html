@@ -1,0 +1,118 @@
+﻿<section class="mapping-panel">
+  <div class="tool-panel-head">
+    <h2>Intelligent Column Mapping</h2>
+    <p>Move a teacher marksheet into an active HOD-approved standard template while preserving template formatting and formulas.</p>
+  </div>
+
+  <div class="stepper" aria-label="Column mapping steps">
+    <div class="step" [class.active]="currentStep >= 1"><span>1</span><strong>Upload source</strong></div>
+    <div class="step" [class.active]="currentStep >= 2"><span>2</span><strong>Pick template</strong></div>
+    <div class="step" [class.active]="currentStep >= 3"><span>3</span><strong>Check columns</strong></div>
+    <div class="step" [class.active]="currentStep >= 4"><span>4</span><strong>Download</strong></div>
+  </div>
+
+  <div class="tool-fields">
+    <section class="flow-section">
+      <div class="section-head">
+        <div>
+          <span class="section-number">Step 1</span>
+          <h3>Choose source marksheet</h3>
+        </div>
+        <p>The target template is controlled by the HOD, so teachers only upload their own source Excel file.</p>
+      </div>
+
+      <label class="file-picker">
+        <input type="file" accept=".xlsx,.xls,.csv" (change)="onSourceSelected($event)" />
+        <span>{{ sourceFile?.name || 'Choose source marksheet' }}</span>
+      </label>
+
+      <button class="tool-primary" type="button" (click)="uploadFiles()" [disabled]="uploadLoading || !sourceFile">
+        {{ uploadLoading ? 'Loading sheets...' : 'Load Sheets and Templates' }}
+      </button>
+    </section>
+
+    <section class="flow-section" *ngIf="sessionId">
+      <div class="section-head">
+        <div>
+          <span class="section-number">Step 2</span>
+          <h3>Choose HOD standard template</h3>
+        </div>
+        <p>Select the template uploaded by the HOD for this marksheet.</p>
+      </div>
+
+      <div class="tool-row">
+        <label>
+          <span>HOD standard template</span>
+          <select [(ngModel)]="selectedTemplateId" (ngModelChange)="onTemplateSelected()">
+            <option [ngValue]="0">{{ templates.length ? 'Choose template' : 'No active template found' }}</option>
+            <option *ngFor="let template of templates" [ngValue]="template.id">
+              {{ template.name }} v{{ template.version }} - {{ template.purpose }}
+            </option>
+          </select>
+        </label>
+      </div>
+
+      <div class="empty-state" *ngIf="!templates.length">
+        <strong>No standard template is ready yet.</strong>
+        <span>Ask the HOD to upload one template, configure its columns, and activate it.</span>
+      </div>
+
+      <button class="tool-primary" type="button" (click)="analyze()" [disabled]="previewLoading || templateLoading || !selectedTemplateId">
+        {{ previewLoading ? 'Preparing preview...' : 'Check Columns' }}
+      </button>
+    </section>
+
+    <section class="flow-section" *ngIf="suggestions.length">
+      <div class="section-head">
+        <div>
+          <span class="section-number">Step 3</span>
+          <h3>Preview automatic mapping</h3>
+        </div>
+        <p>The system has matched your marksheet columns to the HOD template. Review the preview, then download.</p>
+      </div>
+
+      <div class="mapping-summary">
+        <div><strong>{{ mappedCount }}</strong><span>Mapped columns</span></div>
+        <div><strong>{{ reviewCount }}</strong><span>Need attention</span></div>
+        <div><strong>{{ detectedRows['source_header_row'] || '-' }}</strong><span>Source header row</span></div>
+        <div><strong>v{{ selectedTemplate?.version || '-' }}</strong><span>Template version</span></div>
+      </div>
+
+      <div class="mapping-table-wrap">
+        <table class="mapping-table">
+          <thead>
+            <tr>
+              <th>HOD Template Column</th>
+              <th>Teacher Sheet Column</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of previewRows" [class.needs-review]="row.needsAttention">
+              <td>{{ row.target }}</td>
+              <td>
+                <select class="mapping-select" [ngModel]="row.selectedSource" (ngModelChange)="setSourceForTarget(row.target, $event)">
+                  <option value="">Leave blank</option>
+                  <option *ngFor="let source of sourceHeaders" [value]="source.name">{{ source.name }}</option>
+                </select>
+              </td>
+              <td>
+                <span class="status-pill" [class.attention]="row.needsAttention">{{ row.status }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mapping-actions">
+        <button class="tool-primary" type="button" (click)="confirmAndDownload()" [disabled]="downloading">
+          {{ downloading ? 'Preparing download...' : 'Confirm and Download' }}
+        </button>
+      </div>
+    </section>
+
+    <p class="tool-success" *ngIf="message">{{ message }}</p>
+    <p class="tool-error" *ngIf="error">{{ error }}</p>
+  </div>
+</section>
+

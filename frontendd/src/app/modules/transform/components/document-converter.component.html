@@ -1,0 +1,28 @@
+<section class="converter-panel">
+  <div class="converter-head">
+    <div>
+      <span class="section-kicker">File Converter</span>
+      <h2>Convert documents</h2>
+    </div>
+    <p>Choose one file and convert it while keeping tables and formatting as close as possible.</p>
+  </div>
+
+  <div class="converter-grid">
+    <div class="converter-field">
+      <span>Conversion</span>
+      <div class="converter-static">Excel to PDF</div>
+    </div>
+
+    <label class="converter-upload">
+      <input type="file" hidden accept=".xlsx,.xls,.xlsm" (change)="onFileSelected($event)" />
+      <span>{{ selectedFile?.name || 'Choose Excel file' }}</span>
+    </label>
+  </div>
+
+  <button class="converter-button" type="button" (click)="convert()" [disabled]="loading">
+    {{ loading ? 'Converting...' : 'Convert and Download' }}
+  </button>
+
+  <p class="converter-success" *ngIf="message">{{ message }}</p>
+  <p class="converter-error" *ngIf="error">{{ error }}</p>
+</section>

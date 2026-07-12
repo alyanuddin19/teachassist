@@ -1,0 +1,49 @@
+{
+  "supported_extensions": [".xlsx", ".xls", ".csv"],
+  "template_purposes": [
+    "Marksheet",
+    "Attendance sheet",
+    "CLO attainment sheet",
+    "Student result",
+    "Assessment record",
+    "Course file"
+  ],
+  "missing_value_rules": [
+    { "key": "blank", "label": "Leave blank" },
+    { "key": "zero", "label": "Fill with zero" },
+    { "key": "fixed", "label": "Use fixed value" },
+    { "key": "manual", "label": "Teacher enters value" },
+    { "key": "formula", "label": "Use formula" },
+    { "key": "sequence", "label": "Generate sequence" },
+    { "key": "current_date", "label": "Use current date" },
+    { "key": "copy", "label": "Copy from another mapped column" }
+  ],
+  "max_upload_mb": 15,
+  "allow_duplicate_target_mappings": false,
+  "confidence_thresholds": [
+    { "label": "High", "min_score": 0.85 },
+    { "label": "Medium", "min_score": 0.65 },
+    { "label": "Low", "min_score": 0.0 }
+  ],
+  "matching": {
+    "fuzzy_min_score": 0.62,
+    "uncertain_score": 0.65
+  },
+  "required_targets": [],
+  "synonym_groups": [
+    ["student id", "registration", "registration no", "registration number", "roll number", "roll no", "reg no", "reg number"],
+    ["obtained marks", "marks obtained", "marks scored"],
+    ["name", "student", "student name", "student full name", "full name"],
+    ["total marks", "max marks", "maximum marks"]
+  ],
+  "abbreviations": {
+    "reg": "registration",
+    "no": "number",
+    "num": "number",
+    "id": "identifier",
+    "q": "quiz",
+    "std": "student",
+    "obt": "obtained",
+    "max": "maximum"
+  }
+}
