@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Float, Boolean
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Float, Boolean, LargeBinary
 from sqlalchemy.sql import func
 from .database import Base
 
@@ -182,6 +182,9 @@ class TransformationTemplate(Base):
     status = Column(String(50), nullable=False, default="draft")
     original_filename = Column(String(255), nullable=True)
     file_path = Column(Text, nullable=True)
+    file_content = Column(LargeBinary, nullable=True)
+    file_content_type = Column(String(100), nullable=True)
+    file_size = Column(Integer, nullable=True)
     sheet_name = Column(String(200), nullable=True)
     header_row = Column(Integer, nullable=True)
     data_start_row = Column(Integer, nullable=True)

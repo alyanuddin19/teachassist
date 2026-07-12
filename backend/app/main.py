@@ -108,6 +108,63 @@ def ensure_retention_schema_columns() -> None:
 
 
 ensure_retention_schema_columns()
+
+
+def ensure_template_file_storage_columns() -> None:
+    try:
+        with engine.begin() as connection:
+            dialect = engine.dialect.name
+            binary_type = "BYTEA" if dialect == "postgresql" else "BLOB"
+            connection.execute(text(f"""
+                ALTER TABLE transformation_templates
+                ADD COLUMN IF NOT EXISTS file_content {binary_type}
+            """))
+            connection.execute(text("""
+                ALTER TABLE transformation_templates
+                ADD COLUMN IF NOT EXISTS file_content_type VARCHAR(100)
+            """))
+            connection.execute(text("""
+                ALTER TABLE transformation_templates
+                ADD COLUMN IF NOT EXISTS file_size INTEGER
+            """))
+    except Exception:
+        pass
+
+
+ensure_template_file_storage_columns()
+
+
+def backfill_template_file_storage() -> None:
+    db = SessionLocal()
+    try:
+        templates = db.query(models.TransformationTemplate).filter(
+            models.TransformationTemplate.file_content.is_(None),
+            models.TransformationTemplate.file_path.isnot(None)
+        ).all()
+        for template in templates:
+            path = Path(template.file_path or "")
+            if not path.exists() or not path.is_file():
+                continue
+            content = path.read_bytes()
+            if not content:
+                continue
+            template.file_content = content
+            template.file_size = len(content)
+            suffix = path.suffix.lower()
+            if suffix == ".xlsx":
+                template.file_content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            elif suffix == ".xls":
+                template.file_content_type = "application/vnd.ms-excel"
+            elif suffix == ".csv":
+                template.file_content_type = "text/csv"
+        db.commit()
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()
+
+
+backfill_template_file_storage()
 app = FastAPI(title="TeachAssist Backend")
 
 app.include_router(gap_analysis_clean.router)
