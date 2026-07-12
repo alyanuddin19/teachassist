@@ -1,4 +1,5 @@
 import { Component, HostListener, OnInit } from '@angular/core';
+import { HttpEventType } from '@angular/common/http';
 import { Router } from '@angular/router';
 import {
   ApiService,
@@ -24,6 +25,7 @@ export class AdminDashboardComponent implements OnInit {
   savingHod = false;
   savingStudent = false;
   importingStudents = false;
+  importProgress = 0;
   savingCourse = false;
   createdHod: CreatedHodResponse['hod'] | null = null;
   createdStudent: CreatedStudentResponse['student'] | null = null;
@@ -192,14 +194,28 @@ export class AdminDashboardComponent implements OnInit {
     form.append('file', this.selectedStudentImportFile);
 
     this.importingStudents = true;
+    this.importProgress = 0;
     this.api.importStudentsFromExcel(form).subscribe({
-      next: (res) => {
-        this.importingStudents = false;
-        this.success = `${res.imported_count} students imported, ${res.updated_count} updated, ${res.skipped_count} skipped. Department/batch tables: ${res.auxiliary_tables.join(', ') || 'none'}.`;
-        this.selectedStudentImportFile = null;
+      next: (event) => {
+        if (event.type === HttpEventType.UploadProgress) {
+          const total = event.total || this.selectedStudentImportFile?.size || 0;
+          this.importProgress = total ? Math.round((event.loaded / total) * 100) : 50;
+          return;
+        }
+
+        if (event.type === HttpEventType.Response) {
+          const res = event.body;
+          this.importingStudents = false;
+          this.importProgress = 100;
+          if (res) {
+            this.success = `${res.imported_count} students imported, ${res.updated_count} updated, ${res.skipped_count} skipped. Department/batch tables: ${res.auxiliary_tables.join(', ') || 'none'}.`;
+          }
+          this.selectedStudentImportFile = null;
+        }
       },
       error: (err) => {
         this.importingStudents = false;
+        this.importProgress = 0;
         this.error = err.error?.detail || 'Unable to import students right now.';
       }
     });

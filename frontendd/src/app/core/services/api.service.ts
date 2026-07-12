@@ -604,7 +604,11 @@ export class ApiService {
   importStudentsFromExcel(form: FormData) {
     return this.http.post<ImportedStudentsResponse>(
       `${this.BASE_URL}/admin/students/import`,
-      form
+      form,
+      {
+        observe: 'events',
+        reportProgress: true
+      }
     );
   }
 

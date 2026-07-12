@@ -108,6 +108,15 @@
             {{ importingStudents ? 'Importing...' : 'Import Students' }}
           </button>
         </div>
+        <div class="import-progress" *ngIf="importingStudents">
+          <div class="progress-meta">
+            <span>Importing student sheet</span>
+            <strong>{{ importProgress }}%</strong>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" [style.width.%]="importProgress"></div>
+          </div>
+        </div>
       </div>
 
       <div class="form-grid">
