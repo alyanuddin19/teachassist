@@ -129,9 +129,14 @@
             <input type="number" min="1" [(ngModel)]="templateForm.version" />
           </label>
 
-          <label class="field-block">
+          <label class="field-block template-file-field">
             <span>Excel Template File</span>
-            <input type="file" accept=".xlsx,.xls,.csv" (change)="onTemplateFileSelected($event)" />
+            <input id="hod-template-file" type="file" accept=".xlsx,.xls,.csv" (change)="onTemplateFileSelected($event)" />
+            <span class="template-upload-box">
+              <span class="material-symbols-rounded">upload_file</span>
+              <strong>{{ templateFile?.name || 'Choose Excel template' }}</strong>
+              <small>.xlsx, .xls, or .csv</small>
+            </span>
           </label>
 
           <label class="check-row">

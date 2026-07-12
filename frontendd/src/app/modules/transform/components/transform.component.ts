@@ -9,6 +9,7 @@ import { TransformService } from '../services/transform.service';
 })
 export class TransformComponent implements OnInit, OnDestroy {
   showRecords = false;
+  activeTool: 'marksheet' | 'mapping' | 'converter' = 'marksheet';
   private subscriptions = new Subscription();
 
   constructor(private transformService: TransformService) {}
@@ -35,5 +36,10 @@ export class TransformComponent implements OnInit, OnDestroy {
 
   closeRecords(): void {
     this.showRecords = false;
+  }
+
+  setActiveTool(tool: 'marksheet' | 'mapping' | 'converter'): void {
+    this.activeTool = tool;
+    this.closeRecords();
   }
 }

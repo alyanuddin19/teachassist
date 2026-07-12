@@ -1,18 +1,45 @@
 <main class="page-shell">
-  <section class="page-head">
-    <div class="page-head-copy">
-      <h1>Generate a Marksheet</h1>
-    </div>
+  <section class="page-head" *ngIf="activeTool === 'marksheet'">
     <button class="records-toggle" type="button" (click)="toggleRecords()">
       {{ showRecords ? 'Close Records' : 'View Records' }}
     </button>
   </section>
 
-  <app-transform-teacher-form></app-transform-teacher-form>
+  <nav class="transform-subbar" aria-label="Transformation tools">
+    <button
+      type="button"
+      [class.active]="activeTool === 'marksheet'"
+      (click)="setActiveTool('marksheet')">
+      <span class="material-symbols-rounded">table_chart</span>
+      <span>Marksheet</span>
+    </button>
+    <button
+      type="button"
+      [class.active]="activeTool === 'mapping'"
+      (click)="setActiveTool('mapping')">
+      <span class="material-symbols-rounded">account_tree</span>
+      <span>Intelligent Column Mapping</span>
+    </button>
+    <button
+      type="button"
+      [class.active]="activeTool === 'converter'"
+      (click)="setActiveTool('converter')">
+      <span class="material-symbols-rounded">picture_as_pdf</span>
+      <span>Excel to PDF</span>
+    </button>
+  </nav>
 
-  <app-column-mapping></app-column-mapping>
-
-  <app-document-converter></app-document-converter>
+  <section class="transform-tool-view">
+    <div class="tool-pane" *ngIf="activeTool === 'marksheet'">
+      <app-transform-teacher-form></app-transform-teacher-form>
+    </div>
+    <div class="tool-pane" *ngIf="activeTool === 'mapping'">
+      <app-column-mapping></app-column-mapping>
+    </div>
+    <div class="tool-pane" *ngIf="activeTool === 'converter'">
+      <app-document-converter></app-document-converter>
+    </div>
+  </section>
 
   <div class="records-overlay" *ngIf="showRecords" (click)="closeRecords()"></div>
   <section class="records-panel" *ngIf="showRecords" (click)="$event.stopPropagation()">

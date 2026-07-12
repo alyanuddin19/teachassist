@@ -27,7 +27,7 @@
       </div>
     </div>
 
-    <div class="login-fields" *ngIf="!(role === 'teacher' && teacherSignupOpen)">
+    <form class="login-fields" *ngIf="!(role === 'teacher' && teacherSignupOpen)" (ngSubmit)="login()">
       <label class="field-label">
         {{
         role === 'teacher'
@@ -39,11 +39,11 @@
         : 'Admin ID'
         }}
       </label>
-      <input class="login-input" type="text" autocomplete="off" [(ngModel)]="username" />
+      <input class="login-input" name="username" type="text" autocomplete="off" [(ngModel)]="username" />
 
       <label class="field-label">Password</label>
       <div class="password-field">
-        <input class="login-input" [type]="showLoginPassword ? 'text' : 'password'" autocomplete="new-password"
+        <input class="login-input" name="password" [type]="showLoginPassword ? 'text' : 'password'" autocomplete="new-password"
           [(ngModel)]="password" />
         <button type="button" class="password-toggle" (click)="showLoginPassword = !showLoginPassword" [attr.aria-label]="showLoginPassword ? 'Hide password' : 'Show password'">
           <span class="material-symbols-rounded">{{ showLoginPassword ? 'visibility_off' : 'visibility' }}</span>
@@ -53,7 +53,7 @@
       <div class="error" *ngIf="error">{{ error }}</div>
       <div class="success" *ngIf="success">{{ success }}</div>
 
-      <button type="button" class="login-btn" (click)="login()" [disabled]="loading">
+      <button type="submit" class="login-btn" [disabled]="loading">
         {{
         loading
         ? 'Checking...'
@@ -72,9 +72,9 @@
           {{ teacherSignupOpen ? 'Close Teacher Signup' : 'Teacher Signup' }}
         </button>
       </div>
-    </div>
+    </form>
 
-    <section class="signup-panel signup-panel-focus" *ngIf="role === 'teacher' && teacherSignupOpen">
+    <form class="signup-panel signup-panel-focus" *ngIf="role === 'teacher' && teacherSignupOpen" (ngSubmit)="signupTeacher()">
       <div class="signup-panel-head">
         <div>
           <span class="signup-badge">Teacher Signup</span>
@@ -84,17 +84,17 @@
       </div>
 
       <label class="field-label">Full Name</label>
-      <input class="login-input" type="text" [(ngModel)]="teacherSignup.fullName" />
+      <input class="login-input" name="teacherFullName" type="text" [(ngModel)]="teacherSignup.fullName" />
 
       <label class="field-label">Contact No</label>
-      <input class="login-input" type="text" autocomplete="off" [(ngModel)]="teacherSignup.contactNo" />
+      <input class="login-input" name="teacherContactNo" type="text" autocomplete="off" [(ngModel)]="teacherSignup.contactNo" />
 
       <label class="field-label">Email</label>
-      <input class="login-input" type="email" autocomplete="off" [(ngModel)]="teacherSignup.email" />
+      <input class="login-input" name="teacherEmail" type="email" autocomplete="off" [(ngModel)]="teacherSignup.email" />
 
       <label class="field-label">Set Password</label>
       <div class="password-field">
-        <input class="login-input" [type]="showSignupPassword ? 'text' : 'password'" autocomplete="new-password"
+        <input class="login-input" name="teacherPassword" [type]="showSignupPassword ? 'text' : 'password'" autocomplete="new-password"
           [(ngModel)]="teacherSignup.password" />
         <button type="button" class="password-toggle" (click)="showSignupPassword = !showSignupPassword" [attr.aria-label]="showSignupPassword ? 'Hide password' : 'Show password'">
           <span class="material-symbols-rounded">{{ showSignupPassword ? 'visibility_off' : 'visibility' }}</span>
@@ -103,7 +103,7 @@
 
       <label class="field-label">Confirm Password</label>
       <div class="password-field">
-        <input class="login-input" [type]="showSignupConfirmPassword ? 'text' : 'password'"
+        <input class="login-input" name="teacherConfirmPassword" [type]="showSignupConfirmPassword ? 'text' : 'password'"
           autocomplete="new-password" [(ngModel)]="teacherSignup.confirmPassword" />
         <button type="button" class="password-toggle"
           (click)="showSignupConfirmPassword = !showSignupConfirmPassword" [attr.aria-label]="showSignupConfirmPassword ? 'Hide password' : 'Show password'">
@@ -114,9 +114,9 @@
       <div class="error" *ngIf="error">{{ error }}</div>
       <div class="success" *ngIf="success">{{ success }}</div>
 
-      <button type="button" class="login-btn secondary-login" (click)="signupTeacher()" [disabled]="signupLoading">
+      <button type="submit" class="login-btn secondary-login" [disabled]="signupLoading">
         {{ signupLoading ? 'Saving...' : 'Save Teacher Signup' }}
       </button>
-    </section>
+    </form>
   </div>
 </div>

@@ -48,6 +48,10 @@ export class LoginComponent {
   }
 
   login(): void {
+    if (this.loading) {
+      return;
+    }
+
     this.error = null;
     this.success = null;
 
@@ -223,6 +227,10 @@ export class LoginComponent {
   }
 
   signupTeacher(): void {
+    if (this.signupLoading) {
+      return;
+    }
+
     this.error = null;
     this.success = null;
 
