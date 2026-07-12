@@ -36,6 +36,10 @@ export class GapAnalysisComponent implements OnInit {
   detectedCourseCode = '';
   thresholdPercentage: number | null = null;
   cloWarning = '';
+  gapReportId: number | null = null;
+  assessmentTypes = ['Quiz', 'Assignment', 'Midterm', 'Final'];
+  selectedAssessmentType = 'Quiz';
+  assessmentTitle = 'Quiz 1';
   recoGenerated    = false;
   showAssignments  = false;
   isCompactPortrait = false;
@@ -81,6 +85,7 @@ export class GapAnalysisComponent implements OnInit {
     this.detectedCourseCode = '';
     this.thresholdPercentage = null;
     this.cloWarning = '';
+    this.gapReportId = null;
 
     const teacherName = (localStorage.getItem('teacherName') || '').trim();
     if (!teacherName) {
@@ -89,13 +94,20 @@ export class GapAnalysisComponent implements OnInit {
       return;
     }
 
-    this.service.analyze(this.questionPaper, this.marksheet, teacherName).subscribe({
+    this.service.analyze(
+      this.questionPaper,
+      this.marksheet,
+      teacherName,
+      this.selectedAssessmentType,
+      this.normalizedAssessmentTitle()
+    ).subscribe({
       next: (res) => {
         this.result  = res;
         this.courseTitle = res.course_name || '';
         this.detectedCourseCode = res.course_code || '';
         this.thresholdPercentage = this.extractThresholdPercentage(res);
         this.cloWarning = res.clo_warning || '';
+        this.gapReportId = res.gap_report_id || null;
         this.loading = false;
         this.resetSectionState();
         setTimeout(() => this.renderChart(), 300);
@@ -121,7 +133,9 @@ export class GapAnalysisComponent implements OnInit {
       this.marksheet,
       this.cisFile,
       'Moderate',
-      teacherName
+      teacherName,
+      this.selectedAssessmentType,
+      this.normalizedAssessmentTitle()
     ).subscribe({
       next: (res) => {
         this.result = {
@@ -140,6 +154,7 @@ export class GapAnalysisComponent implements OnInit {
         this.detectedCourseCode = res.course_code || this.detectedCourseCode;
         this.thresholdPercentage = this.extractThresholdPercentage(res);
         this.cloWarning = res.clo_warning || this.cloWarning || '';
+        this.gapReportId = res.gap_report_id || this.gapReportId || null;
         for (const student of this.weakStudents) {
           this.studentRollNos[student.student_name] = student.roll_no || '';
         }
@@ -308,6 +323,11 @@ export class GapAnalysisComponent implements OnInit {
       lines.push('');
     }
     return lines.join('\n').trim();
+  }
+
+  private normalizedAssessmentTitle(): string {
+    const title = this.assessmentTitle.trim();
+    return title || this.selectedAssessmentType;
   }
 
   private extractThresholdPercentage(res: any): number {

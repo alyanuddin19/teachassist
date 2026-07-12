@@ -12,6 +12,7 @@ from app.services.excel_parser import parse_marksheet, parse_marksheet_structure
 from app.services.gap_analyzer import analyze_gaps
 from app.services.question_generator import generate_personalized_questions
 from app.services.cis_parser import parse_cis_full
+from app.services.gap_report_service import create_gap_analysis_report
 
 router = APIRouter(prefix="/gap-analysis", tags=["Gap Analysis"])
 
@@ -71,11 +72,11 @@ def reconcile_question_clos(questions: list[dict], marksheet_structure: dict) ->
     return reconciled_questions, ""
 
 
-async def resolve_teacher_threshold(
+async def resolve_teacher_course_context(
     question_paper: UploadFile,
     teacher_name: str,
     db: Session
-) -> tuple[str, str, int]:
+) -> dict:
     if not teacher_name:
         raise HTTPException(status_code=400, detail="Teacher session is required for gap analysis")
 
@@ -118,7 +119,14 @@ async def resolve_teacher_threshold(
         )
 
     threshold_percentage = matched_record.threshold_percentage if matched_record.threshold_percentage is not None else 50
-    return matched_course.course_code, matched_course.course_name, threshold_percentage
+    return {
+        "teacher": teacher,
+        "teacher_course": matched_record,
+        "course": matched_course,
+        "course_code": matched_course.course_code,
+        "course_name": matched_course.course_name,
+        "threshold_percentage": threshold_percentage,
+    }
 
 
 @router.post("/")
@@ -126,9 +134,12 @@ async def gap_analysis(
     question_paper: UploadFile = File(...),
     marksheet: UploadFile = File(...),
     teacher_name: str = Form(...),
+    assessment_type: str = Form("Assessment"),
+    assessment_title: str = Form(""),
     db: Session = Depends(get_db)
 ):
-    course_code, course_name, threshold_percentage = await resolve_teacher_threshold(question_paper, teacher_name, db)
+    context = await resolve_teacher_course_context(question_paper, teacher_name, db)
+    threshold_percentage = context["threshold_percentage"]
     questions = await parse_question_paper(question_paper)
     await marksheet.seek(0)
     marksheet_structure = await parse_marksheet_structure(marksheet)
@@ -136,10 +147,23 @@ async def gap_analysis(
     students = await parse_marksheet(marksheet)
     questions, clo_warning = reconcile_question_clos(questions, marksheet_structure)
     result = analyze_gaps(questions, students, threshold_percentage=threshold_percentage)
-    result["course_code"] = course_code
-    result["course_name"] = course_name
+    result["course_code"] = context["course_code"]
+    result["course_name"] = context["course_name"]
     result["teacher_threshold_percentage"] = threshold_percentage
     result["clo_warning"] = clo_warning
+    report = create_gap_analysis_report(
+        db=db,
+        teacher=context["teacher"],
+        teacher_course=context["teacher_course"],
+        course=context["course"],
+        assessment_type=assessment_type,
+        assessment_title=assessment_title or assessment_type,
+        question_paper_name=question_paper.filename or "",
+        marksheet_name=marksheet.filename or "",
+        cis_file_name="",
+        report_data=result,
+    )
+    result["gap_report_id"] = report.id
     return result
 
 
@@ -150,9 +174,12 @@ async def gap_analysis_with_recommendations(
     cis_file: Optional[UploadFile] = File(None),
     difficulty_level: str = Form("Moderate"),
     teacher_name: str = Form(...),
+    assessment_type: str = Form("Assessment"),
+    assessment_title: str = Form(""),
     db: Session = Depends(get_db)
 ):
-    course_code, detected_course_name, threshold_percentage = await resolve_teacher_threshold(question_paper, teacher_name, db)
+    context = await resolve_teacher_course_context(question_paper, teacher_name, db)
+    threshold_percentage = context["threshold_percentage"]
     questions = await parse_question_paper(question_paper)
     await marksheet.seek(0)
     marksheet_structure = await parse_marksheet_structure(marksheet)
@@ -163,7 +190,7 @@ async def gap_analysis_with_recommendations(
 
     cis_weeks = []
     clo_taxonomy = {}
-    course_title = detected_course_name
+    course_title = context["course_name"]
 
     if cis_file and cis_file.filename:
         try:
@@ -192,7 +219,7 @@ async def gap_analysis_with_recommendations(
             "has_weakness": len(weak_clos) > 0
         })
 
-    return JSONResponse(content={
+    response_payload = {
         "threshold_percentage": gap_result["threshold_percentage"],
         "teacher_threshold_percentage": threshold_percentage,
         "gap_results": gap_result["gap_results"],
@@ -203,13 +230,27 @@ async def gap_analysis_with_recommendations(
         "summary": gap_result["class_summary"],
         "clo_overview": gap_result["clo_results"],
         "cis_loaded": len(cis_weeks) > 0,
-        "course_code": course_code,
-        "course_name": detected_course_name,
+        "course_code": context["course_code"],
+        "course_name": context["course_name"],
         "course_title": course_title,
         "clo_taxonomy": clo_taxonomy,
         "weak_students": weak_students,
         "clo_warning": clo_warning,
-    })
+    }
+    report = create_gap_analysis_report(
+        db=db,
+        teacher=context["teacher"],
+        teacher_course=context["teacher_course"],
+        course=context["course"],
+        assessment_type=assessment_type,
+        assessment_title=assessment_title or assessment_type,
+        question_paper_name=question_paper.filename or "",
+        marksheet_name=marksheet.filename or "",
+        cis_file_name=cis_file.filename if cis_file and cis_file.filename else "",
+        report_data=response_payload,
+    )
+    response_payload["gap_report_id"] = report.id
+    return JSONResponse(content=response_payload)
 
 
 @router.post("/generate-for-student")

@@ -43,6 +43,7 @@ TRANSFORM_MARKSHEET_RETENTION_DAYS = 28
 STUDENT_TASK_RETENTION_DAYS = 28
 from app.routers import prompt_generator
 from app.routers import transformation
+from app.routers import hod_insights
 from app.t2_transform_loader import load_t2_transform_app, load_t2_excel_builder
 
 
@@ -109,6 +110,7 @@ app = FastAPI(title="TeachAssist Backend")
 app.include_router(gap_analysis_clean.router)
 app.include_router(prompt_generator.router)
 app.include_router(transformation.router)
+app.include_router(hod_insights.router)
 
 t2_transform_app = load_t2_transform_app()
 if t2_transform_app is not None:
@@ -1406,6 +1408,7 @@ async def import_students_from_excel(file: UploadFile = File(...), db: Session =
         if existing:
             existing.student_name = row["student_name"]
             existing.username = row["roll_no"]
+            existing.password = row["roll_no"]
             existing.contact_no = row["contact_no"] or existing.contact_no
             existing.email = generated_email
             existing.program = program
@@ -1420,7 +1423,7 @@ async def import_students_from_excel(file: UploadFile = File(...), db: Session =
                 student_name=row["student_name"],
                 roll_no=row["roll_no"],
                 username=row["roll_no"],
-                password=generate_easy_password(row["student_name"], "std"),
+                password=row["roll_no"],
                 contact_no=row["contact_no"] or None,
                 email=generated_email,
                 program=program,
@@ -1730,6 +1733,44 @@ def search_courses(q: str = "", db: Session = Depends(get_db)):
             for course in courses
         ]
     }
+
+
+@app.get("/api/academic/options")
+def academic_options(
+    semester: int | None = None,
+    department: str = "",
+    batch: str = "",
+    section: str = "",
+    db: Session = Depends(get_db)
+):
+    filters = []
+    if semester is not None:
+        filters.append(models.Student.semester == semester)
+    if department.strip():
+        filters.append(func.upper(models.Student.department) == department.strip().upper())
+    if batch.strip():
+        filters.append(func.upper(models.Student.batch) == batch.strip().upper())
+    if section.strip():
+        filters.append(func.upper(models.Student.section) == section.strip().upper())
+
+    def distinct_values(column):
+        query = db.query(column).filter(column.isnot(None), column != "")
+        if filters:
+            query = query.filter(*filters)
+        values = [row[0] for row in query.distinct().order_by(column.asc()).all()]
+        return [value for value in values if str(value).strip()]
+
+    semesters = db.query(models.Student.semester).filter(
+        models.Student.semester.isnot(None)
+    ).distinct().order_by(models.Student.semester.asc()).all()
+
+    return {
+        "semesters": [row[0] for row in semesters],
+        "departments": distinct_values(models.Student.department),
+        "batches": distinct_values(models.Student.batch),
+        "sections": distinct_values(models.Student.section)
+    }
+
 
 # =========================================================
 # TEACHER SETUP

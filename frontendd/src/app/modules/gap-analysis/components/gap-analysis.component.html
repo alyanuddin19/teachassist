@@ -24,6 +24,20 @@
       </label>
     </div>
 
+    <div class="assessment-meta-grid">
+      <label>
+        <span>Assessment Type</span>
+        <select [(ngModel)]="selectedAssessmentType">
+          <option *ngFor="let type of assessmentTypes" [value]="type">{{ type }}</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Assessment Name</span>
+        <input [(ngModel)]="assessmentTitle" placeholder="Quiz 1, Assignment 2, Midterm" />
+      </label>
+    </div>
+
     <div class="analyze-center">
       <button class="primary-btn" (click)="analyze()" [disabled]="loading">
         {{ loading ? 'Analyzing...' : 'Analyze Gap' }}
@@ -38,6 +52,7 @@
         <p class="result-summary" *ngIf="courseTitle || detectedCourseCode">
           {{ detectedCourseCode || 'Course' }}<span *ngIf="courseTitle"> - {{ courseTitle }}</span>
           <span *ngIf="thresholdPercentage !== null"> - Threshold {{ thresholdPercentage }}%</span>
+          <span *ngIf="gapReportId"> - Saved Report #{{ gapReportId }}</span>
         </p>
         <p class="result-summary error-text" *ngIf="cloWarning">{{ cloWarning }}</p>
       </div>

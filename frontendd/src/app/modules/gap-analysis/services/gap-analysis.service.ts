@@ -10,11 +10,19 @@ export class GapAnalysisService {
 
   constructor(private http: HttpClient) {}
 
-  analyze(questionPaper: File, marksheet: File, teacherName: string): Observable<any> {
+  analyze(
+    questionPaper: File,
+    marksheet: File,
+    teacherName: string,
+    assessmentType: string,
+    assessmentTitle: string
+  ): Observable<any> {
     const fd = new FormData();
     fd.append('question_paper', questionPaper);
     fd.append('marksheet', marksheet);
     fd.append('teacher_name', teacherName);
+    fd.append('assessment_type', assessmentType);
+    fd.append('assessment_title', assessmentTitle);
     return this.http.post(`${this.baseUrl}/`, fd);
   }
 
@@ -23,7 +31,9 @@ export class GapAnalysisService {
     marksheet: File,
     cisFile: File,
     difficultyLevel: string,
-    teacherName: string
+    teacherName: string,
+    assessmentType: string,
+    assessmentTitle: string
   ): Observable<any> {
     const fd = new FormData();
     fd.append('question_paper', questionPaper);
@@ -31,6 +41,8 @@ export class GapAnalysisService {
     fd.append('cis_file', cisFile);
     fd.append('difficulty_level', difficultyLevel);
     fd.append('teacher_name', teacherName);
+    fd.append('assessment_type', assessmentType);
+    fd.append('assessment_title', assessmentTitle);
     return this.http.post(`${this.baseUrl}/with-recommendations`, fd);
   }
 

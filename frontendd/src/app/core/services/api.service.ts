@@ -173,6 +173,13 @@ export interface CourseSuggestion {
   course_name: string;
 }
 
+export interface AcademicOptionsResponse {
+  semesters: number[];
+  departments: string[];
+  batches: string[];
+  sections: string[];
+}
+
 export interface CreatedCourseResponse {
   status: 'created' | 'already_exists';
   course: {
@@ -230,6 +237,79 @@ export interface CreatedTeacherResponse {
     course_code?: string;
     course_name?: string;
   };
+}
+
+export interface HodGapSummary {
+  student_count: number;
+  average_percentage: number;
+  pass_rate: number;
+  at_risk_students: number;
+  weak_clo_count: number;
+  weakest_clo: string;
+  weakest_clo_gap_percentage: number;
+  strongest_clo: string;
+  most_problematic_question: string;
+  most_problematic_question_gap_percentage: number;
+}
+
+export interface HodInsightCourse {
+  teacher_course_id: number;
+  teacher_id: number;
+  teacher_name: string;
+  course_id: number;
+  course_code: string;
+  course_name: string;
+  department: string;
+  semester: number | null;
+  section: string;
+  batch: string;
+  threshold_percentage: number;
+  report_count: number;
+  latest_report_id: number | null;
+  latest_assessment_title: string;
+  latest_assessment_type: string;
+  latest_report_created_at: string | null;
+  latest_summary: HodGapSummary | null;
+}
+
+export interface HodInsightReport {
+  id: number;
+  teacher_id: number;
+  teacher_course_id: number;
+  course_id: number;
+  department: string;
+  semester: number | null;
+  section: string;
+  batch: string;
+  course_code: string;
+  course_name: string;
+  teacher_name: string;
+  assessment_type: string;
+  assessment_title: string;
+  question_paper_name: string;
+  marksheet_name: string;
+  cis_file_name: string;
+  created_at: string | null;
+  summary: HodGapSummary;
+  report: any;
+}
+
+export interface HodDepartmentsResponse {
+  hod_name: string;
+  hod_department: string;
+  departments: string[];
+  semesters: number[];
+}
+
+export interface HodSemesterInsightsResponse {
+  department: string;
+  semester: number;
+  courses: HodInsightCourse[];
+}
+
+export interface HodCourseReportsResponse {
+  course: HodInsightCourse;
+  reports: HodInsightReport[];
 }
 
 /* ===============================
@@ -385,6 +465,24 @@ export class ApiService {
     );
   }
 
+  getAcademicOptions(filters: {
+    semester?: string;
+    department?: string;
+    batch?: string;
+    section?: string;
+  } = {}) {
+    const params = new URLSearchParams();
+    if (filters.semester) params.set('semester', filters.semester);
+    if (filters.department) params.set('department', filters.department);
+    if (filters.batch) params.set('batch', filters.batch);
+    if (filters.section) params.set('section', filters.section);
+
+    const query = params.toString();
+    return this.http.get<AcademicOptionsResponse>(
+      `${this.BASE_URL}/academic/options${query ? `?${query}` : ''}`
+    );
+  }
+
   getTeacherProfile(teacherName: string) {
     return this.http.get<TeacherProfileResponse>(
       `${this.BASE_URL}/teacher/profile?teacher_name=${encodeURIComponent(teacherName)}`
@@ -528,6 +626,31 @@ export class ApiService {
     return this.http.post<CreatedTeacherResponse>(
       `${this.BASE_URL}/hod/teachers`,
       data
+    );
+  }
+
+  getHodInsightDepartments(hodName: string) {
+    return this.http.get<HodDepartmentsResponse>(
+      `${this.BASE_URL}/hod/academic-insights/departments?hod_name=${encodeURIComponent(hodName)}`
+    );
+  }
+
+  getHodSemesterInsights(hodName: string, department: string, semester: number) {
+    return this.http.get<HodSemesterInsightsResponse>(
+      `${this.BASE_URL}/hod/academic-insights?hod_name=${encodeURIComponent(hodName)}&department=${encodeURIComponent(department)}&semester=${semester}`
+    );
+  }
+
+  getHodCourseReports(hodName: string, teacherCourseId: number) {
+    return this.http.get<HodCourseReportsResponse>(
+      `${this.BASE_URL}/hod/academic-insights/courses/${teacherCourseId}?hod_name=${encodeURIComponent(hodName)}`
+    );
+  }
+
+  saveHodInsightSnapshot(hodName: string, reportId: number) {
+    return this.http.post<{ status: string; snapshot_id: number; created_at: string | null }>(
+      `${this.BASE_URL}/hod/academic-insights/reports/${reportId}/snapshot`,
+      { hod_name: hodName }
     );
   }
 }
