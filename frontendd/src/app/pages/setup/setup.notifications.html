@@ -117,34 +117,25 @@
         <div class="setup-grid">
           <div class="field-block">
             <label>Semester *</label>
-            <select [(ngModel)]="semester" (ngModelChange)="onAcademicFieldChange()">
+            <select [(ngModel)]="semester">
               <option value="">Select Semester</option>
-              <option *ngFor="let s of academicOptions.semesters" [value]="s">Semester {{ s }}</option>
+              <option *ngFor="let s of semesters" [value]="s">Semester {{ s }}</option>
             </select>
           </div>
 
           <div class="field-block">
             <label>Batch *</label>
-            <input [(ngModel)]="batch" (change)="onAcademicFieldChange()" list="teacher-batches" />
-            <datalist id="teacher-batches">
-              <option *ngFor="let item of academicOptions.batches" [value]="item"></option>
-            </datalist>
+            <input [(ngModel)]="batch" />
           </div>
 
           <div class="field-block">
             <label>Department *</label>
-            <input [(ngModel)]="department" (change)="onAcademicFieldChange()" list="teacher-departments" />
-            <datalist id="teacher-departments">
-              <option *ngFor="let item of academicOptions.departments" [value]="item"></option>
-            </datalist>
+            <input [(ngModel)]="department" />
           </div>
 
           <div class="field-block">
             <label>Section</label>
-            <input [(ngModel)]="section" (change)="onAcademicFieldChange()" list="teacher-sections" />
-            <datalist id="teacher-sections">
-              <option *ngFor="let item of academicOptions.sections" [value]="item"></option>
-            </datalist>
+            <input [(ngModel)]="section" />
           </div>
 
           <div class="field-block field-span">
@@ -233,43 +224,25 @@
               <div class="setup-grid">
                 <div class="field-block">
                   <label>Semester *</label>
-                  <select [(ngModel)]="editingSemester[record.id]" (ngModelChange)="onExistingAcademicFieldChange(record.id)">
+                  <select [(ngModel)]="editingSemester[record.id]">
                     <option value="">Select Semester</option>
-                    <option *ngFor="let s of (editingAcademicOptions[record.id]?.semesters || semesters)" [value]="s">Semester {{ s }}</option>
+                    <option *ngFor="let s of semesters" [value]="s">Semester {{ s }}</option>
                   </select>
                 </div>
 
                 <div class="field-block">
                   <label>Batch *</label>
-                  <input
-                    [(ngModel)]="editingBatch[record.id]"
-                    (change)="onExistingAcademicFieldChange(record.id)"
-                    [attr.list]="'teacher-batches-' + record.id" />
-                  <datalist [id]="'teacher-batches-' + record.id">
-                    <option *ngFor="let item of (editingAcademicOptions[record.id]?.batches || [])" [value]="item"></option>
-                  </datalist>
+                  <input [(ngModel)]="editingBatch[record.id]" />
                 </div>
 
                 <div class="field-block">
                   <label>Department *</label>
-                  <input
-                    [(ngModel)]="editingDepartment[record.id]"
-                    (change)="onExistingAcademicFieldChange(record.id)"
-                    [attr.list]="'teacher-departments-' + record.id" />
-                  <datalist [id]="'teacher-departments-' + record.id">
-                    <option *ngFor="let item of (editingAcademicOptions[record.id]?.departments || [])" [value]="item"></option>
-                  </datalist>
+                  <input [(ngModel)]="editingDepartment[record.id]" />
                 </div>
 
                 <div class="field-block">
                   <label>Section</label>
-                  <input
-                    [(ngModel)]="editingSection[record.id]"
-                    (change)="onExistingAcademicFieldChange(record.id)"
-                    [attr.list]="'teacher-sections-' + record.id" />
-                  <datalist [id]="'teacher-sections-' + record.id">
-                    <option *ngFor="let item of (editingAcademicOptions[record.id]?.sections || [])" [value]="item"></option>
-                  </datalist>
+                  <input [(ngModel)]="editingSection[record.id]" />
                 </div>
 
                 <div class="field-block field-span">

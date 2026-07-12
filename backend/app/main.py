@@ -44,7 +44,6 @@ STUDENT_TASK_RETENTION_DAYS = 28
 STUDENT_IMPORT_JOBS: dict[str, dict] = {}
 from app.routers import prompt_generator
 from app.routers import transformation
-from app.routers import hod_insights
 from app.routers import column_mapping
 from app.routers import standard_templates
 from app.t2_transform_loader import load_t2_transform_app, load_t2_excel_builder
@@ -114,7 +113,6 @@ app = FastAPI(title="TeachAssist Backend")
 app.include_router(gap_analysis_clean.router)
 app.include_router(prompt_generator.router)
 app.include_router(transformation.router)
-app.include_router(hod_insights.router)
 app.include_router(column_mapping.router)
 app.include_router(standard_templates.router)
 

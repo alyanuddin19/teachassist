@@ -2,7 +2,6 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import {
-  AcademicOptionsResponse,
   ApiService,
   CourseSuggestion,
   TeacherProfileRecord,
@@ -56,7 +55,6 @@ export class SetupComponent implements OnInit {
   editingCourseName: Record<number, string> = {};
   editingCourseError: Record<number, string> = {};
   editingCourseSuggestions: Record<number, CourseSuggestion[]> = {};
-  editingAcademicOptions: Record<number, AcademicOptionsResponse> = {};
   editingThresholds: Record<number, number> = {};
   thresholdSaving: Record<number, boolean> = {};
   reviewDecision: Record<number, 'PASS' | 'FAIL'> = {};
@@ -66,12 +64,6 @@ export class SetupComponent implements OnInit {
   isCompactPortrait = false;
   recordsPanelCollapsed = false;
   readonly semesters = [1, 2, 3, 4, 5, 6, 7, 8];
-  academicOptions: AcademicOptionsResponse = {
-    semesters: [],
-    departments: [],
-    batches: [],
-    sections: []
-  };
   private dismissedNotificationIds = new Set<number>();
 
   constructor(
@@ -98,7 +90,6 @@ export class SetupComponent implements OnInit {
 
     this.loadDismissedNotifications();
     this.syncViewportState();
-    this.loadAcademicOptions();
     this.loadProfile();
     this.loadNotifications();
   }
@@ -156,15 +147,6 @@ export class SetupComponent implements OnInit {
     this.courseName = course.course_name;
     this.courseError = '';
     this.courseSuggestions = [];
-  }
-
-  onAcademicFieldChange(): void {
-    this.loadAcademicOptions({
-      semester: this.semester,
-      department: this.department,
-      batch: this.batch,
-      section: this.section
-    });
   }
 
   loadProfile(): void {
@@ -234,7 +216,6 @@ export class SetupComponent implements OnInit {
     const nextCourseName: Record<number, string> = {};
     const nextCourseError: Record<number, string> = {};
     const nextCourseSuggestions: Record<number, CourseSuggestion[]> = {};
-    const nextAcademicOptions: Record<number, AcademicOptionsResponse> = {};
     for (const record of this.records) {
       nextExpanded[record.id] = this.expandedRecords[record.id] ?? false;
       nextEditingRecords[record.id] = this.editingRecords[record.id] ?? false;
@@ -247,7 +228,6 @@ export class SetupComponent implements OnInit {
       nextCourseName[record.id] = record.course_name || '';
       nextCourseError[record.id] = '';
       nextCourseSuggestions[record.id] = [];
-      nextAcademicOptions[record.id] = this.editingAcademicOptions[record.id] || this.emptyAcademicOptions();
     }
     this.expandedRecords = nextExpanded;
     this.editingRecords = nextEditingRecords;
@@ -260,7 +240,6 @@ export class SetupComponent implements OnInit {
     this.editingCourseName = nextCourseName;
     this.editingCourseError = nextCourseError;
     this.editingCourseSuggestions = nextCourseSuggestions;
-    this.editingAcademicOptions = nextAcademicOptions;
   }
 
   saveRecord(): void {
@@ -336,18 +315,12 @@ export class SetupComponent implements OnInit {
 
   toggleEditRecord(recordId: number): void {
     this.editingRecords[recordId] = !this.editingRecords[recordId];
-    const record = this.records.find((item) => item.id === recordId);
-    if (record) {
-      if (this.editingRecords[recordId]) {
-        this.loadEditingAcademicOptions(recordId);
-      } else {
+    if (!this.editingRecords[recordId]) {
+      const record = this.records.find((item) => item.id === recordId);
+      if (record) {
         this.resetEditingState(record);
       }
     }
-  }
-
-  onExistingAcademicFieldChange(recordId: number): void {
-    this.loadEditingAcademicOptions(recordId);
   }
 
   onExistingCourseCodeInput(recordId: number): void {
@@ -570,7 +543,6 @@ export class SetupComponent implements OnInit {
     this.thresholdPercentage = 50;
     this.courseError = '';
     this.courseSuggestions = [];
-    this.loadAcademicOptions();
   }
 
   private isValidThreshold(value: number): boolean {
@@ -587,71 +559,6 @@ export class SetupComponent implements OnInit {
     this.editingCourseError[record.id] = '';
     this.editingCourseSuggestions[record.id] = [];
     this.editingThresholds[record.id] = record.threshold_percentage ?? 50;
-    this.editingAcademicOptions[record.id] = this.emptyAcademicOptions();
-  }
-
-  private loadAcademicOptions(filters: {
-    semester?: string;
-    department?: string;
-    batch?: string;
-    section?: string;
-  } = {}): void {
-    this.api.getAcademicOptions(this.cleanAcademicFilters(filters)).subscribe({
-      next: (options) => {
-        this.academicOptions = this.normalizeAcademicOptions(options);
-      },
-      error: () => {
-        this.academicOptions = this.emptyAcademicOptions();
-      }
-    });
-  }
-
-  private loadEditingAcademicOptions(recordId: number): void {
-    this.api.getAcademicOptions(this.cleanAcademicFilters({
-      semester: this.editingSemester[recordId],
-      department: this.editingDepartment[recordId],
-      batch: this.editingBatch[recordId],
-      section: this.editingSection[recordId]
-    })).subscribe({
-      next: (options) => {
-        this.editingAcademicOptions[recordId] = this.normalizeAcademicOptions(options);
-      },
-      error: () => {
-        this.editingAcademicOptions[recordId] = this.emptyAcademicOptions();
-      }
-    });
-  }
-
-  private cleanAcademicFilters(filters: {
-    semester?: string;
-    department?: string;
-    batch?: string;
-    section?: string;
-  }) {
-    return {
-      semester: (filters.semester || '').trim(),
-      department: (filters.department || '').trim().toUpperCase(),
-      batch: (filters.batch || '').trim().toUpperCase(),
-      section: (filters.section || '').trim().toUpperCase()
-    };
-  }
-
-  private normalizeAcademicOptions(options: AcademicOptionsResponse): AcademicOptionsResponse {
-    return {
-      semesters: options.semesters?.length ? options.semesters : this.semesters,
-      departments: options.departments || [],
-      batches: options.batches || [],
-      sections: options.sections || []
-    };
-  }
-
-  private emptyAcademicOptions(): AcademicOptionsResponse {
-    return {
-      semesters: this.semesters,
-      departments: [],
-      batches: [],
-      sections: []
-    };
   }
 
   private loadDismissedNotifications(): void {
