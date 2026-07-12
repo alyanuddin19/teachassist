@@ -26,6 +26,7 @@ export class AdminDashboardComponent implements OnInit {
   savingStudent = false;
   importingStudents = false;
   importProgress = 0;
+  importStatusMessage = '';
   savingCourse = false;
   createdHod: CreatedHodResponse['hod'] | null = null;
   createdStudent: CreatedStudentResponse['student'] | null = null;
@@ -178,6 +179,8 @@ export class AdminDashboardComponent implements OnInit {
   onStudentImportSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.selectedStudentImportFile = input.files?.[0] || null;
+    this.importProgress = 0;
+    this.importStatusMessage = '';
   }
 
   importStudents(): void {
@@ -195,28 +198,65 @@ export class AdminDashboardComponent implements OnInit {
 
     this.importingStudents = true;
     this.importProgress = 0;
+    this.importStatusMessage = 'Uploading Excel sheet...';
     this.api.importStudentsFromExcel(form).subscribe({
       next: (event) => {
         if (event.type === HttpEventType.UploadProgress) {
           const total = event.total || this.selectedStudentImportFile?.size || 0;
-          this.importProgress = total ? Math.round((event.loaded / total) * 100) : 50;
+          const uploadProgress = total ? Math.round((event.loaded / total) * 10) : 5;
+          this.importProgress = Math.min(uploadProgress, 10);
           return;
         }
 
         if (event.type === HttpEventType.Response) {
-          const res = event.body;
-          this.importingStudents = false;
-          this.importProgress = 100;
-          if (res) {
-            this.success = `${res.imported_count} students imported, ${res.updated_count} updated, ${res.skipped_count} skipped. Department/batch tables: ${res.auxiliary_tables.join(', ') || 'none'}.`;
+          const job = event.body;
+          if (job?.job_id) {
+            this.importProgress = Math.max(this.importProgress, 10);
+            this.importStatusMessage = 'Processing rows...';
+            this.pollStudentImportJob(job.job_id);
           }
-          this.selectedStudentImportFile = null;
         }
       },
       error: (err) => {
         this.importingStudents = false;
         this.importProgress = 0;
+        this.importStatusMessage = '';
         this.error = err.error?.detail || 'Unable to import students right now.';
+      }
+    });
+  }
+
+  private pollStudentImportJob(jobId: string): void {
+    this.api.getStudentImportJob(jobId).subscribe({
+      next: (job) => {
+        this.importProgress = Math.max(this.importProgress, Math.min(job.progress || 0, 100));
+        this.importStatusMessage = job.message || 'Processing rows...';
+
+        if (job.status === 'completed' && job.result) {
+          this.importingStudents = false;
+          this.importProgress = 100;
+          this.importStatusMessage = 'Import completed.';
+          const res = job.result;
+          this.success = `${res.imported_count} students imported, ${res.updated_count} updated, ${res.skipped_count} skipped. Department/batch tables: ${res.auxiliary_tables.join(', ') || 'none'}.`;
+          this.selectedStudentImportFile = null;
+          return;
+        }
+
+        if (job.status === 'failed') {
+          this.importingStudents = false;
+          this.importProgress = 0;
+          this.importStatusMessage = '';
+          this.error = job.error || 'Unable to import students right now.';
+          return;
+        }
+
+        window.setTimeout(() => this.pollStudentImportJob(jobId), 700);
+      },
+      error: (err) => {
+        this.importingStudents = false;
+        this.importProgress = 0;
+        this.importStatusMessage = '';
+        this.error = err.error?.detail || 'Unable to check import progress right now.';
       }
     });
   }

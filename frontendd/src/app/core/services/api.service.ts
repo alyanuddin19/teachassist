@@ -225,6 +225,19 @@ export interface ImportedStudentsResponse {
   auxiliary_tables: string[];
 }
 
+export interface StudentImportStartResponse {
+  status: 'started';
+  job_id: string;
+}
+
+export interface StudentImportJobResponse {
+  status: 'queued' | 'processing' | 'completed' | 'failed';
+  progress: number;
+  message?: string;
+  error?: string;
+  result?: ImportedStudentsResponse;
+}
+
 export interface CreatedTeacherResponse {
   status: 'assigned' | 'already_assigned' | 'updated';
   teacher: {
@@ -602,13 +615,19 @@ export class ApiService {
   }
 
   importStudentsFromExcel(form: FormData) {
-    return this.http.post<ImportedStudentsResponse>(
+    return this.http.post<StudentImportStartResponse>(
       `${this.BASE_URL}/admin/students/import`,
       form,
       {
         observe: 'events',
         reportProgress: true
       }
+    );
+  }
+
+  getStudentImportJob(jobId: string) {
+    return this.http.get<StudentImportJobResponse>(
+      `${this.BASE_URL}/admin/students/import/${encodeURIComponent(jobId)}`
     );
   }
 

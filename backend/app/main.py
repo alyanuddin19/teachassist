@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, FileResponse
 from sqlalchemy.orm import Session
@@ -41,6 +41,7 @@ from app.routers import gap_analysis_clean
 
 TRANSFORM_MARKSHEET_RETENTION_DAYS = 28
 STUDENT_TASK_RETENTION_DAYS = 28
+STUDENT_IMPORT_JOBS: dict[str, dict] = {}
 from app.routers import prompt_generator
 from app.routers import transformation
 from app.routers import hod_insights
@@ -1369,8 +1370,113 @@ def create_student_from_admin(data: dict, db: Session = Depends(get_db)):
       }
 
 
+def run_student_import_job(job_id: str, file_bytes: bytes) -> None:
+    db = SessionLocal()
+    try:
+        STUDENT_IMPORT_JOBS[job_id].update({
+            "status": "processing",
+            "progress": 5,
+            "message": "Reading Excel sheet..."
+        })
+
+        student_rows = parse_student_import_rows(file_bytes)
+        if not student_rows:
+            STUDENT_IMPORT_JOBS[job_id].update({
+                "status": "failed",
+                "progress": 100,
+                "message": "No valid student rows were found in the Excel sheet.",
+                "error": "No valid student rows were found in the Excel sheet."
+            })
+            return
+
+        imported_count = 0
+        updated_count = 0
+        skipped_count = 0
+        auxiliary_tables: set[str] = set()
+        total_rows = len(student_rows)
+
+        for index, row in enumerate(student_rows, start=1):
+            if not all([row["student_name"], row["roll_no"]]):
+                skipped_count += 1
+            else:
+                generated_email = row["email"] or build_student_email(row["roll_no"])
+                department = row["department"] or "GENERAL"
+                batch = row["batch"] or "UNASSIGNED"
+                program = row["program"] or department
+                semester_value = row["semester"]
+                semester = int(float(semester_value)) if semester_value not in ("", None) else None
+
+                existing = db.query(models.Student).filter(models.Student.roll_no == row["roll_no"]).first()
+                if existing:
+                    existing.student_name = row["student_name"]
+                    existing.username = row["roll_no"]
+                    existing.password = row["roll_no"]
+                    existing.contact_no = row["contact_no"] or existing.contact_no
+                    existing.email = generated_email
+                    existing.program = program
+                    existing.department = department
+                    existing.batch = batch
+                    existing.section = row["section"] or existing.section
+                    existing.semester = semester
+                    student_record = existing
+                    updated_count += 1
+                else:
+                    student_record = models.Student(
+                        student_name=row["student_name"],
+                        roll_no=row["roll_no"],
+                        username=row["roll_no"],
+                        password=row["roll_no"],
+                        contact_no=row["contact_no"] or None,
+                        email=generated_email,
+                        program=program,
+                        department=department,
+                        batch=batch,
+                        section=row["section"] or None,
+                        semester=semester
+                    )
+                    db.add(student_record)
+                    db.flush()
+                    imported_count += 1
+
+                table_name = build_student_batch_table_name(department, batch)
+                ensure_student_batch_table(table_name, db)
+                auxiliary_tables.add(table_name)
+                mirror_student_to_batch_table(student_record, table_name, db)
+
+            progress = 5 + round((index / total_rows) * 90)
+            STUDENT_IMPORT_JOBS[job_id].update({
+                "progress": min(progress, 95),
+                "message": f"Imported {index} of {total_rows} rows..."
+            })
+
+        db.commit()
+        result = {
+            "status": "imported",
+            "imported_count": imported_count,
+            "updated_count": updated_count,
+            "skipped_count": skipped_count,
+            "auxiliary_tables": sorted(auxiliary_tables),
+        }
+        STUDENT_IMPORT_JOBS[job_id].update({
+            "status": "completed",
+            "progress": 100,
+            "message": "Import completed.",
+            "result": result
+        })
+    except Exception as exc:
+        db.rollback()
+        STUDENT_IMPORT_JOBS[job_id].update({
+            "status": "failed",
+            "progress": 100,
+            "message": "Import failed.",
+            "error": str(exc)
+        })
+    finally:
+        db.close()
+
+
 @app.post("/api/admin/students/import")
-async def import_students_from_excel(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def import_students_from_excel(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
     filename = (file.filename or "").lower()
     if not filename.endswith(".xlsx"):
         raise HTTPException(status_code=400, detail="Please upload an Excel sheet in .xlsx format.")
@@ -1379,77 +1485,22 @@ async def import_students_from_excel(file: UploadFile = File(...), db: Session =
     if not file_bytes:
         raise HTTPException(status_code=400, detail="The uploaded Excel sheet is empty.")
 
-    try:
-        student_rows = parse_student_import_rows(file_bytes)
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Could not read the Excel sheet: {exc}") from exc
-
-    if not student_rows:
-        raise HTTPException(status_code=400, detail="No valid student rows were found in the Excel sheet.")
-
-    imported_count = 0
-    updated_count = 0
-    skipped_count = 0
-    auxiliary_tables: set[str] = set()
-
-    for row in student_rows:
-        if not all([row["student_name"], row["roll_no"]]):
-            skipped_count += 1
-            continue
-
-        generated_email = row["email"] or build_student_email(row["roll_no"])
-        department = row["department"] or "GENERAL"
-        batch = row["batch"] or "UNASSIGNED"
-        program = row["program"] or department
-        semester_value = row["semester"]
-        semester = int(float(semester_value)) if semester_value not in ("", None) else None
-
-        existing = db.query(models.Student).filter(models.Student.roll_no == row["roll_no"]).first()
-        if existing:
-            existing.student_name = row["student_name"]
-            existing.username = row["roll_no"]
-            existing.password = row["roll_no"]
-            existing.contact_no = row["contact_no"] or existing.contact_no
-            existing.email = generated_email
-            existing.program = program
-            existing.department = department
-            existing.batch = batch
-            existing.section = row["section"] or existing.section
-            existing.semester = semester
-            student_record = existing
-            updated_count += 1
-        else:
-            student_record = models.Student(
-                student_name=row["student_name"],
-                roll_no=row["roll_no"],
-                username=row["roll_no"],
-                password=row["roll_no"],
-                contact_no=row["contact_no"] or None,
-                email=generated_email,
-                program=program,
-                department=department,
-                batch=batch,
-                section=row["section"] or None,
-                semester=semester
-            )
-            db.add(student_record)
-            db.flush()
-            imported_count += 1
-
-        table_name = build_student_batch_table_name(department, batch)
-        ensure_student_batch_table(table_name, db)
-        auxiliary_tables.add(table_name)
-        mirror_student_to_batch_table(student_record, table_name, db)
-
-    db.commit()
-
-    return {
-        "status": "imported",
-        "imported_count": imported_count,
-        "updated_count": updated_count,
-        "skipped_count": skipped_count,
-        "auxiliary_tables": sorted(auxiliary_tables),
+    job_id = uuid4().hex
+    STUDENT_IMPORT_JOBS[job_id] = {
+        "status": "queued",
+        "progress": 1,
+        "message": "Import queued."
     }
+    background_tasks.add_task(run_student_import_job, job_id, file_bytes)
+    return {"status": "started", "job_id": job_id}
+
+
+@app.get("/api/admin/students/import/{job_id}")
+def get_student_import_job(job_id: str):
+    job = STUDENT_IMPORT_JOBS.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Import job not found")
+    return job
 
 
 @app.post("/api/admin/courses")
