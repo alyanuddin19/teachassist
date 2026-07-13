@@ -192,6 +192,18 @@ app.add_middleware(
 @app.get("/health")
 def healthcheck():
     return {"status": "ok"}
+
+
+@app.get("/keep-alive")
+def keep_alive():
+    db = SessionLocal()
+    try:
+        db.execute(text("SELECT 1"))
+        return {"status": "ok", "database": "reachable"}
+    finally:
+        db.close()
+
+
 # ------------------ DB DEP ------------------
 def get_db():
     db = SessionLocal()
