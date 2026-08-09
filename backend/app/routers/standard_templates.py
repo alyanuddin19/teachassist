@@ -41,9 +41,10 @@ def transformation_template_settings():
 
 @router.get("/api/hod/transformation-templates")
 def list_hod_templates(department: str, include_archived: bool = False, db: Session = Depends(get_db)):
-    query = db.query(models.TransformationTemplate).filter(
-        models.TransformationTemplate.department == department
-    )
+    normalized_department = department.strip().upper()
+    query = db.query(models.TransformationTemplate)
+    if normalized_department:
+        query = query.filter(models.TransformationTemplate.department == normalized_department)
     if not include_archived:
         query = query.filter(models.TransformationTemplate.archived == False)  # noqa: E712
     templates = query.order_by(models.TransformationTemplate.created_at.desc()).all()
@@ -125,6 +126,9 @@ def duplicate_hod_template(template_id: int, db: Session = Depends(get_db)):
         status="draft",
         original_filename=template.original_filename,
         file_path=template.file_path,
+        file_content=template.file_content,
+        file_content_type=template.file_content_type,
+        file_size=template.file_size,
         sheet_name=template.sheet_name,
         header_row=template.header_row,
         data_start_row=template.data_start_row,

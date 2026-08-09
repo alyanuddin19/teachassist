@@ -40,19 +40,34 @@ def missing_value_rules() -> list[dict]:
     ])
 
 
-def save_template_file(upload: UploadFile | None) -> tuple[str | None, str | None]:
+def save_template_file(upload: UploadFile | None) -> tuple[str | None, str | None, bytes | None, str | None, int | None]:
     if upload is None:
-        return None, None
+        return None, None, None, None, None
     suffix = Path(upload.filename or "").suffix.lower()
     if suffix not in set(get_mapping_config().get("supported_extensions", [])):
         raise HTTPException(status_code=400, detail="Please upload a supported Excel template.")
+    content = upload.file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="Template file is empty.")
     path = TEMPLATE_DIR / f"{uuid4().hex}{suffix}"
     with path.open("wb") as target:
-        shutil.copyfileobj(upload.file, target)
+        target.write(content)
     if path.stat().st_size == 0:
         path.unlink(missing_ok=True)
         raise HTTPException(status_code=400, detail="Template file is empty.")
-    return str(path), upload.filename or path.name
+    return str(path), upload.filename or path.name, content, upload.content_type, len(content)
+
+
+def materialize_template_file(template: models.TransformationTemplate) -> Path:
+    if template.file_path and Path(template.file_path).exists():
+        return Path(template.file_path)
+    if not template.file_content:
+        raise HTTPException(status_code=400, detail="This template has no Excel file attached.")
+    suffix = Path(template.original_filename or "").suffix.lower() or ".xlsx"
+    path = TEMPLATE_DIR / f"db_template_{template.id}_v{template.version or 1}{suffix}"
+    path.write_bytes(template.file_content)
+    template.file_path = str(path)
+    return path
 
 
 def create_template(
@@ -66,7 +81,7 @@ def create_template(
     upload: UploadFile | None,
     is_active: bool,
 ) -> models.TransformationTemplate:
-    file_path, original_name = save_template_file(upload)
+    file_path, original_name, file_content, file_content_type, file_size = save_template_file(upload)
     parent = db.query(models.TransformationTemplate).filter(
         models.TransformationTemplate.name == name,
         models.TransformationTemplate.department == department,
@@ -83,6 +98,9 @@ def create_template(
         status="active" if is_active else "draft",
         original_filename=original_name,
         file_path=file_path,
+        file_content=file_content,
+        file_content_type=file_content_type,
+        file_size=file_size,
         created_by_hod_id=hod_id,
         parent_template_id=parent.id if parent else None,
         is_active=is_active,
@@ -98,9 +116,10 @@ def create_template(
 
 
 def extract_and_save_fields(db: Session, template: models.TransformationTemplate) -> list[models.TransformationTemplateField]:
-    if not template.file_path:
+    if not template.file_path and not template.file_content:
         return []
-    workbook = load_any_workbook(Path(template.file_path), template.original_filename)
+    template_path = materialize_template_file(template)
+    workbook = load_any_workbook(template_path, template.original_filename)
     sheet_name = template.sheet_name or workbook.sheetnames[0]
     sheet = get_sheet(workbook, sheet_name)
     header_row = detect_header_row(sheet, template.header_row)
@@ -163,6 +182,8 @@ def template_payload(template: models.TransformationTemplate, fields: list[model
         "is_active": template.is_active,
         "archived": template.archived,
         "original_filename": template.original_filename or "",
+        "file_size": template.file_size or 0,
+        "file_stored_in_database": bool(template.file_content),
         "sheet_name": template.sheet_name or "",
         "header_row": template.header_row,
         "data_start_row": template.data_start_row,

@@ -21,7 +21,7 @@ from app.services.column_mapping.workbook_service import (
     load_any_workbook,
     save_upload,
 )
-from app.services.column_mapping.template_service import field_payload, get_template, template_payload
+from app.services.column_mapping.template_service import field_payload, get_template, materialize_template_file, template_payload
 
 
 router = APIRouter(prefix="/api/transform/column-mapping", tags=["column-mapping"])
@@ -135,11 +135,12 @@ async def analyze_standard_mapping(
     template = get_template(db, template_id)
     if not template.is_active or template.archived:
         raise HTTPException(status_code=400, detail="This standard template is not active.")
-    if not template.file_path:
+    if not template.file_path and not template.file_content:
         raise HTTPException(status_code=400, detail="This template has no Excel file attached.")
 
     source_workbook = load_any_workbook(session.source.path, session.source.original_name)
-    target_workbook = load_any_workbook(Path(template.file_path), template.original_filename)
+    template_path = materialize_template_file(template)
+    target_workbook = load_any_workbook(template_path, template.original_filename)
     source_ws = get_sheet(source_workbook, source_sheet)
     target_ws = get_sheet(target_workbook, template.sheet_name or target_workbook.sheetnames[0])
 
@@ -274,7 +275,7 @@ async def transform_standard_mapping(
     template = get_template(db, template_id)
     if not template.is_active or template.archived:
         raise HTTPException(status_code=400, detail="This standard template is not active.")
-    if not template.file_path:
+    if not template.file_path and not template.file_content:
         raise HTTPException(status_code=400, detail="This template has no Excel file attached.")
     mappings = _json_list(mappings_json, "Invalid mappings.")
     try:
@@ -287,7 +288,8 @@ async def transform_standard_mapping(
     source_workbook = load_any_workbook(session.source.path, session.source.original_name)
     source_ws = get_sheet(source_workbook, source_sheet)
     detected_source_header = detect_header_row(source_ws, source_header_row or None)
-    target_workbook = load_any_workbook(Path(template.file_path), template.original_filename)
+    template_path = materialize_template_file(template)
+    target_workbook = load_any_workbook(template_path, template.original_filename)
     target_ws = get_sheet(target_workbook, template.sheet_name or target_workbook.sheetnames[0])
     detected_target_header = detect_header_row(target_ws, None)
     detected_target_start = detect_data_start_row(target_ws, detected_target_header, None)
@@ -297,7 +299,7 @@ async def transform_standard_mapping(
     output = apply_mapping(
         source_path=session.source.path,
         source_name=session.source.original_name,
-        target_path=Path(template.file_path),
+        target_path=template_path,
         target_name=template.original_filename or template.name,
         source_sheet_name=source_sheet,
         target_sheet_name=template.sheet_name or "",

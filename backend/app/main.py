@@ -46,6 +46,7 @@ from app.routers import prompt_generator
 from app.routers import transformation
 from app.routers import column_mapping
 from app.routers import standard_templates
+from app.routers import hod_insights
 from app.t2_transform_loader import load_t2_transform_app, load_t2_excel_builder
 
 
@@ -108,6 +109,63 @@ def ensure_retention_schema_columns() -> None:
 
 
 ensure_retention_schema_columns()
+
+
+def ensure_template_file_storage_columns() -> None:
+    try:
+        with engine.begin() as connection:
+            dialect = engine.dialect.name
+            binary_type = "BYTEA" if dialect == "postgresql" else "BLOB"
+            connection.execute(text(f"""
+                ALTER TABLE transformation_templates
+                ADD COLUMN IF NOT EXISTS file_content {binary_type}
+            """))
+            connection.execute(text("""
+                ALTER TABLE transformation_templates
+                ADD COLUMN IF NOT EXISTS file_content_type VARCHAR(100)
+            """))
+            connection.execute(text("""
+                ALTER TABLE transformation_templates
+                ADD COLUMN IF NOT EXISTS file_size INTEGER
+            """))
+    except Exception:
+        pass
+
+
+ensure_template_file_storage_columns()
+
+
+def backfill_template_file_storage() -> None:
+    db = SessionLocal()
+    try:
+        templates = db.query(models.TransformationTemplate).filter(
+            models.TransformationTemplate.file_content.is_(None),
+            models.TransformationTemplate.file_path.isnot(None)
+        ).all()
+        for template in templates:
+            path = Path(template.file_path or "")
+            if not path.exists() or not path.is_file():
+                continue
+            content = path.read_bytes()
+            if not content:
+                continue
+            template.file_content = content
+            template.file_size = len(content)
+            suffix = path.suffix.lower()
+            if suffix == ".xlsx":
+                template.file_content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            elif suffix == ".xls":
+                template.file_content_type = "application/vnd.ms-excel"
+            elif suffix == ".csv":
+                template.file_content_type = "text/csv"
+        db.commit()
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()
+
+
+backfill_template_file_storage()
 app = FastAPI(title="TeachAssist Backend")
 
 app.include_router(gap_analysis_clean.router)
@@ -115,6 +173,7 @@ app.include_router(prompt_generator.router)
 app.include_router(transformation.router)
 app.include_router(column_mapping.router)
 app.include_router(standard_templates.router)
+app.include_router(hod_insights.router)
 
 t2_transform_app = load_t2_transform_app()
 if t2_transform_app is not None:
@@ -133,6 +192,18 @@ app.add_middleware(
 @app.get("/health")
 def healthcheck():
     return {"status": "ok"}
+
+
+@app.get("/keep-alive")
+def keep_alive():
+    db = SessionLocal()
+    try:
+        db.execute(text("SELECT 1"))
+        return {"status": "ok", "database": "reachable"}
+    finally:
+        db.close()
+
+
 # ------------------ DB DEP ------------------
 def get_db():
     db = SessionLocal()

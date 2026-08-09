@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Float, Boolean
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Float, Boolean, LargeBinary
 from sqlalchemy.sql import func
 from .database import Base
 
@@ -170,6 +170,45 @@ class TransformStudentAssessmentMark(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
+class GapAnalysisReport(Base):
+    __tablename__ = "gap_analysis_reports"
+
+    id = Column(Integer, primary_key=True, index=True)
+    teacher_id = Column(Integer, ForeignKey("teachers.id"), nullable=False, index=True)
+    teacher_course_id = Column(Integer, ForeignKey("teacher_courses.id"), nullable=True, index=True)
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=True, index=True)
+    department = Column(String(100), nullable=True, index=True)
+    semester = Column(Integer, nullable=True, index=True)
+    section = Column(String(50), nullable=True)
+    batch = Column(String(50), nullable=True)
+    assessment_type = Column(String(50), nullable=False, default="Assessment")
+    assessment_title = Column(String(150), nullable=True)
+    course_code_snapshot = Column(String(50), nullable=True)
+    course_name_snapshot = Column(String(200), nullable=True)
+    question_paper_name = Column(String(255), nullable=True)
+    marksheet_name = Column(String(255), nullable=True)
+    cis_file_name = Column(String(255), nullable=True)
+    report_json = Column(Text, nullable=False, default="{}")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class HodInsightSnapshot(Base):
+    __tablename__ = "hod_insight_snapshots"
+
+    id = Column(Integer, primary_key=True, index=True)
+    hod_id = Column(Integer, ForeignKey("heads_of_department.id"), nullable=False, index=True)
+    gap_report_id = Column(Integer, ForeignKey("gap_analysis_reports.id"), nullable=False, index=True)
+    teacher_id = Column(Integer, ForeignKey("teachers.id"), nullable=False, index=True)
+    teacher_course_id = Column(Integer, ForeignKey("teacher_courses.id"), nullable=True, index=True)
+    department = Column(String(100), nullable=True, index=True)
+    semester = Column(Integer, nullable=True, index=True)
+    course_code = Column(String(50), nullable=True)
+    course_name = Column(String(200), nullable=True)
+    teacher_name = Column(String(100), nullable=True)
+    snapshot_json = Column(Text, nullable=False, default="{}")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
 class TransformationTemplate(Base):
     __tablename__ = "transformation_templates"
 
@@ -182,6 +221,9 @@ class TransformationTemplate(Base):
     status = Column(String(50), nullable=False, default="draft")
     original_filename = Column(String(255), nullable=True)
     file_path = Column(Text, nullable=True)
+    file_content = Column(LargeBinary, nullable=True)
+    file_content_type = Column(String(100), nullable=True)
+    file_size = Column(Integer, nullable=True)
     sheet_name = Column(String(200), nullable=True)
     header_row = Column(Integer, nullable=True)
     data_start_row = Column(Integer, nullable=True)

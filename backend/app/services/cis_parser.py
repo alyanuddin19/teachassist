@@ -191,7 +191,8 @@ def _normalize_course_code(value: str) -> str:
 def extract_course_code(text: str) -> str:
     patterns = [
         r'Course\s*(?:Code|No|Number|ID)\s*[:\-\|]\s*(.+)',
-        r'Subject\s*Code\s*[:\-\|]\s*(.+)'
+        r'Subject\s*Code\s*[:\-\|]\s*(.+)',
+        r'(?<![A-Za-z])Code\s*[:\-\|]\s*(.+)'
     ]
     code_pattern = re.compile(
         r'\b([A-Z]{2,5}\s*-?\s*\d{2,4}[A-Z]?(?:\s*/\s*[A-Z]{2,5}\s*-?\s*\d{2,4}[A-Z]?)*)\b',
@@ -208,6 +209,9 @@ def extract_course_code(text: str) -> str:
                 if code_match:
                     return _normalize_course_code(code_match.group(1))
                 return match.group(1).strip().upper()
+        code_match = code_pattern.search(clean)
+        if code_match and re.search(r'\b(?:course|subject|code)\b', clean, re.IGNORECASE):
+            return _normalize_course_code(code_match.group(1))
     return ""
 
 

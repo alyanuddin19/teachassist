@@ -207,6 +207,10 @@ def _normalize_exam_header(exam_content: str, course_code: str, course_title: st
     lines = (exam_content or "").splitlines()
     if not lines:
         return exam_content
+    code_value_pattern = re.compile(
+        r"\b[A-Z]{2,5}\s*-?\s*\d{2,4}[A-Z]?(?:\s*/\s*[A-Z]{2,5}\s*-?\s*\d{2,4}[A-Z]?)*\b",
+        re.IGNORECASE
+    )
 
     for index, line in enumerate(lines[:12]):
         title_match = re.match(r"^(#{1,6}\s+)([A-Z]{2,5}-\d{2,4}[A-Z]?)\s+(.+)$", line.strip())
@@ -217,7 +221,7 @@ def _normalize_exam_header(exam_content: str, course_code: str, course_title: st
 
     course_code_line_index = None
     for index, line in enumerate(lines[:15]):
-        if re.search(r"\bCourse\s*(?:Code|No|Number|ID)\b", line, re.IGNORECASE):
+        if re.search(r"\b(?:Course\s*)?(?:Code|No|Number|ID)\b", line, re.IGNORECASE):
             course_code_line_index = index
             break
 
@@ -242,8 +246,18 @@ def _normalize_exam_header(exam_content: str, course_code: str, course_title: st
         if course_name_line_index is not None:
             lines[course_name_line_index] = name_replacement
         else:
-            insert_at = min((course_code_line_index or 0) + 1, len(lines))
+            insert_at = min((course_code_line_index if course_code_line_index is not None else 0) + 1, len(lines))
             lines.insert(insert_at, name_replacement)
+    else:
+        for index, line in enumerate(lines[:16]):
+            if re.search(r"\bCourse\s*(?:Name|Title)\b", line, re.IGNORECASE):
+                prefix_match = re.match(r"^(#{0,6}\s*Course\s*(?:Name|Title)\s*[:\-\|]\s*)", line, re.IGNORECASE)
+                if prefix_match:
+                    prefix = prefix_match.group(1)
+                    value = line[prefix_match.end():].strip()
+                    value = code_value_pattern.sub("", value).strip(" -|:")
+                    lines[index] = f"{prefix}{value or 'Not specified'}"
+                break
 
     return "\n".join(lines).strip()
 
