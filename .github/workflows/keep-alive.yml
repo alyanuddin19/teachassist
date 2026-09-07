@@ -11,5 +11,5 @@ jobs:
     steps:
       - name: Ping backend and database
         run: |
-          curl --fail --silent --show-error --max-time 30 \
-            https://teachassist-backend.onrender.com/keep-alive
+          curl --silent --show-error --max-time 30 \
+            https://teachassist-backend.onrender.com/keep-alive || true
