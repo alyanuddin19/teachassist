@@ -38,6 +38,7 @@ uploads/
 backend/uploads/
 backend/app/generated/
 t2/backend/exports/
+*.drawio
 *.log
 
 # Build artifacts and temporary files

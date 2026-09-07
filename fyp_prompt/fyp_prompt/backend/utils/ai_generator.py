@@ -1,12 +1,4 @@
-"""
-AI Generator utility - uses Google Gemini 1.5 Flash for exam generation.
-Fast, high-quality, large context window (1M tokens) — no document truncation.
 
-Setup:
-    pip install google-generativeai
-    Set your API key in backend/.env  →  GEMINI_API_KEY=your_key_here
-    Get a free key at: https://aistudio.google.com/
-"""
 
 import os
 import google.generativeai as genai
