@@ -1,5 +1,7 @@
 # Frontendd
 
+<!-- Deployment refresh: 2026-09-08 -->
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.16.
 
 ## Development server

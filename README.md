@@ -1,5 +1,7 @@
 # TeachAssist
 
+<!-- Repository refresh: 2026-09-08 -->
+
 TeachAssist is a web application with a FastAPI backend, PostgreSQL database, and Angular frontend.
 
 ## Project Structure
@@ -179,4 +181,3 @@ Before production deployment, confirm `frontendd/src/environments/environment.pr
 2. Add the developer to the Render team or service with deploy permissions.
 3. Share required production environment variable values through a secure channel.
 4. Never commit real `.env` files, API keys, database passwords, local virtual environments, or `node_modules`.
-

@@ -1,5 +1,7 @@
 # TeachAssist Backend (FastAPI + PostgreSQL + Gemini)
 
+<!-- Deployment refresh: 2026-09-08 -->
+
 This is a minimal backend skeleton for your FYP:
 
 - Teacher signup/login (username + password)
